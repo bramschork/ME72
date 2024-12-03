@@ -15,9 +15,9 @@ Roboclaw: `pip install roboclaw`
 ## Blueooth
 
 Open bluetooth panel: `bluetooth ctl`
-`discoverable on`
-`pair MAC`
-`trust MAC`
+`discoverable on`\n
+`pair MAC`\n
+`trust MAC`\n
 `connect MAC`
 
 Scan will list all bluetooth devices. Aftwr you find the device with the name "Wireless Controller", you can run
