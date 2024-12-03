@@ -1,5 +1,5 @@
 import pygame
-import time
+# import time
 from roboclaw import Roboclaw
 
 # Initialize RoboClaw (adjust '/dev/ttyS0' and baud rate as needed)
