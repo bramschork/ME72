@@ -1,8 +1,20 @@
 # ME72
 
+## Raspberry Pi Zero 2 W Login
+
+User: me72\
+Pass: mello\
+Current IP (may change for other Pi's. You can check the IP by logging into the router and checking connected devices. See below for instructions): 192.168.8.135\
+SSH (Port 22): me72@RPI_IP (ex. me72@192.168.8.135)
+
+## Router
+
+Static IP: 192.168.8.1\
+Password: Will change. Ask Bram if needed.
+
 ## Virtual Environment
 
-Install venv tool: `sudo apt install python3-venv`
+Install venv tool: `sudo apt install python3-venv`\
 Create venv: `python3 -m venv venv`
 
 ACTIVATE venv: `source venv/bin/activate`
@@ -10,11 +22,13 @@ ACTIVATE venv: `source venv/bin/activate`
 ## Required Packages
 
 Pygame for bluetooth PS4 controller: `pip install pygame`
+
 Roboclaw: `pip install roboclaw`
 
 ## Blueooth
 
-Open bluetooth panel: `bluetooth ctl`
+Open bluetooth panel:\
+`bluetooth ctl`\
 `discoverable on`\
 `pair MAC`\
 `trust MAC`\
