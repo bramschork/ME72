@@ -1,4 +1,3 @@
-import pygame
 import time
 from roboclaw_3 import Roboclaw
 
@@ -13,17 +12,15 @@ ADDRESS = 0x80
 def main():
     try:
 
-        running = True
-        while running:
-            # Pump events to update the state of the controller
-            pygame.event.pump()
-
+        i = 0
+        while i < 3:
             print('Forward')
             roboclaw.ForwardM1(ADDRESS, 64)  # Move motor forward
             time.sleep(2)
             print('Stop')
             roboclaw.ForwardM1(ADDRESS, 0)  # Stop the motor
             time.sleep(2)
+            i += 1
 
     except KeyboardInterrupt:
         print("\nExiting program.")
@@ -32,7 +29,6 @@ def main():
     finally:
         # Stop motors when exiting
         roboclaw.ForwardM1(ADDRESS, 0)
-        pygame.quit()
 
 
 if __name__ == "__main__":
