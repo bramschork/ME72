@@ -1,5 +1,5 @@
 import pygame
-# import time
+import time
 from roboclaw import Roboclaw
 
 # Initialize RoboClaw (adjust '/dev/ttyS0' and baud rate as needed)
@@ -32,12 +32,12 @@ def main():
 
             # Read joystick axes for motor control (left stick: Y-axis for motor1, right stick: Y-axis for motor2)
             # Inverted axis for natural forward/backward
-            left_stick_y = -joystick.get_axis(1)
-            right_stick_y = -joystick.get_axis(4)
+            left_UD_stick_y = -joystick.get_axis(1)
+            right_UD_stick_y = -joystick.get_axis(3)
 
             # Map joystick input (-1 to 1) to motor speed (-127 to 127)
-            motor1_speed = map_value(left_stick_y, -1, 1, -127, 127)
-            motor2_speed = map_value(right_stick_y, -1, 1, -127, 127)
+            motor1_speed = map_value(left_UD_stick_y, -1, 1, -127, 127)
+            motor2_speed = map_value(right_UD_stick_y, -1, 1, -127, 127)
 
             # Send commands to RoboClaw
             roboclaw.SpeedM1(ADDRESS, motor1_speed)
