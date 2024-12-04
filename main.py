@@ -6,7 +6,7 @@ from roboclaw import Roboclaw
 roboclaw = Roboclaw("/dev/ttyS0", 38400)
 roboclaw.Open()
 
-# Motor addresses (update according to your setup)
+# Motor addresses (ensure this is an integer)
 ADDRESS = 0x80
 
 # Initialize Pygame for the PS4 controller
