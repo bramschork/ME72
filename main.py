@@ -33,9 +33,12 @@ def main():
     try:
         joystick = initialize_controller()
 
-        while True:
+        running = True  # Use a flag to control the main loop
+        while running:
             # Poll events to update the controller state
-            pygame.event.pump()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
 
             # Get the Y-axis value of the left joystick (-1 is up, 1 is down)
             left_UD_stick_y = -joystick.get_axis(1)
@@ -53,12 +56,12 @@ def main():
 
     except KeyboardInterrupt:
         print("\nExiting program.")
+    except ValueError as e:
+        print(f"Error: {e}")
+    finally:
         # Stop motors when exiting
         roboclaw.ForwardM1(ADDRESS, 0)
         roboclaw.ForwardM2(ADDRESS, 0)
-        pygame.quit()
-    except ValueError as e:
-        print(f"Error: {e}")
         pygame.quit()
 
 
