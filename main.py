@@ -44,13 +44,13 @@ def main():
             if left_UD_stick_y > 0.5:  # Joystick is pushed upward
                 # Move motor forward at speed 64
                 roboclaw.ForwardM1(ADDRESS, 64)
-                print("Joystick up: Sending ForwardM1 with speed 64")
+                print("FORWARD")
             else:  # Joystick is not pushed upward
                 roboclaw.ForwardM1(ADDRESS, 0)  # Stop the motor
-                print("Joystick not up: Sending ForwardM1 with speed 0")
+                print("Stop")
 
             # Replace sleep with a very short delay to reduce CPU usage
-            time.sleep(0.01)  # 10ms delay for smoother operation
+            # time.sleep(0.01)  # 10ms delay for smoother operation
 
     except KeyboardInterrupt:
         print("\nExiting program.")
