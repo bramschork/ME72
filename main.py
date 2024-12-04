@@ -24,33 +24,27 @@ def initialize_controller():
     return joystick
 
 
-def map_value(x, in_min, in_max, out_min, out_max):
-    """Map joystick values to motor speed range."""
-    return int((x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
-
-
 def main():
     try:
         joystick = initialize_controller()
 
-        running = True  # Use a flag to control the main loop
+        running = True
         while running:
             # Pump events to update the state of the controller
             pygame.event.pump()
 
-            # Check if the joystick axis indicates upward movement
+            # Check joystick position
             left_UD_stick_y = -joystick.get_axis(1)
 
             if left_UD_stick_y > 0.5:  # Joystick is pushed upward
-                # Move motor forward at speed 64
-                roboclaw.ForwardM1(ADDRESS, 64)
-                print("FORWARD")
-            else:  # Joystick is not pushed upward
+                roboclaw.ForwardM1(ADDRESS, 64)  # Move motor forward
+                print("Motor Forward")
+            else:  # Joystick not pushed upward
                 roboclaw.ForwardM1(ADDRESS, 0)  # Stop the motor
-                print("Stop")
+                print("Motor Stopped")
 
-            # Replace sleep with a very short delay to reduce CPU usage
-            # time.sleep(0.01)  # 10ms delay for smoother operation
+            # Wait for 0.1 seconds before checking again
+            time.sleep(0.1)
 
     except KeyboardInterrupt:
         print("\nExiting program.")
@@ -59,7 +53,6 @@ def main():
     finally:
         # Stop motors when exiting
         roboclaw.ForwardM1(ADDRESS, 0)
-        roboclaw.ForwardM2(ADDRESS, 0)
         pygame.quit()
 
 
