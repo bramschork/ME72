@@ -1,6 +1,6 @@
 import pygame
 import time
-from roboclaw import Roboclaw
+from roboclaw_3 import Roboclaw
 
 # Initialize RoboClaw (adjust '/dev/ttyS0' and baud rate as needed)
 roboclaw = Roboclaw("/dev/ttyS0", 38400)
@@ -35,12 +35,10 @@ def main():
 
         running = True  # Use a flag to control the main loop
         while running:
-            # Poll events to update the controller state
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
+            # Pump events to update the state of the controller
+            pygame.event.pump()
 
-            # Get the Y-axis value of the left joystick (-1 is up, 1 is down)
+            # Check if the joystick axis indicates upward movement
             left_UD_stick_y = -joystick.get_axis(1)
 
             if left_UD_stick_y > 0.5:  # Joystick is pushed upward
@@ -51,8 +49,8 @@ def main():
                 roboclaw.ForwardM1(ADDRESS, 0)  # Stop the motor
                 print("Joystick not up: Sending ForwardM1 with speed 0")
 
-            # Small delay for smoother control
-            time.sleep(0.1)
+            # Replace sleep with a very short delay to reduce CPU usage
+            time.sleep(0.01)  # 10ms delay for smoother operation
 
     except KeyboardInterrupt:
         print("\nExiting program.")
