@@ -30,22 +30,22 @@ def main():
         while True:
             pygame.event.pump()
 
+            # Get the Y-axis value of the left joystick
             left_UD_stick_y = -joystick.get_axis(1)
 
-            # Map joystick input (-1 to 1) to motor speed (-127 to 127)
-            motor1_speed = map_value(left_UD_stick_y, -1, 1, -127, 127)
-
-            # Send commands to RoboClaw
-            roboclaw.SpeedM1(ADDRESS, motor1_speed)
-
-            print(f"Motor1: {motor1_speed}")
+            if left_UD_stick_y > 0.5:  # Joystick is pushed upward
+                roboclaw.ForwardM1(ADDRESS, 64)
+                print("Joystick up: Sending ForwardM1 with speed 64")
+            else:  # Joystick not pushed upward
+                roboclaw.ForwardM1(ADDRESS, 0)
+                print("Joystick not up: Sending ForwardM1 with speed 0")
 
             time.sleep(0.1)  # Small delay for smoother control
 
     except KeyboardInterrupt:
         print("\nExiting program.")
-        roboclaw.SpeedM1(ADDRESS, 0)
-        roboclaw.SpeedM2(ADDRESS, 0)
+        roboclaw.ForwardM1(ADDRESS, 0)
+        roboclaw.ForwardM2(ADDRESS, 0)
         pygame.quit()
 
 
