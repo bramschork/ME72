@@ -10,9 +10,7 @@ SoftwareSerial serial(10,11);
 RoboClaw roboclaw(&serial,10000);
 
 #define address 0x80
- 
-// LED on pin 13
-const int ledPin = 13; 
+
  
 void setup() {
   // Join I2C bus as slave with address 8
@@ -20,10 +18,7 @@ void setup() {
   
   // Call receiveEvent when data received                
   Wire.onReceive(receiveEvent);
-  
-  // Setup pin 13 as output and turn LED off
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
+
   roboclaw.begin(38400);
 }
  
@@ -32,10 +27,15 @@ void receiveEvent(int howMany) {
   while (Wire.available()) { // loop through all but the last
     char c = Wire.read(); // receive byte as a character
 
-    // Flash on ledPin, the built-in LED on the Arduino Uno
-    digitalWrite(ledPin, 0);
-    roboclaw.ForwardM1(address,c); //start Motor1 forward at half speed
-    digitalWrite(ledPin, 1); //ledPin off
+
+     // Check if the value is a hexadecimal number greater than 0x1000
+    unsigned int value = (unsigned int)c;
+    if (value < 0x1000) {
+      roboclaw.ForwardM1(address, value-0x1000); // Start Motor1 forward with the specified speed
+    }
+    else {
+      roboclaw.ForwardM1(address, -(value)); // Start Motor1 forward with the specified speed
+    }
   }
 }
 void loop() {

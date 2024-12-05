@@ -26,25 +26,17 @@ while True:
     pygame.event.pump()
 
     # Left joystick axes for PS4 controller
-    x = left_stick.get_axis(0)  # Horizontal axis
     left_y = left_stick.get_axis(1)  # Vertical axis (inverted)
     right_y = right_stick.get_axis(1)  # Vertical axis (inverted)
 
-    left_direction = "Neutral"
-    if left_y > 0.2:  # Deadzone threshold
-        if left_y > 0:
-            bus.write_byte(addr, 0x7F)
-        else:
-            bus.write_byte(addr, 0x7F)
-    else:
-        bus.write_byte(addr, 0x0)
+    # MODIFIER to slow down the motors
+    modifier = 0.1
 
-    right_direction = "Neutral"
-    if right_y > 0.2:  # Deadzone threshold
-        if right_y > 0:
-            bus.write_byte(addr, 0x7F)
-        else:
-            bus.write_byte(addr, 0x7F)
+    if abs(left_y > 0.2):  # Deadzone threshold
+        if left_y > 0:  # Reverse
+            bus.write_byte(addr, hex(1000+left_y*127*modifier))
+        else:  # Forward
+            bus.write_byte(addr, hex(left_y*127*modifier))
     else:
         bus.write_byte(addr, 0x0)
 
