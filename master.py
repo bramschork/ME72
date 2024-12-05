@@ -40,7 +40,7 @@ while True:
             print('L0')'''
 
         if right_y > 0.2:   # Forward
-            bus.write_byte(addr, 0x14)  # 20
+            bus.write_byte(addr, 0x3FC)  # 20
             time.sleep(0.2)
             # print('20')
         else:
