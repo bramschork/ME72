@@ -20,6 +20,8 @@ void setup() {
   Wire.onReceive(receiveEvent);
 
   roboclaw.begin(38400);
+  roboclaw.ForwardM1(address, 0);
+  roboclaw.ForwardM2(address, 0);
 }
  
 // Function that executes whenever data is received from master
