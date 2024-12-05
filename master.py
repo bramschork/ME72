@@ -28,18 +28,18 @@ while True:
         pygame.event.pump()
 
         # Left joystick axes for PS4 controller
-        left_y = left_stick.get_axis(1)  # Vertical axis (inverted)
-        right_y = right_stick.get_axis(3)  # Vertical axis (inverted)
+        left_y = -left_stick.get_axis(1)  # Vertical axis (inverted)
+        right_y = -right_stick.get_axis(3)  # Vertical axis (inverted)
 
-        # MODIFIER to slow down the motors
-        modifier = (round(1 * 127 * left_y))
-        if 1 < modifier < 10:
+        if left_y < 0.2:
+            modifier = 0
+        elif left_y >= 0.2 and left_y < 0.5:
             modifier = 3
         else:
             modifier = 6
 
-        print(f'Modifier: {0} Left_y*127: {1}'.format(modifier, left_y*127))
-        if -left_y > 0.2:   # Forward
+        print(f'Modifier: {0} Left_y*127: {1}'.format(modifier, left_y))
+        if left_y > 0.2:   # Forward
             bus.write_byte(addr, modifier)
         else:
             bus.write_byte(addr, 0)
