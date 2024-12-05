@@ -40,7 +40,7 @@ if pygame.joystick.get_count() > 0:
     while True:
         pygame.event.pump()
 
-        y = joystick.get_axis(2)  # Vertical axis (inverted)
+        y = joystick.get_axis(3)  # Vertical axis (inverted)
 
         # Get direction and magnitude
         # direction, magnitude = get_joystick_direction(x, y)
