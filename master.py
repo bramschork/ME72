@@ -37,6 +37,7 @@ while True:
         print(left_y)
         if -left_y > 0.2:   # Forward
             bus.write_byte(addr, modifier)
+            print('MODIFIER ' + modifier)
         else:
             bus.write_byte(addr, 0)
 
