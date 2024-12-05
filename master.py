@@ -65,6 +65,6 @@ while True:
         else:
             bus.write_byte(addr, 0x3E8)'''
 
-        time.sleep(0.1)
+        time.sleep(0.2)
     else:
         print("No joystick connected.")
