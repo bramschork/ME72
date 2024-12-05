@@ -34,16 +34,16 @@ while True:
         if left_y < 0.2:
             L_modifier = 0
         elif left_y >= 0.2 and left_y < 0.5:
-            L_modifier = 5
+            L_modifier = 32
         else:
-            L_modifier = 30
+            L_modifier = 64
 
         if right_y < 0.2:
             R_modifier = 0
         elif right_y >= 0.2 and right_y < 0.5:
-            R_modifier = 5
+            R_modifier = 32
         else:
-            R_modifier = 30
+            R_modifier = 64
 
         ''' # print(f'Modifier: {modifier} Left_y: {left_y}')
         if left_y > 0.2:   # Forward
