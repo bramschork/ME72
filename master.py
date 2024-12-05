@@ -32,7 +32,11 @@ while True:
         right_y = right_stick.get_axis(3)  # Vertical axis (inverted)
 
         # MODIFIER to slow down the motors
-        modifier = (round(.3 * 127 * left_y))
+        modifier = (round(1 * 127 * left_y))
+        if 1 < modifier < 10:
+            modifier = 3
+        else:
+            modifier = 6
 
         # print(left_y)
         if -left_y > 0.2:   # Forward
