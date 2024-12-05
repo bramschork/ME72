@@ -44,7 +44,7 @@ if pygame.joystick.get_count() > 0:
         one = joystick.get_axis(1)  # Vertical axis (inverted)
         two = joystick.get_axis(2)  # Vertical axis (inverted)
         three = joystick.get_axis(3)  # Vertical axis (inverted)
-        print(f'Zero: {zero}\n One: {one}\n Two: {two}\n Three: {three}')
+        print(f'Zero: {zero} One: {one} Two: {two} Three: {three}')
 
         # Get direction and magnitude
         # direction, magnitude = get_joystick_direction(x, y)
