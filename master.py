@@ -55,11 +55,12 @@ while True:
 
         if right_y > 0.2:   # Forward
             bus.write_byte(addr, 0x14)
+            time.sleep(0.2)
             print(R_modifier)
         else:
             bus.write_byte(addr, 0x3E8)
+            time.sleep(0.2)
             print('R0')
 
-        time.sleep(0.2)
     else:
         print("No joystick connected.")
