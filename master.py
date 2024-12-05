@@ -19,15 +19,15 @@ while True:
     left_stick = pygame.joystick.Joystick(0)
     left_stick.init()
 
-    right_stick = pygame.joystick.Joystick(1)
-    right_stick.init()
+    # right_stick = pygame.joystick.Joystick(1)
+    # right_stick.init()
 
     print(f"Connected to: {left_stick.get_name()}")
     pygame.event.pump()
 
     # Left joystick axes for PS4 controller
     left_y = left_stick.get_axis(1)  # Vertical axis (inverted)
-    right_y = right_stick.get_axis(1)  # Vertical axis (inverted)
+    # right_y = right_stick.get_axis(1)  # Vertical axis (inverted)
 
     # MODIFIER to slow down the motors
     modifier = 0.1
