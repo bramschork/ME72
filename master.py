@@ -50,15 +50,15 @@ while True:
 
         if right_y > 0.2:   # Forward
             bus.write_byte(addr, 0x3FC)  # 1020
-        '''            time.sleep(0.1)
-					print('TWO FORWARD')
-				elif right_y < -0.2:   # Reverse
-					bus.write_byte(addr, 0xBCC)  # (30)20
-					time.sleep(0.1)
-					print('TWO REVERSE')
-				else:  # Zero
-					bus.write_byte(addr, 0x3E8)  # 1000
-					time.sleep(0.1)
-            print('TWO ZERO')'''
+            time.sleep(0.1)
+            print('TWO FORWARD')
+        elif right_y < -0.2:   # Reverse
+            bus.write_byte(addr, 0xBCC)  # (30)20
+            time.sleep(0.1)
+            print('TWO REVERSE')
+            # else:  # Zero
+        #   bus.write_byte(addr, 0x3E8)  # 1000
+        #    time.sleep(0.1)
+        #    print('TWO ZERO')
 else:
     print("No joystick connected.")

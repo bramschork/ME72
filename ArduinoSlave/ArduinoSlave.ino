@@ -38,6 +38,9 @@ void receiveEvent(int howMany) {
     // MOTOR ONE REVERSE
     else if (value = 65508) { roboclaw.BackwardM1(address, 20); }
 
+    // MOTOR OTWONE REVERSE
+    else if (value = 65532) { roboclaw.ForwardM2(address, 20); }
+
     
     // MOTOR ONE STOP --> send 64
 
