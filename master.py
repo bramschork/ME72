@@ -30,7 +30,7 @@ while True:
     # right_y = right_stick.get_axis(1)  # Vertical axis (inverted)
 
     # MODIFIER to slow down the motors
-    modifier = hex(round(.5 * 127 * left_y))
+    modifier = (round(.5 * 127 * left_y))
 
     '''if abs(left_y > 0.2):  # Deadzone threshold
         if left_y > 0:  # Reverse
