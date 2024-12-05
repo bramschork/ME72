@@ -30,11 +30,17 @@ void receiveEvent(int howMany) {
 
      // Check if the value is a hexadecimal number greater than 0x1000
     unsigned int value = (unsigned int)c;
-    if (value < 0x1000) {
+    if (0x0 <= value <= 0x1000) {
       roboclaw.ForwardM1(address, value-0x1000); // Start Motor1 forward with the specified speed
     }
-    else {
+    else if (0x1000 <= value <= 0x7D0) {
       roboclaw.ForwardM1(address, -(value)); // Start Motor1 forward with the specified speed
+    }
+    else if (0x7D0 <= value <= 0xBB8) {
+      roboclaw.ForwardM2(address, value-0xBB8); // Start Motor1 forward with the specified speed
+    }
+    else (0xBB8 <= value) {
+      roboclaw.ForwardM2(address, -(value)); // Start Motor1 forward with the specified speed
     }
   }
 }
