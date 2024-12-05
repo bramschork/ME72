@@ -32,7 +32,6 @@ while True:
         left_y = -left_stick.get_axis(1)  # Vertical axis (inverted)
         right_y = right_stick.get_axis(3)  # Vertical axis (inverted)
 
-        '''
     # print(f'Modifier: {modifier} Left_y: {left_y}')
     if left_y > 0.2:   # Forward
         bus.write_byte(addr, 0x14)  # 20
@@ -46,19 +45,3 @@ while True:
         bus.write_byte(addr, 0x0)  # 0
         time.sleep(0.1)
         print('ONE ZERO')
-        '''
-
-        if right_y > 0.2:   # Forward
-            bus.write_byte(addr, 0x3FC)  # 1020
-            time.sleep(0.1)
-            print('TWO FORWARD')
-        elif right_y < -0.2:   # Reverse
-            bus.write_byte(addr, 0xBCC)  # (30)20
-            time.sleep(0.1)
-            print('TWO REVERSE')
-        else:  # Zero
-            bus.write_byte(addr, 0x3E8)  # 1000
-            time.sleep(0.1)
-            print('TWO ZERO')
-else:
-    print("No joystick connected.")
