@@ -40,6 +40,7 @@ while True:
             print(hex(int(left_y)*modifier))'''
     bus.write_byte(addr, 0x0)
     print(type(modifier))
+    print(modifier)
     # else:
     #    bus.write_byte(addr, 0x0)
 
