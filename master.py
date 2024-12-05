@@ -34,17 +34,23 @@ while True:
 
         # print(f'Modifier: {modifier} Left_y: {left_y}')
         if left_y > 0.2:   # Forward
-            bus.write_byte(addr, 0x14)
+            bus.write_byte(addr, 0x14)  # 20
             time.sleep(0.1)
-        else:
+        elif left_y < -0.2:   # Reverse
+            bus.write_byte(addr, 0x7E4)  # (20)20
+            time.sleep(0.1)
+        else:  # Zero
             bus.write_byte(addr, 0x0)
             time.sleep(0.1)
             print('L0')
 
         if right_y > 0.2:   # Forward
-            bus.write_byte(addr, 0x3FC)  # 20
+            bus.write_byte(addr, 0x3FC)  # (10)20
             time.sleep(0.1)
             # print('20')
+        elif right_y < -0.2:   # Reverse
+            bus.write_byte(addr, 0xBCC)  # (30)20
+            time.sleep(0.1)
         else:
             bus.write_byte(addr, 0x3E8)
             time.sleep(0.1)

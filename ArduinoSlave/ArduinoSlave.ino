@@ -33,10 +33,20 @@ void receiveEvent(int howMany) {
     // Check if the value is a hexadecimal number greater than 0x1000
     unsigned int value = (unsigned int)c;
     Serial.println(value);
-    if (value < 1000) {
+    if (value < 1000) { // MOTOR ONE FORWARD
       roboclaw.ForwardM1(address, value);  // Start Motor1 forward with the specified speed
-    } else {
+    } 
+    
+    else if (1000 < value && value < 2000){ // MOTOR TWO FORWARD
       roboclaw.ForwardM2(address, value - 1000);  // Start Motor1 forward with the specified speed
+    }
+      
+    else if (2000 < value && value < 3000){ // MOTOR ONE REVERSE
+      roboclaw.ForwardM1(address, -(value - 2000));  // Start Motor1 forward with the specified speed
+    }
+      
+    else if (3000 < value && value < 4000){ // MOTOR TWO REVERSE
+      roboclaw.ForwardM2(address, -(value - 3000));  // Start Motor1 forward with the specified speed
     }
   }
 }
