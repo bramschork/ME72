@@ -34,12 +34,9 @@ void receiveEvent(int howMany) {
     unsigned int value = (unsigned int)c;
     Serial.println(value);
     // MOTOR ONE FORWARD
-    if (value < 1000) { roboclaw.ForwardM1(address, value); } 
-    
+    if (value < 1000) { roboclaw.ForwardM1(address, value); }     
     // MOTOR ONE REVERSE
-    else if (value = 65508) { 
-      roboclaw.BackwardM1(address, 20);
-    }
+    else if (value = 65508) { roboclaw.BackwardM1(address, 20); }
 
     
     // MOTOR ONE STOP --> send 64
