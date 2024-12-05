@@ -1,10 +1,12 @@
+
 # this is a comment
+#testing change 
 import pygame
 import time
 from roboclaw_3 import Roboclaw
 
 # Initialize RoboClaw (adjust '/dev/ttyS0' and baud rate as needed)
-roboclaw = Roboclaw("/dev/ttyS0", 9600)
+roboclaw = Roboclaw("/dev/ttyS0", 38400)
 roboclaw.Open()
 
 # Motor address (set this to match the Packet Serial address in RoboClaw)
