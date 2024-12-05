@@ -46,16 +46,18 @@ while True:
         time.sleep(0.1)
         print('ONE ZERO')
 
-        # RIGHT MOTOR / MOTOR TWO
+    print(left_y)
+
+    '''    # RIGHT MOTOR / MOTOR TWO
     if right_y > 0.2:   # Motor One Forward
         bus.write_byte(addr, 0x4)
         time.sleep(0.1)
-        print('ONE FORWARD')
+        print('TWO FORWARD')
     elif right_y < -0.2:   # Motor One Reverse
         bus.write_byte(addr, 0x5)
         time.sleep(0.1)
-        print('ONE REVERSE')
+        print('TWO REVERSE')
     else:  # Motor One Neutral
         bus.write_byte(addr, 0x3)
         time.sleep(0.1)
-        print('ONE ZERO')
+        print('TWO ZERO')'''

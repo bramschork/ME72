@@ -32,10 +32,12 @@ void receiveEvent(int howMany) {
 
     // Check if the value is a hexadecimal number greater than 0x1000
     unsigned int value = (unsigned int)c;
+
+    if (value == 0) {roboclaw.ForwardM1(address, 0); }
+    else if (value == 1) {roboclaw.ForwardM1(address, 0); }
+    else if (value == 2) {roboclaw.BackwardM1(address, 20); }
     Serial.println(value);
-    // MOTOR ONE FORWARD
-    // if (value < 1000) { roboclaw.ForwardM1(address, value); } 
-    
+
 
     
     // MOTOR ONE STOP --> send 64
