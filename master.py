@@ -32,12 +32,19 @@ while True:
         right_y = right_stick.get_axis(3)  # Vertical axis (inverted)
 
         # MODIFIER to slow down the motors
-        modifier = (round(.5 * 127 * left_y))
+        modifier = (round(.3 * 127 * left_y))
 
         if -left_y > 0.2:   # Forward
+            print(-left_y)
             bus.write_byte(addr, modifier)
+        else:
+            bus.write_byte(addr, 0x0)
+
         if -right_y > 0.2:  # Forward
+            print(-right_y)
             bus.write_byte(addr, modifier+1000)
+        else:
+            bus.write_byte(addr, 0x0)
 
         time.sleep(0.1)
     else:
