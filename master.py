@@ -34,8 +34,8 @@ while True:
         # MODIFIER to slow down the motors
         modifier = (round(.3 * 127 * left_y))
 
+        print(left_y)
         if -left_y > 0.2:   # Forward
-            print(-left_y)
             bus.write_byte(addr, modifier)
         else:
             bus.write_byte(addr, 0)
