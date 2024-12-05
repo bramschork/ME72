@@ -18,7 +18,9 @@ bus = SMBus(1)  # indicates /dev/ic2-1
 #    pygame.joystick.Joystick.get_power_level))
 
 i = 0
-while True:
+
+
+def main():
     if pygame.joystick.get_count() > 0:
         left_stick = pygame.joystick.Joystick(0)
         left_stick.init()
@@ -31,7 +33,7 @@ while True:
 
         # Left joystick axes for PS4 controller
         left_y = -left_stick.get_axis(1)  # Vertical axis (inverted)
-        right_y = right_stick.get_axis(3)  # Vertical axis (inverted)
+        right_y = right_stick.get_axis(4)  # Vertical axis (inverted)
 
         # LEFT MOTOR / MOTOR ONE
         if left_y > 0.2:   # Motor One Forward
@@ -60,3 +62,10 @@ while True:
         bus.write_byte(addr, 0x3)
         time.sleep(0.1)
         print('TWO ZERO')
+
+
+while True:
+    try:
+        main()
+    except OSError:
+        main()
