@@ -54,10 +54,10 @@ while True:
             print('L0')'''
 
         if right_y > 0.2:   # Forward
-            bus.write_byte(addr, R_modifier+1000)
+            bus.write_byte(addr, 0x14)
             print(R_modifier)
         else:
-            bus.write_byte(addr, 1000)
+            bus.write_byte(addr, 0x3E8)
             print('R0')
 
         time.sleep(0.2)
