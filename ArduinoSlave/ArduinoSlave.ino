@@ -37,9 +37,9 @@ void receiveEvent(int howMany) {
     else if (value == 1) {roboclaw.ForwardM1(address, 20); }
     else if (value == 2) {roboclaw.BackwardM1(address, 20); }
 
-    if (value == 0) {roboclaw.ForwardM1(address, 0); }
-    else if (value == 1) {roboclaw.ForwardM1(address, 20); }
-    else if (value == 2) {roboclaw.BackwardM1(address, 20); }
+    if (value == 11) {roboclaw.ForwardM2(address, 0); }
+    else if (value == 12) {roboclaw.Forward2(address, 20); }
+    else if (value == 13) {roboclaw.BackwardM2(address, 20); }
     Serial.println(value);
 
 
