@@ -56,6 +56,6 @@ while True:
 
         print(f"Direction: {direction}, Magnitude: {magnitude}")
         if direction == 'Up':
-            bus.write_byte(addr, 0x1)  # switch it on
+            bus.write_byte(addr, 0x7F)  # switch it on
         else:
             bus.write_byte(addr, 0x0)  # switch it on
