@@ -29,15 +29,16 @@ while True:
 
         # Left joystick axes for PS4 controller
         left_y = -left_stick.get_axis(1)  # Vertical axis (inverted)
-        right_y = right_stick.get_axis(2)  # Vertical axis (inverted)
+        right_y = right_stick.get_axis(3)  # Vertical axis (inverted)
 
-        ''' # print(f'Modifier: {modifier} Left_y: {left_y}')
+        # print(f'Modifier: {modifier} Left_y: {left_y}')
         if left_y > 0.2:   # Forward
-            bus.write_byte(addr, L_modifier)
-            print(L_modifier)
+            bus.write_byte(addr, 0x14)
+            time.sleep(0.2)
         else:
-            bus.write_byte(addr, 0)
-            print('L0')'''
+            bus.write_byte(addr, 0x0)
+            time.sleep(0.2)
+            print('L0')
 
         if right_y > 0.2:   # Forward
             bus.write_byte(addr, 0x3FC)  # 20
