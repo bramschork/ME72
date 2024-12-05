@@ -33,32 +33,30 @@ while True:
         left_y = -left_stick.get_axis(1)  # Vertical axis (inverted)
         right_y = right_stick.get_axis(3)  # Vertical axis (inverted)
 
-        '''    if i == 0:
-			# LEFT MOTOR / MOTOR ONE
-			if left_y > 0.2:   # Motor One Forward
-				bus.write_byte(addr, 0x1)
-				time.sleep(0.1)
-				print('ONE FORWARD')
-			elif left_y < -0.2:   # Motor One Reverse
-				bus.write_byte(addr, 0x2)
-				time.sleep(0.1)
-				print('ONE REVERSE')
-			else:  # Motor One Neutral
-				bus.write_byte(addr, 0x0)
-				time.sleep(0.1)
-				print('ONE ZERO')
-			i = 1'''
-
-        # RIGHT MOTOR / MOTOR TWO
-        if right_y > 0.2:   # Motor One Forward
-            bus.write_byte(addr, 0x4)
+        # LEFT MOTOR / MOTOR ONE
+        if left_y > 0.2:   # Motor One Forward
+            bus.write_byte(addr, 0x1)
             time.sleep(0.1)
-            print('TWO FORWARD')
-        elif right_y < -0.2:   # Motor One Reverse
-            bus.write_byte(addr, 0x5)
+            print('ONE FORWARD')
+        elif left_y < -0.2:   # Motor One Reverse
+            bus.write_byte(addr, 0x2)
             time.sleep(0.1)
-            print('TWO REVERSE')
+            print('ONE REVERSE')
         else:  # Motor One Neutral
-            bus.write_byte(addr, 0x3)
+            bus.write_byte(addr, 0x0)
             time.sleep(0.1)
-            print('TWO ZERO')
+            print('ONE ZERO')
+
+    # RIGHT MOTOR / MOTOR TWO
+    if right_y > 0.2:   # Motor One Forward
+        bus.write_byte(addr, 0x4)
+        time.sleep(0.1)
+        print('TWO FORWARD')
+    elif right_y < -0.2:   # Motor One Reverse
+        bus.write_byte(addr, 0x5)
+        time.sleep(0.1)
+        print('TWO REVERSE')
+    else:  # Motor One Neutral
+        bus.write_byte(addr, 0x3)
+        time.sleep(0.1)
+        print('TWO ZERO')
