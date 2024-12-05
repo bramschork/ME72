@@ -41,7 +41,7 @@ if pygame.joystick.get_count() > 0:
     while True:
         pygame.event.pump()
 
-        zero = joystick.get_axis(2)  # Vertical axis (inverted)
+        zero = joystick.get_axis(5)  # Vertical axis (inverted)
         print(zero)
         time.sleep(0.1)
 

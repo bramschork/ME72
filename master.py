@@ -29,7 +29,7 @@ while True:
 
         # Left joystick axes for PS4 controller
         left_y = -left_stick.get_axis(1)  # Vertical axis (inverted)
-        right_y = -right_stick.get_axis(3)  # Vertical axis (inverted)
+        right_y = -right_stick.get_axis(5)  # Vertical axis (inverted)
 
         if left_y < 0.2:
             L_modifier = 0
