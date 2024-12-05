@@ -31,6 +31,7 @@ while True:
         left_y = -left_stick.get_axis(1)  # Vertical axis (inverted)
         right_y = -right_stick.get_axis(3)  # Vertical axis (inverted)
 
+        print(left_y)
         if left_y < 0.2:
             modifier = 0
         elif left_y >= 0.2 and left_y < 0.5:
@@ -38,7 +39,7 @@ while True:
         else:
             modifier = 6
 
-        print(f'Modifier: {0} Left_y*127: {1}'.format(modifier, left_y))
+        print(f'Modifier: {0} Left_y: {1}'.format(modifier, left_y))
         if left_y > 0.2:   # Forward
             bus.write_byte(addr, modifier)
         else:
