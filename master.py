@@ -49,19 +49,19 @@ def main():
             time.sleep(0.05)
             print('ONE ZERO')
 
-    # RIGHT MOTOR / MOTOR TWO
-    if right_y > 0.2:   # Motor One Forward
-        bus.write_byte(addr, 0x4)
-        time.sleep(0.05)
-        print('TWO FORWARD')
-    elif right_y < -0.2:   # Motor One Reverse
-        bus.write_byte(addr, 0x5)
-        time.sleep(0.05)
-        print('TWO REVERSE')
-    else:  # Motor One Neutral
-        bus.write_byte(addr, 0x3)
-        time.sleep(0.05)
-        print('TWO ZERO')
+            # RIGHT MOTOR / MOTOR TWO
+        if right_y > 0.2:   # Motor One Forward
+            bus.write_byte(addr, 0x4)
+            time.sleep(0.05)
+            print('TWO FORWARD')
+        elif right_y < -0.2:   # Motor One Reverse
+            bus.write_byte(addr, 0x5)
+            time.sleep(0.05)
+            print('TWO REVERSE')
+        else:  # Motor One Neutral
+            bus.write_byte(addr, 0x3)
+            time.sleep(0.05)
+            print('TWO ZERO')
 
 
 while True:
