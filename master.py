@@ -33,15 +33,15 @@ while True:
         right_y = right_stick.get_axis(3)  # Vertical axis (inverted)
 
     # print(f'Modifier: {modifier} Left_y: {left_y}')
-    if left_y > 0.2:   # Forward
-        bus.write_byte(addr, 0x14)  # RECEIVED AS 20
+    if left_y > 0.2:   # Motor One Forward
+        bus.write_byte(addr, 0x1)
         time.sleep(0.1)
         print('ONE FORWARD')
-    elif left_y < -0.2:   # Reverse
-        bus.write_byte(addr, 0x7E4)  # 65508
+    elif left_y < -0.2:   # Motor One Reverse
+        bus.write_byte(addr, 0x2)
         time.sleep(0.1)
         print('ONE REVERSE')
     else:  # Zero
-        bus.write_byte(addr, 0x0)  # RECEIVED AS 0
+        bus.write_byte(addr, 0x3)
         time.sleep(0.1)
         print('ONE ZERO')
