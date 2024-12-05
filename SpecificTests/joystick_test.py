@@ -40,8 +40,6 @@ if pygame.joystick.get_count() > 0:
     while True:
         pygame.event.pump()
 
-        # Left joystick axes for PS4 controller
-        x = joystick.get_axis(3)  # Horizontal axis
         y = joystick.get_axis(2)  # Vertical axis (inverted)
 
         # Get direction and magnitude
