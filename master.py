@@ -49,7 +49,6 @@ while True:
 				print('ONE ZERO')
 			i = 1'''
 
-    else:
         # RIGHT MOTOR / MOTOR TWO
         if right_y > 0.2:   # Motor One Forward
             bus.write_byte(addr, 0x0)
@@ -63,4 +62,3 @@ while True:
             bus.write_byte(addr, 0x2)
             time.sleep(0.1)
             print('TWO ZERO')
-    i = 0
