@@ -38,29 +38,29 @@ def main():
         # LEFT MOTOR / MOTOR ONE
         if left_y > 0.2:   # Motor One Forward
             bus.write_byte(addr, 0x1)
-            time.sleep(0.1)
+            time.sleep(0.05)
             print('ONE FORWARD')
         elif left_y < -0.2:   # Motor One Reverse
             bus.write_byte(addr, 0x2)
-            time.sleep(0.1)
+            time.sleep(0.05)
             print('ONE REVERSE')
         else:  # Motor One Neutral
             bus.write_byte(addr, 0x0)
-            time.sleep(0.1)
+            time.sleep(0.05)
             print('ONE ZERO')
 
     # RIGHT MOTOR / MOTOR TWO
     if right_y > 0.2:   # Motor One Forward
         bus.write_byte(addr, 0x4)
-        time.sleep(0.1)
+        time.sleep(0.05)
         print('TWO FORWARD')
     elif right_y < -0.2:   # Motor One Reverse
         bus.write_byte(addr, 0x5)
-        time.sleep(0.1)
+        time.sleep(0.05)
         print('TWO REVERSE')
     else:  # Motor One Neutral
         bus.write_byte(addr, 0x3)
-        time.sleep(0.1)
+        time.sleep(0.05)
         print('TWO ZERO')
 
 

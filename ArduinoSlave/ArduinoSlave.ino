@@ -34,12 +34,12 @@ void receiveEvent(int howMany) {
     unsigned int value = (unsigned int)c;
 
     if (value == 0) {roboclaw.ForwardM1(address, 0); }
-    else if (value == 1) {roboclaw.ForwardM1(address, 20); }
-    else if (value == 2) {roboclaw.BackwardM1(address, 20); }
+    else if (value == 1) {roboclaw.ForwardM1(address, 30); }
+    else if (value == 2) {roboclaw.BackwardM1(address, 30); }
 
     if (value == 3) {roboclaw.ForwardM2(address, 0); }
-    else if (value == 4) {roboclaw.ForwardM2(address, 20); }
-    else if (value == 5) {roboclaw.BackwardM2(address, 20); }
+    else if (value == 4) {roboclaw.ForwardM2(address, 30); }
+    else if (value == 5) {roboclaw.BackwardM2(address, 30); }
     Serial.println(value);
 
 
@@ -57,5 +57,5 @@ void receiveEvent(int howMany) {
   }
 }
 void loop() {
-  delay(500);
+  delay(50);
 }
