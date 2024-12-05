@@ -47,6 +47,7 @@ if pygame.joystick.get_count() > 0:
         # Get direction and magnitude
         direction, magnitude = get_joystick_direction(x, y)
 
-        print(f"Direction: {direction}, Magnitude: {magnitude}")
+        # print(f"Direction: {direction}, Magnitude: {magnitude}")
+        print(y)
 else:
     print("No joystick connected.")

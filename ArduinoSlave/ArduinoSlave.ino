@@ -1,6 +1,6 @@
+// Caltech ME72 2024
+// Wayne Botzky
 
- 
-// Include the Wire library for I2C
 #include <Wire.h>
 #include <SoftwareSerial.h>
 #include "RoboClaw.h"
@@ -31,8 +31,11 @@ void setup() {
 void receiveEvent(int howMany) {
   while (Wire.available()) { // loop through all but the last
     char c = Wire.read(); // receive byte as a character
-    digitalWrite(ledPin, c);
+
+    // Flash on ledPin, the built-in LED on the Arduino Uno
+    digitalWrite(ledPin, 0);
     roboclaw.ForwardM1(address,c); //start Motor1 forward at half speed
+    digitalWrite(ledPin, 1); //ledPin off
   }
 }
 void loop() {
