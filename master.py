@@ -22,7 +22,7 @@ while True:
     # right_stick = pygame.joystick.Joystick(1)
     # right_stick.init()
 
-    print(f"Connected to: {left_stick.get_name()}")
+    # print(f"Connected to: {left_stick.get_name()}")
     pygame.event.pump()
 
     # Left joystick axes for PS4 controller
@@ -30,15 +30,17 @@ while True:
     # right_y = right_stick.get_axis(1)  # Vertical axis (inverted)
 
     # MODIFIER to slow down the motors
-    modifier = 0.1 * 127
+    modifier = 1 * 127
 
-    if abs(left_y > 0.2):  # Deadzone threshold
+    '''if abs(left_y > 0.2):  # Deadzone threshold
         if left_y > 0:  # Reverse
             bus.write_byte(addr, hex(1000+int(left_y)*modifier))
         else:  # Forward
             bus.write_byte(addr, hex(int(left_y)*modifier))
-            print(hex(int(left_y)*modifier))
-    else:
-        bus.write_byte(addr, 0x0)
+            print(hex(int(left_y)*modifier))'''
+    bus.write_byte(addr, hex(int(left_y)*modifier))
+    print(hex(int(left_y)*modifier))
+    # else:
+    #    bus.write_byte(addr, 0x0)
 
     time.sleep(0.1)
