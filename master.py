@@ -1,4 +1,3 @@
-#  Raspberry Pi Master for Arduino Slave
 #  i2c_master_pi.py
 #  Connects to Arduino via I2C
 
@@ -9,9 +8,7 @@ from smbus import SMBus
 import pygame
 import math
 from pygame.locals import *
-
-# Initialize Pygame
-pygame.init()
+pygame.init()  # Initialize Pygame
 pygame.joystick.init()
 
 addr = 0x8  # bus address
@@ -39,8 +36,8 @@ def get_joystick_direction(x, y):
     return direction, round(magnitude, 2)
 
 
-# Check for connected joysticks
-if pygame.joystick.get_count() > 0:
+while True:
+
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
     print(f"Connected to: {joystick.get_name()}")
@@ -56,12 +53,9 @@ if pygame.joystick.get_count() > 0:
 
         # Get direction and magnitude
         direction, magnitude = get_joystick_direction(x, y)
-        send_magnitude = magnitude*127
-        byte = '0x' + str(send_magnitude)
-
-        if direction == 'Up':
-            bus.write_byte(addr, byte)  # switch it on
 
         print(f"Direction: {direction}, Magnitude: {magnitude}")
-else:
-    print("No joystick connected.")
+        if direction == 'Up':
+            bus.write_byte(addr, 0x1)  # switch it on
+        else:
+            bus.write_byte(addr, 0x0)  # switch it on

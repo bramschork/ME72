@@ -1,9 +1,4 @@
-#testing inputs import 
-from inputs import devices 
-for device in devices:
-    print(device)
 
-'''
 import pygame
 import math
 from pygame.locals import *
@@ -13,6 +8,8 @@ pygame.init()
 pygame.joystick.init()
 
 # Function to calculate joystick direction and magnitude
+
+
 def get_joystick_direction(x, y):
     magnitude = math.sqrt(x**2 + y**2)
     direction = "Neutral"
@@ -31,6 +28,7 @@ def get_joystick_direction(x, y):
 
     return direction, round(magnitude, 2)
 
+
 # Check for connected joysticks
 if pygame.joystick.get_count() > 0:
     joystick = pygame.joystick.Joystick(0)
@@ -41,15 +39,14 @@ if pygame.joystick.get_count() > 0:
     print("Reading left joystick input. Use Ctrl+C to quit.")
     while True:
         pygame.event.pump()
-        
+
         # Left joystick axes for PS4 controller
         x = joystick.get_axis(0)  # Horizontal axis
         y = joystick.get_axis(1)  # Vertical axis (inverted)
-        
+
         # Get direction and magnitude
         direction, magnitude = get_joystick_direction(x, y)
-        
+
         print(f"Direction: {direction}, Magnitude: {magnitude}")
 else:
     print("No joystick connected.")
-'''
