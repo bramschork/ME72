@@ -38,9 +38,8 @@ while True:
         else:  # Forward
             bus.write_byte(addr, hex(int(left_y)*modifier))
             print(hex(int(left_y)*modifier))'''
-    print(hex(modifier))
-    print(modifier.hex())
-    bus.write_byte(addr, hex(modifier))
+    print(hex(int(modifier)))
+    bus.write_byte(addr, hex(int(modifier)))
     # else:
     #    bus.write_byte(addr, 0x0)
 
