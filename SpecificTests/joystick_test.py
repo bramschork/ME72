@@ -1,6 +1,7 @@
 
 import pygame
 import math
+import time
 from pygame.locals import *
 
 # Initialize Pygame
@@ -40,11 +41,9 @@ if pygame.joystick.get_count() > 0:
     while True:
         pygame.event.pump()
 
-        zero = joystick.get_axis(0)  # Vertical axis (inverted)
-        one = joystick.get_axis(1)  # Vertical axis (inverted)
-        two = joystick.get_axis(2)  # Vertical axis (inverted)
-        three = joystick.get_axis(3)  # Vertical axis (inverted)
-        print(f'Zero: {zero} One: {one} Two: {two} Three: {three}')
+        zero = joystick.get_axis(2)  # Vertical axis (inverted)
+        print(zero)
+        time.sleep(0.1)
 
         # Get direction and magnitude
         # direction, magnitude = get_joystick_direction(x, y)
