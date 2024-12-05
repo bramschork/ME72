@@ -38,13 +38,13 @@ while True:
             print(-left_y)
             bus.write_byte(addr, modifier)
         else:
-            bus.write_byte(addr, 0x0)
+            bus.write_byte(addr, 0)
 
-        if -right_y > 0.2:  # Forward
+        '''if -right_y > 0.2:  # Forward
             print(-right_y)
             bus.write_byte(addr, modifier+1000)
         else:
-            bus.write_byte(addr, 0x3E8)
+            bus.write_byte(addr, 0x3E8)'''
 
         time.sleep(0.1)
     else:
