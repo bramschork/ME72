@@ -17,6 +17,7 @@ bus = SMBus(1)  # indicates /dev/ic2-1
 # print('PS4 Controller Battery: {0}%'.format(
 #    pygame.joystick.Joystick.get_power_level))
 
+i = 0
 while True:
     if pygame.joystick.get_count() > 0:
         left_stick = pygame.joystick.Joystick(0)
@@ -32,7 +33,6 @@ while True:
         left_y = -left_stick.get_axis(1)  # Vertical axis (inverted)
         right_y = right_stick.get_axis(3)  # Vertical axis (inverted)
 
-    i = 0
     if i == 0:
         # LEFT MOTOR / MOTOR ONE
         if left_y > 0.2:   # Motor One Forward
