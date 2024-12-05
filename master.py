@@ -40,7 +40,7 @@ while True:
             bus.write_byte(addr, 0x7E4)  # (20)20
             time.sleep(0.1)
         else:  # Zero
-            bus.write_byte(addr, 0x40)  # 64
+            bus.write_byte(addr, 0x0)  # 0
             time.sleep(0.1)
             print('L0')
     else:

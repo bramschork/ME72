@@ -42,14 +42,13 @@ void receiveEvent(int howMany) {
     // MOTOR ONE STOP --> send 64
 
     // MOTOR TWO FORWARD
-    else if (1000 < value && value < 2000){ roboclaw.ForwardM2(address, value - 1000); }
+    //else if (1000 < value && value < 2000){ roboclaw.ForwardM2(address, value - 1000); }
 
    // MOTOR TWO STOP
-    else if (value = 1000) { roboclaw.ForwardM2(address, 192); }
+    //else if (value = 1000) { roboclaw.ForwardM2(address, 192); }
 
-    
     // MOTOR TWO REVERSE
-    else if (3000 <= value && value < 4000){ roboclaw.ForwardM2(address, -(value - 3000)); }
+    //else if (3000 <= value && value < 4000){ roboclaw.ForwardM2(address, -(value - 3000)); }
   }
 }
 void loop() {
