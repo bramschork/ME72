@@ -17,10 +17,10 @@ bus = SMBus(1)  # indicates /dev/ic2-1
 #    pygame.joystick.Joystick.get_power_level))
 
 while True:
-    left_stick = pygame.joystick.Joystick(1)
+    left_stick = pygame.joystick.Joystick(0)
     left_stick.init()
 
-    right_stick = pygame.joystick.Joystick(1)
+    right_stick = pygame.joystick.Joystick(0)
     right_stick.init()
 
     # print(f"Connected to: {left_stick.get_name()}")
