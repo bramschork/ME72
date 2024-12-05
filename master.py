@@ -35,11 +35,11 @@ while True:
         if left_y < 0.2:
             modifier = 0
         elif left_y >= 0.2 and left_y < 0.5:
-            modifier = 3
+            modifier = 5
         else:
-            modifier = 6
+            modifier = 20
 
-        print(f'Modifier: {0} Left_y: {1}'.format(modifier, left_y))
+        print(f'Modifier: {modifier} Left_y: {left_y}')
         if left_y > 0.2:   # Forward
             bus.write_byte(addr, modifier)
         else:
