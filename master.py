@@ -38,11 +38,9 @@ while True:
         else:
             modifier = 6
 
-        # print(left_y)
+        print(f'Modifier: {0} Left_y*127: {1}'.format(modifier, left_y*127))
         if -left_y > 0.2:   # Forward
             bus.write_byte(addr, modifier)
-            print('MODIFIER:')
-            print(modifier)
         else:
             bus.write_byte(addr, 0)
 
