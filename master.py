@@ -44,7 +44,7 @@ while True:
             time.sleep(0.2)
             # print('20')
         else:
-            bus.write_byte(addr, 0x0)
+            bus.write_byte(addr, 0x3E8)
             time.sleep(0.2)
             # print('0')
         print(right_y)
