@@ -3,8 +3,8 @@ import time
 
 # Initialize serial connection
 ser = serial.Serial(
-    port='/dev/serial0',  # Replace with the correct serial port
-    baudrate=9600,        # Ensure the baudrate matches your motor controller
+    port='/dev/ttyS0',  # Replace with the correct serial port
+    baudrate=38400,        # Ensure the baudrate matches your motor controller
     timeout=1
 )
 
