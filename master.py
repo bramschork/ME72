@@ -32,7 +32,7 @@ while True:
         left_y = -left_stick.get_axis(1)  # Vertical axis (inverted)
         right_y = right_stick.get_axis(3)  # Vertical axis (inverted)
 
-        # LEFT MOTOR / MOTOR ONE
+    '''    # LEFT MOTOR / MOTOR ONE
     if left_y > 0.2:   # Motor One Forward
         bus.write_byte(addr, 0x1)
         time.sleep(0.1)
@@ -44,11 +44,9 @@ while True:
     else:  # Motor One Neutral
         bus.write_byte(addr, 0x0)
         time.sleep(0.1)
-        print('ONE ZERO')
+        print('ONE ZERO')'''
 
-    print(left_y)
-
-    '''    # RIGHT MOTOR / MOTOR TWO
+    # RIGHT MOTOR / MOTOR TWO
     if right_y > 0.2:   # Motor One Forward
         bus.write_byte(addr, 0x4)
         time.sleep(0.1)
@@ -60,4 +58,4 @@ while True:
     else:  # Motor One Neutral
         bus.write_byte(addr, 0x3)
         time.sleep(0.1)
-        print('TWO ZERO')'''
+        print('TWO ZERO')
