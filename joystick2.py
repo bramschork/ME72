@@ -1,3 +1,9 @@
+#testing inputs import 
+from inputs import devices 
+for device in devices:
+    print(device)
+
+'''
 import pygame
 import math
 from pygame.locals import *
@@ -46,3 +52,4 @@ if pygame.joystick.get_count() > 0:
         print(f"Direction: {direction}, Magnitude: {magnitude}")
 else:
     print("No joystick connected.")
+'''

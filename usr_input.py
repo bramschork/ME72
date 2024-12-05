@@ -26,6 +26,13 @@ def send_command(value):
     else:
         print("Invalid command. Enter 0 (off) or 1 (10% power).")
 
+def stop_motor():
+    """
+    Stops the motor by sending the 'stop' command.
+    """
+    print("Stopping motor...")
+    ser.write(bytes([64]))  # 64 = Stop channel 1
+    ser.flush()
 
 def main():
     print("Motor Control Program")
@@ -48,6 +55,7 @@ def main():
     except KeyboardInterrupt:
         print("\nProgram terminated by user.")
     finally:
+        stop_motor()  # Ensure the motor stops when exiting
         ser.close()
         print("Serial connection closed.")
 
