@@ -30,13 +30,13 @@ while True:
     # right_y = right_stick.get_axis(1)  # Vertical axis (inverted)
 
     # MODIFIER to slow down the motors
-    modifier = 0.1
+    modifier = 0.1 * 127
 
     if abs(left_y > 0.2):  # Deadzone threshold
         if left_y > 0:  # Reverse
-            bus.write_byte(addr, hex(1000+left_y*127*modifier))
+            bus.write_byte(addr, hex(1000+int(left_y)*modifier))
         else:  # Forward
-            bus.write_byte(addr, hex(left_y*127*modifier))
+            bus.write_byte(addr, hex(int(left_y)*modifier))
     else:
         bus.write_byte(addr, 0x0)
 
