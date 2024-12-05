@@ -63,6 +63,9 @@ def main():
 if __name__ == "__main__":
     main()
 '''
+from inputs import devices 
+for device in devices:
+    print(device)
 import time
 from roboclaw_3 import Roboclaw
 from inputs import devices, get_gamepad
