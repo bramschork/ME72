@@ -13,8 +13,8 @@ addr = 0x8  # bus address
 bus = SMBus(1)  # indicates /dev/ic2-1
 
 # Function to calculate joystick direction and magnitude
-print('PS4 Controller Battery: {0}%'.format(
-    pygame.joystick.Joystick.get_power_level))
+# print('PS4 Controller Battery: {0}%'.format(
+#    pygame.joystick.Joystick.get_power_level))
 
 while True:
     left_stick = pygame.joystick.Joystick(0)
