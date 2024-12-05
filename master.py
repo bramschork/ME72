@@ -39,7 +39,7 @@ while True:
         elif left_y < -0.2:   # Reverse
             bus.write_byte(addr, 0x7E4)  # (20)20
             time.sleep(0.1)
-            print('REVERSE')
+            # print('REVERSE')
         else:  # Zero
             bus.write_byte(addr, 0x0)  # 0
             time.sleep(0.1)
@@ -48,11 +48,11 @@ while True:
         if right_y > 0.2:   # Forward
             bus.write_byte(addr, 0x3FC)  # 1020
             time.sleep(0.1)
-            print('1020')
+            # print('1020')
         elif right_y < -0.2:   # Reverse
             bus.write_byte(addr, 0xBCC)  # (30)20
             time.sleep(0.1)
-            print('3020')
+            # print('3020')
         else:  # Zero
             bus.write_byte(addr, 0x3E8)  # 1000
             time.sleep(0.1)
