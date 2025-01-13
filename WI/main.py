@@ -1,53 +1,76 @@
-import evdev
-from evdev import ecodes
-from roboclaw_3 import Roboclaw
+import pygame
 import serial
+import time
+from roboclaw_3 import Roboclaw
 
-# Initialize PS4 controller
-controller = find_ps4_controller()
-print(f"Connected to {controller.name} at {controller.path}")
+# Initialize Pygame
+pygame.init()
+pygame.joystick.init()
+
+# Function to find and initialize the PS4 controller
+
+
+def initialize_ps4_controller():
+    joystick_count = pygame.joystick.get_count()
+    if joystick_count == 0:
+        raise RuntimeError(
+            "No joystick detected. Ensure the PS4 controller is connected via Bluetooth.")
+    controller = pygame.joystick.Joystick(0)
+    controller.init()
+    print(f"Connected to controller: {controller.get_name()}")
+    return controller
+
+
+# Initialize the PS4 controller
+controller = initialize_ps4_controller()
 
 # Initialize RoboClaw
-roboclaw = Roboclaw(serial.Serial('/dev/ttyS0', 38400))
+roboclaw = Roboclaw('/dev/ttyS0', 115200)  # Adjust the serial port as needed
 roboclaw.Open()
-address = 0x80  # Default address; adjust if necessary
+address = 0x80  # Replace with your RoboClaw address
 
-# Axis codes
-AXIS_CODES = {
-    'LEFT_Y': ecodes.ABS_Y,
-    'RIGHT_Y': ecodes.ABS_RY,
-}
+# Function to map joystick input (-1 to 1) to motor speed (0 to 127)
 
-# Initialize joystick positions
-joystick_positions = {
-    'LEFT_Y': 128,
-    'RIGHT_Y': 128,
-}
 
 def joystick_to_speed(value):
-    # Normalize to -127 to 127
-    return int((value - 128) * 127 / 128)
+    return int((value + 1) * 63.5)  # Maps -1 to 1 range to 0 to 127
 
+
+# Main loop
 try:
-    print("Reading joystick positions. Use the left and right joysticks to control motors.")
-    for event in controller.read_loop():
-        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-            for axis_name, axis_code in AXIS_CODES.items():
-                if event.code == axis_code:
-                    joystick_positions[axis_name] = event.value
-                    speed = joystick_to_speed(event.value)
-                    if axis_name == 'LEFT_Y':
-                        if speed >= 0:
-                            roboclaw.ForwardM1(address, speed)
-                        else:
-                            roboclaw.BackwardM1(address, -speed)
-                    elif axis_name == 'RIGHT_Y':
-                        if speed >= 0:
-                            roboclaw.ForwardM2(address, speed)
-                        else:
-                            roboclaw.BackwardM2(address, -speed)
+    print("Press Ctrl+C to exit.")
+    while True:
+        # Process Pygame events
+        for event in pygame.event.get():
+            if event.type == pygame.JOYAXISMOTION:
+                # Read joystick positions
+                left_y = controller.get_axis(1)  # Left joystick vertical axis
+                # Right joystick vertical axis
+                right_y = controller.get_axis(4)
+
+                # Print joystick values
+                print(
+                    f"Left joystick Y-axis: {left_y:.2f}, Right joystick Y-axis: {right_y:.2f}")
+
+                # Convert joystick positions to motor speeds
+                # Invert axis if necessary
+                speed_m1 = joystick_to_speed(-left_y)
+                # Invert axis if necessary
+                speed_m2 = joystick_to_speed(-right_y)
+
+                # Send commands to RoboClaw
+                roboclaw.ForwardM1(address, speed_m1)
+                roboclaw.ForwardM2(address, speed_m2)
+
+        # Delay to prevent excessive CPU usage
+        time.sleep(0.1)
+
 except KeyboardInterrupt:
     print("\nExiting...")
-    # Stop motors on exit
+
+finally:
+    # Stop motors and clean up
     roboclaw.ForwardM1(address, 0)
     roboclaw.ForwardM2(address, 0)
+    pygame.joystick.quit()
+    pygame.quit()
