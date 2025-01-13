@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ME72
 
 ## Raspberry Pi Zero 2 W Login
@@ -41,3 +42,9 @@ Running `devices` will list all devices the RPI has paired to (INCLUDING present
 PS4 controller is currently connect, run `info MAC`. This will list all stats.
 
 **Substitute MAC for the MAC address of the controller found when you run** `scan on`.
+=======
+This repository contains the test file 'packet_serial.py'
+and the BasicMicro Python library 'roboclaw.py'. The test file
+operates a RoboClaw in packet serial mode with a Raspberry Pi single board computer. The accompanying
+Application Note can be [found here](https://resources.basicmicro.com/packet-serial-with-the-raspberry-pi-3/).
+>>>>>>> master
