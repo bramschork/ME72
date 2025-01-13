@@ -4,7 +4,8 @@ pygame.init()
 pygame.joystick.init()
 
 # List the available joystick devices
-joysticks = [pygame.joystick.Joystick(i) for i in range(pygame.joystick.get_count())]
+joysticks = [pygame.joystick.Joystick(i)
+             for i in range(pygame.joystick.get_count())]
 
 # Initialize all detected joysticks
 for joystick in joysticks:
@@ -21,4 +22,5 @@ while True:
         right_x_axis = joystick.get_axis(2)
         right_y_axis = joystick.get_axis(3)
 
-        print(f"Left Joystick: X={left_x_axis}, Y={left_y_axis}, Right Joystick: X={right_x_axis}, Y={right_y_axis}")
+        print(
+            f"Left Joystick: X={left_x_axis}, Y={left_y_axis}, Right Joystick: X={right_x_axis}, Y={right_y_axis}")
