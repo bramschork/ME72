@@ -1,4 +1,4 @@
-from roboclaw import Roboclaw
+from roboclaw_3 import Roboclaw
 from time import sleep
 
 if __name__ == "__main__":
