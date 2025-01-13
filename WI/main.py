@@ -51,12 +51,33 @@ except KeyboardInterrupt:
     print("\nExiting...")
 
 
-'''roboclaw.ForwardM1(address,64)
-sleep(2)
-roboclaw.ForwardM1(address,0)
-sleep(2)
+# Normalize joystick values (0–256 to -127 to 127)
+def normalize(value):
+    return value - 128
 
-roboclaw.ForwardM2(address, 64)
-sleep(2)
-roboclaw.ForwardM2(address,0)
-sleep(2)'''
+# Tank drive mixed mode function
+
+
+def tank_drive(left_x, left_y, right_x, right_y):
+    # Normalize inputs
+    left_y = normalize(left_y)  # Forward/Reverse for Motor 1
+    right_y = normalize(right_y)  # Forward/Reverse for Motor 2
+    left_x = normalize(left_x)  # Turning for Motor 1
+    right_x = normalize(right_x)  # Turning for Motor 2
+
+    # Calculate mixed motor speeds
+    motor1_speed = left_y + left_x  # Left joystick controls Motor 1
+    motor2_speed = right_y + right_x  # Right joystick controls Motor 2
+
+    # Clamp values to -127 to 127
+    motor1_speed = max(min(motor1_speed, 127), -127)
+    motor2_speed = max(min(motor2_speed, 127), -127)
+
+    # Send speed commands to motors
+    roboclaw.ForwardBackwardM1(0x80, motor1_speed + 127)  # Address 0x80, M1
+    roboclaw.ForwardBackwardM2(0x80, motor2_speed + 127)  # Address 0x80, M2
+
+
+# Example usage
+# Replace with actual joystick values
+tank_drive(left_x=128, left_y=200, right_x=128, right_y=56)
