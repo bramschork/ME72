@@ -1,28 +1,6 @@
 from roboclaw_3 import Roboclaw
 from time import sleep
 
-dual_controller = True
-'''
-if dual_controller == True:
-
-    controller_address_1 = 0x80 # 128 in hex
-    controller_address_2 = 0x82 # 128 in hex
-    roboclaw_1 = Roboclaw("/dev/ttyS0", 38400)
-    roboclaw.Open()
-
-    while True:
-
-        roboclaw.ForwardM1(address, 64)
-        sleep(2)
-        roboclaw.ForwardM1(address, 0)
-        sleep(2)
-
-        roboclaw.ForwardM2(address, 64)
-        sleep(2)
-        roboclaw.ForwardM2(address, 0)
-        sleep(2)'''
-
-
 # Addresses for the two Roboclaws
 controller_address_1 = 0x80  # 128 in hex
 controller_address_2 = 0x82  # 130 in hex
