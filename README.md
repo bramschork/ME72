@@ -1,18 +1,34 @@
-# Wayne Botzky ME72
-
-2024-2025
-
-## WiFi
+# WiFi
 
 WiFi Router Management IP: 192.168.8.1
+SSID: The Net
+Password: michaelmello
 
-## Pi
+# Raspberry Pi's
 
-### Login
+## Login:
 
+RPI 1
 RPI USER: ME72
 SSH IP: me72@192.168.8.135
 Pass: mello
+
+RPI 1
+RPI USER: ME72
+SSH IP: me72@192.168.8.162
+Pass: mello
+
+## Setup
+
+Use the Raspberry Pi imager to flash the SD card using the first recommended full installation of Raspbian for the Raspberry Pi Zero W. **Follow the prompts to install custom settings**. Here, when flashing the SD card, you can populate the SSID and password of the network so that the Pi automatically joins on startup. The IP address of the Pi can be found using the instructions below.
+![[Pasted image 20250206112721.png]]
+
+## Login Help
+
+The IP address of the Pi's can be found on the router using a tool such as Angry IP Scanner (free Mac/Windows). This tool cans the local network and will locate the IP of the Raspberry pi as long as it is connected to the network.
+![[Pasted image 20250206123146.png]]
+
+## Bluetooth Commands
 
 List connected devices: `bluetoothctl devices`
 Info on specific device: `bluetoothctl info [DEVICE_MAC_ADDRESS]`
@@ -29,13 +45,13 @@ Save and exit (Ctrl+O, Enter, Ctrl+X).
 
 sudo systemctl restart bluetooth
 
-## Programming
+# Programming
 
 ### Venv
 
 Create and activate virtual environment:
 
-```python
+```
 python -m venv venv
 source venv/bin/activate
 ```
@@ -44,11 +60,12 @@ source venv/bin/activate
 
 Prints the value of the left and right joysticks in both the x and y directions.
 
-## Controllers
+# Controllers
 
 ## Controller Lists
 
 Pi 1, Controller 1 (MAC: 30:0E:D5:92:26:3E)
+Pi 2, Controller 2 (MAC: 28:C1:3C:59:86:C9)
 
 ## Useful Commands
 
@@ -98,15 +115,15 @@ Only charge the controller with it's intended connection device. Pairing occurs 
 
 ## Errors
 
-### Connection Error
+**Connection Error**
 
-```python
+```
 [CHG] Device 30:0E:D5:92:26:3E Connected: yes
 Failed to connect: org.bluez.Error.Failed br-connection-create-socket
 [CHG] Device 30:0E:D5:92:26:3E Connected: no
 ```
 
-```python
+```
 sudo apt update && sudo apt upgrade -y
 sudo apt install bluetooth bluez bluez-tools python3-dbus python3-pip
 pip3 install ds4drv
@@ -124,11 +141,11 @@ sudo systemctl restart bluetooth
 
 `AttributeError: 'Roboclaw' object has no attribute '_port'`: Roboclaw is not connected properly
 
-## Github
+# Github
 
 Auth Errors:
 
-```python
+```
 (venv) **me72@raspberrypi**:**~/ME72/WI $** git push
 Username for 'https://github.com': bramschork
 Password for 'https://bramschork@github.com': 
@@ -141,12 +158,60 @@ Add new origin: `git remote add origin https://bramschork:TOKEN@github.com/brams
 Then, `git push -u origin main`
 Ask Bram for the token. It's a private key and cannot be shared on Github.
 
-## Electronics
+# Electronics
 
-Wiring: <https://resources.basicmicro.com/packet-serial-with-the-raspberry-pi-3/>
+Wiring: https://resources.basicmicro.com/packet-serial-with-the-raspberry-pi-3/
 
 | **Raspberry Pi** | **RoboClaw**                                   |
 | ---------------- | ---------------------------------------------- |
 | GPIO 14          | S1 signal pin (pin closest to board edge)      |
 | GPIO 15          | S2 signal pin (pin closest to board edge)      |
 | Any ground pin   | S1 ground pin (pin closest to inside of board) |
+
+nano ~/.ssh/config
+![[Pasted image 20250207141220.png]]
+
+## Label Schema
+
+### Controllers
+
+Front: C* (* = controller number)
+Back: C\* MAC
+
+Roboclaw naming convention. All roboclaws use “Packet Serial Mode”, Baud Rate = 38400
+
+A1D = Attacker #1, Drive motors controller, 128 = Packet Serial Address of 128
+A1S = Attacher #1 Shooter motors controller, 130 = Packet Serial Address of 130
+
+![[Pasted image 20250207151031.png]]
+
+![[Pasted image 20250207163147.png]]
+
+Pin 1, 2 VCC
+Pin 3 GND
+S1, TX, Pin 4
+S2, RX, Pin 5
+
+AttributeError: 'Roboclaw' object has no attribute '\_port'
+
+One of two causes. 1) wiring issue, check all connections. 2) UART not enabled (Pi default). You can check if this is the case by running `ls -l /dev/serial*`. If the output is `ls: cannot access '/dev/serial*': No such file or directory`, UART is disable. To fix:
+`sudo raspi-config`
+
+1. **Go to**: Interfacing Options
+2. **Select**: Serial Port
+3. **Disable shell login over serial** (select **No**)
+4. **Enable serial hardware** (select **Yes**)
+   sudo reboot
+   Check: ls /dev/ | grep tty
+
+I changed the wiring on the Pi. Since we are communicating over serial the connections can be daisy chained.
+
+For each roboclaw,:
+
+S1 closest to board edge pins connect to the TX (Pin 4) of the RPI
+S2 pins connect to the RX (pin 4) of the RPI
+S1 furthest from board edge connect to GND (Pin 3) of the RPI
+
+The GitHub has two scripts, single_roboclaw_test and dual_roboclaw_test. The RPI is successfully connecting to the controllers and controlling the motors. Once we have the chassis assembled I will fine tune the tank drive. Same with mechanism when it is ready. I talked with Claire regarding the button/controller schema.
+
+Electronics are good for now. When I come in this weekend I’m free to help do whatever until we are assembled enough for testing

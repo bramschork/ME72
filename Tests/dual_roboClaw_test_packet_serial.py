@@ -19,7 +19,7 @@ power = 6
 while True:
     # Roboclaw 1 - Motor 1
     roboclaw_1.ForwardM1(controller_address_1, power)
-    sleep(2)
+    sleep(0.1)
     roboclaw_1.ForwardM1(controller_address_1, 0)
     sleep(2)
 
