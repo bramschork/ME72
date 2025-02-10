@@ -1,27 +1,30 @@
-import subprocess
+import hid
 import time
 
-# Replace this with your actual PS4 controller's MAC address
-PS4_CONTROLLER_MAC = "30:0E:D5:92:26:3E"  # Update with your actual MAC
-
-
-def connect_ps4_controller():
-    """
-    Ensures the PS4 controller is connected via Bluetooth before sending commands.
-    """
-    cmd = f"echo -e 'connect {PS4_CONTROLLER_MAC}\ntrust {PS4_CONTROLLER_MAC}\nquit' | bluetoothctl"
-    subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL,
-                   stderr=subprocess.DEVNULL)
+# Replace this with your actual PS4 controller's HID Vendor & Product IDs
+DS4_VENDOR_ID = 0x054C  # Sony
+DS4_PRODUCT_ID = 0x05C4  # DualShock 4 (CUH-ZCT1)
+LIGHTBAR_REPORT_ID = 0x11  # Standard HID report for light bar
 
 
 def set_lightbar_color(r, g, b):
     """
-    Uses `ds4drv` to change the light bar color on a Bluetooth-connected PS4 controller.
+    Sets the PS4 controller light bar color using HIDAPI.
+    Works over both USB and Bluetooth.
     """
-    cmd = f"ds4drv --led {r},{g},{b}"
-    subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL,
-                     stderr=subprocess.DEVNULL)
-    print(f"Setting light bar color to: R={r}, G={g}, B={b}")
+    try:
+        # Open the HID device (PS4 Controller)
+        ds4 = hid.device()
+        ds4.open(DS4_VENDOR_ID, DS4_PRODUCT_ID)
+
+        # Send light bar color change command
+        command = [LIGHTBAR_REPORT_ID, 0xFF, r, g, b, 0, 0, 0, 0, 0]
+        ds4.write(command)
+
+        print(f"Light bar set to: R={r}, G={g}, B={b}")
+        ds4.close()
+    except Exception as e:
+        print(f"Failed to set light bar color: {e}")
 
 
 def cycle_lightbar_colors():
@@ -44,14 +47,6 @@ def cycle_lightbar_colors():
 
 
 if __name__ == "__main__":
-    print("Ensuring PS4 controller is connected via Bluetooth...")
-    connect_ps4_controller()
-
-    print("Starting `ds4drv` for Bluetooth LED control...")
-    subprocess.Popen("ds4drv --hidraw", shell=True,
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
     print("Cycling light bar colors...")
     cycle_lightbar_colors()
-
     print("Finished cycling colors.")
