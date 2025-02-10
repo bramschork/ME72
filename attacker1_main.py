@@ -101,9 +101,9 @@ def tank_drive(left_x, left_y, right_x, right_y):
     left_motor_speed = left_y  # Left joystick controls Motor 1
     right_motor_speed = right_y  # Right joystick controls Motor 2
 
-    roboclaw.ForwardBackwardM1(
+    motor_roboclaw.ForwardBackwardM1(
         motor_roboclaw_address, left_motor_speed)  # Motor 1
-    roboclaw.ForwardBackwardM2(
+    motor_roboclaw.ForwardBackwardM2(
         motor_roboclaw_address, right_motor_speed)  # Motor 2
 
 
