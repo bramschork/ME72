@@ -1,5 +1,4 @@
 from roboclaw_3 import Roboclaw
-from evdev import InputDevice, list_devices, ecodes
 
 import threading
 import time
@@ -54,39 +53,6 @@ def find_ps4_controller():
 
 # Hidraw for light bar and rumble control
 
-
-def find_ps4_hidraw():
-    """
-    hidraw (Human Interface Device Raw) communicates with the controller at a lower level via raw HID reports.
-        Can send commands for light bar color, control rumble, outputs, etc.
-    """
-
-    hidraw_devices = glob.glob('/dev/hidraw*')
-    for device in hidraw_devices:
-        try:
-            with open(device, "rb") as f:
-                name = os.readlink(
-                    f"/sys/class/hidraw/{os.path.basename(device)}/device/driver")
-                if "sony" in name.lower():
-                    return device
-        except Exception:
-            pass
-    raise RuntimeError(
-        "PS4 hidraw device not found! Ensure it's connected via USB.")
-
-# Function to change the light bar color
-
-
-def set_lightbar_color(r, g, b):
-    """Sends a HID report to change the PS4 controller light bar color."""
-    hidraw_device = find_ps4_hidraw()
-    with open(hidraw_device, "wb") as f:
-        command = bytes([0x05, 0xFF, r, g, b, 0x00, 0x00, 0x00, 0x00, 0x00])
-        f.write(command)
-
-
-# Set Initial Lightbar Color
-set_lightbar_color(0, 255, 0)
 
 # Initialize the PS4 controller
 controller = find_ps4_controller()
