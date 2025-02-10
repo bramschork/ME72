@@ -6,7 +6,7 @@ controller_address_1 = 0x80  # 128 in hex
 controller_address_2 = 0x82  # 130 in hex
 
 # Initialize both Roboclaws
-roboclaw_1 = Roboclaw("/dev/ttyS0", 115200)  # original 38400
+roboclaw_1 = Roboclaw("/dev/ttyS0", 115200)
 roboclaw_2 = Roboclaw("/dev/ttyS0", 115200)
 
 # Open serial communication
