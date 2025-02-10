@@ -21,6 +21,8 @@ motor_roboclaw.Open()
 mechanism_roboclaw.Open()
 #####################################
 
+MECHANISM_MOTOR_SPEED = 64  # half-speed, since full speed is 127
+
 # Joystick Deadzone threshold
 DEADZONE = 5
 
@@ -121,6 +123,37 @@ def tank_drive(left_x, left_y, right_x, right_y):
         motor_roboclaw_address, right_motor_speed)  # Motor 2
 
 
+def monitor_and_check_motor_speed(target_current=2.0, tolerance=0.5, check_interval=0.1):
+    """
+    Monitors the motor current until it stabilizes at the target speed.
+    Once the motors are up to speed, this function returns.
+
+    Args:
+        target_current (float): Expected steady-state current (in Amps).
+        tolerance (float): Allowed variation from the target current.
+        check_interval (float): Time in seconds between checks.
+
+    Returns:
+        bool: True when motors reach target speed.
+    """
+    while True:
+        # Read motor currents (converted from mA to A)
+        m1_current = mechanism_roboclaw.ReadCurrents(
+            mechanism_roboclaw_address)[1] / 100.0
+        m2_current = mechanism_roboclaw.ReadCurrents(
+            mechanism_roboclaw_address)[2] / 100.0
+
+        # Check if both motors are within the target range
+        if (
+            abs(m1_current - target_current) <= tolerance and
+            abs(m2_current - target_current) <= tolerance
+        ):
+            print("Motors are up to speed!")
+            return True  # Exit and return once motors stabilize
+
+        time.sleep(check_interval)  # Wait before checking again
+
+
 # Read joystick inputs and control motors
 try:
     print("JOYSTICKS HOT")
@@ -151,14 +184,43 @@ try:
                         )
 
             # Right Trigger / Mechanism Event
-            if event.code == ecodes.ABS_RZ:  # Right Trigger (R2)
+
+            # Handle R2 (Right Trigger) press for motor control and monitoring
+            if event.code == ecodes.ABS_RZ:
                 trigger_value = event.value
-                if trigger_value > 10 and not blinking:  # R2 is pressed
-                    blink_thread = threading.Thread(
-                        target=blink_lightbar, args=(255, 0, 0), daemon=True)
-                    blink_thread.start()
-                elif trigger_value <= 10 and blinking:  # R2 released
-                    blinking = False
-                    set_lightbar_color(0, 255, 0)  # Restore default green
+
+                if trigger_value > 10:  # Trigger pulled
+                    set_lightbar_color(255, 0, 0)  # Set light bar red
+
+                    # Set mechanism motors: M1 forward, M2 reverse
+                    mechanism_roboclaw.ForwardM1(
+                        mechanism_roboclaw_address, MECHANISM_MOTOR_SPEED)
+                    mechanism_roboclaw.BackwardM2(
+                        mechanism_roboclaw_address, MECHANISM_MOTOR_SPEED)
+
+                    def monitor_and_stop_motors():
+                        """Runs monitor function and stops motors when it's done."""
+                        if monitor_and_check_motor_speed():
+                            # Stop mechanism motors after reaching speed
+                            mechanism_roboclaw.ForwardM1(
+                                mechanism_roboclaw_address, 0)
+                            mechanism_roboclaw.BackwardM2(
+                                mechanism_roboclaw_address, 0)
+                            print("Mechanism motors stopped.")
+
+                    # Start monitoring motor speed in a separate thread
+                    motor_monitor_thread = threading.Thread(
+                        target=monitor_and_stop_motors,
+                        daemon=True
+                    )
+                    motor_monitor_thread.start()
+
+                else:  # Trigger released
+                    set_lightbar_color(0, 255, 0)  # Set light bar green
+
+                    # Stop mechanism motors
+                    mechanism_roboclaw.ForwardM1(mechanism_roboclaw_address, 0)
+                    mechanism_roboclaw.BackwardM2(
+                        mechanism_roboclaw_address, 0)
 except KeyboardInterrupt:
     print("\nExiting...")
