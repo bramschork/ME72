@@ -1,3 +1,5 @@
+from evdev import ecodes
+
 # Axis codes for left and right joysticks
 AXIS_CODES = {
     'LEFT_X': ecodes.ABS_X,
