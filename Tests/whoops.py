@@ -2,7 +2,7 @@ import hid
 import time
 
 DS4_VENDOR_ID = 0x054C  # Sony
-DS4_PRODUCT_ID = 0x05C4  # Use 0x05C4 for USB mode
+DS4_PRODUCT_ID = 0x09CC  # Use 0x05C4 for USB mode
 
 
 def set_lightbar_color(r, g, b):
