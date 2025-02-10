@@ -2,24 +2,25 @@ import hid
 
 # Use 0x09CC if 0x05C4 does not work
 DS4_VENDOR_ID = 0x054C  # Sony
-DS4_PRODUCT_ID = 0x09CC  # DualShock 4 Bluetooth Mode
+DS4_PRODUCT_ID = 0x05c4  # DualShock 4 Bluetooth Mode
 
 
 def set_lightbar_color(r, g, b):
     """
-    Sets the PS4 controller light bar color using HIDAPI.
+    Sends a properly formatted HID report to change the PS4 light bar color.
     """
     try:
         ds4 = hid.Device(DS4_VENDOR_ID, DS4_PRODUCT_ID)
 
-        # HID Report Format (Bluetooth requires a longer 78-byte report)
+        # HID Report Format (USB requires a 32-byte report, Bluetooth requires 78 bytes)
         command = bytearray([
             0x11, 0x80, 0x00,  # HID Report ID
             r, g, b,  # RGB values
             0x00, 0x00, 0x00, 0x00,  # Padding
-        ] + [0x00] * 56)  # Ensuring 64-byte length
+        ] + [0x00] * 56)  # Ensure report is 64 bytes long
 
-        ds4.write(command)
+        ds4.write(command)  # Send the HID report
+
         ds4.close()
         print(f"Light bar set to: R={r}, G={g}, B={b}")
 
