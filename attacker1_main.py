@@ -3,6 +3,7 @@ from evdev import InputDevice, list_devices, ecodes
 
 import threading
 import time
+import glob
 
 # Grab axis codes and initial stick positions
 from joystick_config import AXIS_CODES, joystick_positions
