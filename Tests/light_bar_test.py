@@ -16,9 +16,9 @@ def connect_ps4_controller():
 
 def set_lightbar_color(r, g, b):
     """
-    Sets the PS4 controller light bar color using Bluetooth via `bluetoothctl`.
+    Uses `ds4drv` to change the light bar color on a Bluetooth-connected PS4 controller.
     """
-    cmd = f"echo -e 'connect {PS4_CONTROLLER_MAC}\ntrust {PS4_CONTROLLER_MAC}\nquit' | bluetoothctl"
+    cmd = f"ds4drv --led {r},{g},{b}"
     subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL)
     print(f"Setting light bar color to: R={r}, G={g}, B={b}")
@@ -46,6 +46,10 @@ def cycle_lightbar_colors():
 if __name__ == "__main__":
     print("Ensuring PS4 controller is connected via Bluetooth...")
     connect_ps4_controller()
+
+    print("Starting `ds4drv` for Bluetooth LED control...")
+    subprocess.Popen("ds4drv --hidraw", shell=True,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     print("Cycling light bar colors...")
     cycle_lightbar_colors()
