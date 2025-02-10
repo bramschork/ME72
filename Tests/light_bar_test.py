@@ -13,7 +13,7 @@ def set_lightbar_color(r, g, b):
         ds4 = hid.Device(DS4_VENDOR_ID, DS4_PRODUCT_ID)
 
         # HID Report Format (USB requires a 32-byte report, Bluetooth requires 78 bytes)
-        command = bytearray([
+        command = bytes([
             0x11, 0x80, 0x00,  # HID Report ID
             r, g, b,  # RGB values
             0x00, 0x00, 0x00, 0x00,  # Padding
