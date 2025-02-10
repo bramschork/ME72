@@ -26,9 +26,6 @@ MECHANISM_MOTOR_SPEED = 64  # half-speed, since full speed is 127
 # Joystick Deadzone threshold
 DEADZONE = 5
 
-# Set Initial Lightbar Color
-set_lightbar_color(0, 255, 0)
-
 # Find PS4 controller for inputs
 
 
@@ -86,6 +83,9 @@ def set_lightbar_color(r, g, b):
         command = bytes([0x05, 0xFF, r, g, b, 0x00, 0x00, 0x00, 0x00, 0x00])
         f.write(command)
 
+
+# Set Initial Lightbar Color
+set_lightbar_color(0, 255, 0)
 
 # Initialize the PS4 controller
 controller = find_ps4_controller()
