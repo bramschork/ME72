@@ -53,12 +53,17 @@ def find_ps4_controller():
 def set_lightbar_color(r, g, b):
     """
     Sets the PS4 controller light bar color using HIDAPI.
+    Works for both USB and Bluetooth connections.
     """
     try:
         ds4 = hid.Device(DS4_VENDOR_ID, DS4_PRODUCT_ID)
 
-        # Correct the command format (Ensure it's a bytearray)
-        command = bytearray([LIGHTBAR_REPORT_ID, 0xFF, r, g, b, 0, 0, 0, 0, 0])
+        # HID report structure for PS4 light bar control
+        command = bytearray([
+            0x05, 0xFF,  # Report ID and Effect Identifier
+            r, g, b,  # RGB Values
+            0, 0, 0, 0, 0,  # Padding bytes (must be included)
+        ] + [0] * 68)  # Ensuring 78-byte HID report length
 
         # Write the command to the device
         ds4.write(command)
