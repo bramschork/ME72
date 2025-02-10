@@ -55,9 +55,12 @@ def set_lightbar_color(r, g, b):
     Sets the PS4 controller light bar color using HIDAPI.
     """
     try:
-        ds4 = hid.Device(DS4_VENDOR_ID, DS4_PRODUCT_ID)  # Corrected line
+        ds4 = hid.Device(DS4_VENDOR_ID, DS4_PRODUCT_ID)
 
-        command = [LIGHTBAR_REPORT_ID, 0xFF, r, g, b, 0, 0, 0, 0, 0]
+        # Correct the command format (Ensure it's a bytearray)
+        command = bytearray([LIGHTBAR_REPORT_ID, 0xFF, r, g, b, 0, 0, 0, 0, 0])
+
+        # Write the command to the device
         ds4.write(command)
 
         ds4.close()
