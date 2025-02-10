@@ -2,7 +2,7 @@ import subprocess
 import time
 
 # Replace this with your actual PS4 controller's MAC address
-PS4_CONTROLLER_MAC = "11:22:33:44:55:66"  # Update with your actual MAC
+PS4_CONTROLLER_MAC = "30:0E:D5:92:26:3E"  # Update with your actual MAC
 
 
 def connect_ps4_controller():
@@ -16,9 +16,9 @@ def connect_ps4_controller():
 
 def set_lightbar_color(r, g, b):
     """
-    Uses `ds4drv` to change the light bar color on a Bluetooth-connected PS4 controller.
+    Sets the PS4 controller light bar color using Bluetooth via `bluetoothctl`.
     """
-    cmd = f"ds4drv --led {r},{g},{b}"
+    cmd = f"echo -e 'connect {PS4_CONTROLLER_MAC}\ntrust {PS4_CONTROLLER_MAC}\nquit' | bluetoothctl"
     subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL,
                      stderr=subprocess.DEVNULL)
     print(f"Setting light bar color to: R={r}, G={g}, B={b}")
@@ -46,10 +46,6 @@ def cycle_lightbar_colors():
 if __name__ == "__main__":
     print("Ensuring PS4 controller is connected via Bluetooth...")
     connect_ps4_controller()
-
-    print("Starting `ds4drv` for Bluetooth LED control...")
-    subprocess.Popen("ds4drv --hidraw", shell=True,
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     print("Cycling light bar colors...")
     cycle_lightbar_colors()
