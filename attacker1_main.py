@@ -45,32 +45,42 @@ def send_motor_command():
 
     while True:
         try:
-            # Read speeds outside the lock to avoid blocking joystick updates
             with lock:
                 speed_L = left_speed
                 speed_R = right_speed
 
-            # Always send a command, even if speed hasn't changed
-            if 126 <= speed_L <= 130:
-                roboclaw.SpeedAccelM1(address, acceleration, 0)
+            # Motor 1 - Left Joystick Control
+            if 126 <= speed_L <= 130:  # Dead zone
+                roboclaw.ForwardM1(address, 0)
                 if last_left_speed != 0:
                     print("Sent Stop Command to Motor 1")
                     last_left_speed = 0
-            else:
-                roboclaw.SpeedAccelM1(address, acceleration, speed_L)
+            elif speed_L < 128:  # Forward
+                roboclaw.ForwardM1(address, 127 - speed_L)
                 if last_left_speed != speed_L:
-                    print(f"Sent Speed to Motor 1: {speed_L}")
+                    print(f"Sent Forward Speed to Motor 1: {127 - speed_L}")
+                    last_left_speed = speed_L
+            else:  # Reverse
+                roboclaw.BackwardM1(address, speed_L - 128)
+                if last_left_speed != speed_L:
+                    print(f"Sent Reverse Speed to Motor 1: {speed_L - 128}")
                     last_left_speed = speed_L
 
-            if 126 <= speed_R <= 130:
-                roboclaw.SpeedAccelM2(address, acceleration, 0)
+            # Motor 2 - Right Joystick Control
+            if 126 <= speed_R <= 130:  # Dead zone
+                roboclaw.ForwardM2(address, 0)
                 if last_right_speed != 0:
                     print("Sent Stop Command to Motor 2")
                     last_right_speed = 0
-            else:
-                roboclaw.SpeedAccelM2(address, acceleration, speed_R)
+            elif speed_R < 128:  # Forward
+                roboclaw.ForwardM2(address, 127 - speed_R)
                 if last_right_speed != speed_R:
-                    print(f"Sent Speed to Motor 2: {speed_R}")
+                    print(f"Sent Forward Speed to Motor 2: {127 - speed_R}")
+                    last_right_speed = speed_R
+            else:  # Reverse
+                roboclaw.BackwardM2(address, speed_R - 128)
+                if last_right_speed != speed_R:
+                    print(f"Sent Reverse Speed to Motor 2: {speed_R - 128}")
                     last_right_speed = speed_R
 
         except Exception as e:
