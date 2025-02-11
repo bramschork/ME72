@@ -33,6 +33,8 @@ def find_ps4_controller():
 
 
 def send_motor_command():
+    # M1 is RIGHT
+    # M2 is LEFT
     global left_speed, right_speed
     last_left_speed = -1  # Track last sent speed for Motor 1
     last_right_speed = -1  # Track last sent speed for Motor 2
@@ -45,12 +47,12 @@ def send_motor_command():
 
             # Motor 1 - Left Joystick Control
             if 126 <= speed_L <= 130:  # Dead zone
-                roboclaw.ForwardM1(address, 0)
+                roboclaw.ForwardM2(address, 0)
                 if last_left_speed != 0:
                     print("Sent Stop Command to Motor 1")
                     last_left_speed = 0
             elif speed_L < 128:  # Forward
-                roboclaw.ForwardM1(address, 127 - speed_L)
+                roboclaw.ForwardM2(address, 127 - speed_L)
                 if last_left_speed != speed_L:
                     print(f"Sent Forward Speed to Motor 1: {127 - speed_L}")
                     last_left_speed = speed_L
@@ -62,7 +64,7 @@ def send_motor_command():
 
             # Motor 2 - Right Joystick Control
             if 126 <= speed_R <= 130:  # Dead zone
-                roboclaw.ForwardM2(address, 0)
+                roboclaw.ForwardM1(address, 0)
                 if last_right_speed != 0:
                     print("Sent Stop Command to Motor 2")
                     last_right_speed = 0
