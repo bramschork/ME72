@@ -53,7 +53,7 @@ def poll_trigger():
 
 
 # Set to intake
-roboclaw.ForwardM1(address, 20)
+roboclaw.BackwardM1(address, 20)
 roboclaw.BackwardM2(address, 20)
 servo.min()  # Move to 0 degrees
 
