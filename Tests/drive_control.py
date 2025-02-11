@@ -33,27 +33,30 @@ def find_ps4_controller():
 
 def send_motor_command():
     global left_speed
+    last_sent_speed = -1  # Track the last sent speed
+
     while True:
         try:
-            if not roboclaw._port:
-                print("Error: Serial connection to Roboclaw is not open")
-                roboclaw.Open()
-
-            # Read speed first, then send it outside the lock
+            # Read speed outside the lock to avoid blocking joystick updates
             with lock:
                 speed_to_send = left_speed
 
+            # Always send a command, even if speed hasn't changed
             if 126 <= speed_to_send <= 130:
                 roboclaw.ForwardM1(address, 0)
-                print(f"Sent Stop Command to Roboclaw")
+                if last_sent_speed != 0:
+                    print("Sent Stop Command to Roboclaw")
+                    last_sent_speed = 0
             else:
                 roboclaw.ForwardM1(address, speed_to_send)
-                print(f"Sent Speed to Roboclaw: {speed_to_send}")
+                if last_sent_speed != speed_to_send:
+                    print(f"Sent Speed to Roboclaw: {speed_to_send}")
+                    last_sent_speed = speed_to_send
 
         except Exception as e:
             print(f"Error sending motor command: {e}")
 
-        time.sleep(0.05)  # Ensures a continuous stream every 50ms
+        time.sleep(0.02)  # Reduce delay to 20ms for faster response
 
 # Function to continuously read joystick positions
 
@@ -64,23 +67,21 @@ def poll_joystick(controller):
         try:
             event = controller.read_one()
             if event is None:
-                time.sleep(0.005)  # Prevent CPU overuse
+                time.sleep(0.002)  # Reduced sleep to improve polling speed
                 continue
 
             if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
                 value = event.value
-                with lock:
-                    if event.code == ecodes.ABS_Y:
+                if event.code == ecodes.ABS_Y:
+                    with lock:
                         joystick_positions['LEFT_Y'] = value
-                        if 126 <= value <= 130:
-                            left_speed = 0  # Set speed to zero if joystick is near center
-                        else:
-                            left_speed = max(0, min(127, 128 - value))
+                        left_speed = 0 if 126 <= value <= 130 else max(
+                            0, min(127, 128 - value))
 
-                        print(f"Joystick Y: {value}")
+                    print(f"Joystick Y: {value}")  # Debugging feedback
 
         except BlockingIOError:
-            time.sleep(0.005)
+            time.sleep(0.002)  # Minimize blocking delay
 
 # Main function
 
