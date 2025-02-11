@@ -28,12 +28,12 @@ def find_ps4_controller():
 
 
 def trigger_pulled():
-    servo.min()  # Move to 0 degrees
+    servo.max()  # Move to 0 degrees
     roboclaw.ForwardM1(address, 10)
     roboclaw.ForwardM2(address, 10)
     sleep(1)
 
-    servo.max()  # Move to 180 degre
+    servo.min()  # Move to 180 degre
     roboclaw.BackwardM1(address, 10)
     roboclaw.BackwardM2(address, 10)
 
@@ -43,6 +43,7 @@ def trigger_pulled():
 
 
 def poll_trigger():
+    servo.min()  # Move to 0 degrees
     controller = find_ps4_controller()
     print(f"Connected to {controller.name} at {controller.path}")
 
