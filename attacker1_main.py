@@ -52,23 +52,23 @@ def send_motor_command():
 
             # Always send a command, even if speed hasn't changed
             if 126 <= speed_L <= 130:
-                roboclaw.M1SPEEDACCEL(address, acceleration, 0)
+                roboclaw.SpeedAccelM1()(address, acceleration, 0)
                 if last_left_speed != 0:
                     print("Sent Stop Command to Motor 1")
                     last_left_speed = 0
             else:
-                roboclaw.M1SPEEDACCEL(address, acceleration, speed_L)
+                roboclaw.SpeedAccelM1()(address, acceleration, speed_L)
                 if last_left_speed != speed_L:
                     print(f"Sent Speed to Motor 1: {speed_L}")
                     last_left_speed = speed_L
 
             if 126 <= speed_R <= 130:
-                roboclaw.M2SPEEDACCEL(address, acceleration, 0)
+                roboclaw.SpeedAccelM2()(address, acceleration, 0)
                 if last_right_speed != 0:
                     print("Sent Stop Command to Motor 2")
                     last_right_speed = 0
             else:
-                roboclaw.M2SPEEDACCEL(address, acceleration, speed_R)
+                roboclaw.SpeedAccelM2()(address, acceleration, speed_R)
                 if last_right_speed != speed_R:
                     print(f"Sent Speed to Motor 2: {speed_R}")
                     last_right_speed = speed_R
