@@ -15,13 +15,13 @@ def ramp_motor_speed():
             for speed in range(0, 128):
                 roboclaw.ForwardM1(address, speed)
                 print(f"Sent Speed to Roboclaw: {speed}")
-                time.sleep(0.005)  # 5ms delay
+                time.sleep(0.2)  # 5ms delay
 
             # Ramp down from 127 to 0
             for speed in range(127, -1, -1):
                 roboclaw.ForwardM1(address, speed)
                 print(f"Sent Speed to Roboclaw: {speed}")
-                time.sleep(0.005)  # 5ms delay
+                time.sleep(0.2)  # 5ms delay
 
         except KeyboardInterrupt:
             roboclaw.ForwardM1(address, 0)
