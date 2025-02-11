@@ -19,12 +19,6 @@ lock = threading.Lock()
 left_speed = 0  # Motor 1 speed
 right_speed = 0  # Motor 2 speed
 
-# Acceleration - speed increments per seconds
-# Ex. 1000 = Takes 1 second to ramp from 0 to 1,000 speed units
-# 5000 = Takes ~0.2 seconds to reach max speed
-# 65,535 = Instant acceleration (max setting)
-acceleration = 500
-
 # Locate the PS4 controller
 
 
@@ -45,32 +39,42 @@ def send_motor_command():
 
     while True:
         try:
-            # Read speeds outside the lock to avoid blocking joystick updates
             with lock:
                 speed_L = left_speed
                 speed_R = right_speed
 
-            # Always send a command, even if speed hasn't changed
-            if 126 <= speed_L <= 130:
-                roboclaw.M1SPEEDACCEL(address, acceleration, 0)
+            # Motor 1 - Left Joystick Control
+            if 126 <= speed_L <= 130:  # Dead zone
+                roboclaw.ForwardM1(address, 0)
                 if last_left_speed != 0:
                     print("Sent Stop Command to Motor 1")
                     last_left_speed = 0
-            else:
-                roboclaw.M1SPEEDACCEL(address, acceleration, speed_L)
+            elif speed_L < 128:  # Forward
+                roboclaw.ForwardM1(address, 127 - speed_L)
                 if last_left_speed != speed_L:
-                    print(f"Sent Speed to Motor 1: {speed_L}")
+                    print(f"Sent Forward Speed to Motor 1: {127 - speed_L}")
+                    last_left_speed = speed_L
+            else:  # Reverse
+                roboclaw.BackwardM1(address, speed_L - 128)
+                if last_left_speed != speed_L:
+                    print(f"Sent Reverse Speed to Motor 1: {speed_L - 128}")
                     last_left_speed = speed_L
 
-            if 126 <= speed_R <= 130:
-                roboclaw.M2SPEEDACCEL(address, acceleration, 0)
+            # Motor 2 - Right Joystick Control
+            if 126 <= speed_R <= 130:  # Dead zone
+                roboclaw.ForwardM2(address, 0)
                 if last_right_speed != 0:
                     print("Sent Stop Command to Motor 2")
                     last_right_speed = 0
-            else:
-                roboclaw.M2SPEEDACCEL(address, acceleration, speed_R)
+            elif speed_R < 128:  # Forward
+                roboclaw.ForwardM2(address, 127 - speed_R)
                 if last_right_speed != speed_R:
-                    print(f"Sent Speed to Motor 2: {speed_R}")
+                    print(f"Sent Forward Speed to Motor 2: {127 - speed_R}")
+                    last_right_speed = speed_R
+            else:  # Reverse
+                roboclaw.BackwardM2(address, speed_R - 128)
+                if last_right_speed != speed_R:
+                    print(f"Sent Reverse Speed to Motor 2: {speed_R - 128}")
                     last_right_speed = speed_R
 
         except Exception as e:
@@ -95,15 +99,13 @@ def poll_joystick(controller):
                 if event.code == ecodes.ABS_Y:  # Left joystick
                     with lock:
                         joystick_positions['LEFT_Y'] = value
-                        left_speed = 0 if 126 <= value <= 130 else max(
-                            0, min(127, 128 - value))
+                        left_speed = value  # Directly store joystick value
                     print(f"Joystick Left Y: {value}")
 
                 elif event.code == ecodes.ABS_RY:  # Right joystick
                     with lock:
                         joystick_positions['RIGHT_Y'] = value
-                        right_speed = 0 if 126 <= value <= 130 else max(
-                            0, min(127, 128 - value))
+                        right_speed = value  # Directly store joystick value
                     print(f"Joystick Right Y: {value}")
 
         except BlockingIOError:
