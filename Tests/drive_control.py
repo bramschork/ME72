@@ -17,6 +17,7 @@ AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
 joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
 lock = threading.Lock()
 left_speed = 0  # Motor speed variable
+last_update_time = time.time()  # Track last time motor command was sent
 
 # Locate the PS4 controller
 
@@ -28,13 +29,11 @@ def find_ps4_controller():
             return device
     raise RuntimeError("PS4 controller not found! Ensure it's connected.")
 
-# Function to send motor commands at a continuous rate
+# Function to continuously send motor commands
 
 
 def send_motor_command():
-    global left_speed
-    last_speed = -1  # Track last sent speed
-
+    global left_speed, last_update_time
     while True:
         with lock:
             try:
@@ -42,17 +41,16 @@ def send_motor_command():
                     print("Error: Serial connection to Roboclaw is not open")
                     roboclaw.Open()
 
-                # Always send speed, even if it hasn't changed
+                # Always send the last speed, even if it hasn't changed
                 roboclaw.ForwardM1(address, left_speed)
+                print(f"Sent Speed to Roboclaw: {left_speed}")
 
-                if left_speed != last_speed:  # Print only when speed changes
-                    print(f"Sent Speed to Roboclaw: {left_speed}")
-                    last_speed = left_speed
+                last_update_time = time.time()  # Update the last sent time
 
             except Exception as e:
                 print(f"Error sending motor command: {e}")
 
-        time.sleep(0.05)  # Stream commands every 50ms
+        time.sleep(0.05)  # Ensure a continuous stream every 50ms
 
 # Function to continuously read joystick positions
 
@@ -63,7 +61,7 @@ def poll_joystick(controller):
         try:
             event = controller.read_one()
             if event is None:
-                time.sleep(0.005)
+                time.sleep(0.005)  # Prevent CPU overuse
                 continue
 
             if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
