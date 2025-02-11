@@ -17,7 +17,6 @@ AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
 joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
 lock = threading.Lock()
 left_speed = 0  # Motor speed variable
-last_update_time = time.time()  # Track last time motor command was sent
 
 # Locate the PS4 controller
 
@@ -33,7 +32,7 @@ def find_ps4_controller():
 
 
 def send_motor_command():
-    global left_speed, last_update_time
+    global left_speed
     while True:
         with lock:
             try:
@@ -41,16 +40,18 @@ def send_motor_command():
                     print("Error: Serial connection to Roboclaw is not open")
                     roboclaw.Open()
 
-                # Always send the last speed, even if it hasn't changed
-                roboclaw.ForwardM1(address, left_speed)
-                print(f"Sent Speed to Roboclaw: {left_speed}")
-
-                last_update_time = time.time()  # Update the last sent time
+                # Send stop command if joystick is near center
+                if 126 <= left_speed <= 130:
+                    roboclaw.ForwardM1(address, 0)
+                    print(f"Sent Stop Command to Roboclaw")
+                else:
+                    roboclaw.ForwardM1(address, left_speed)
+                    print(f"Sent Speed to Roboclaw: {left_speed}")
 
             except Exception as e:
                 print(f"Error sending motor command: {e}")
 
-        time.sleep(0.05)  # Ensure a continuous stream every 50ms
+        time.sleep(0.05)  # Ensures a continuous stream every 50ms
 
 # Function to continuously read joystick positions
 
@@ -69,7 +70,11 @@ def poll_joystick(controller):
                 with lock:
                     if event.code == ecodes.ABS_Y:
                         joystick_positions['LEFT_Y'] = value
-                        left_speed = max(0, min(127, 128 - value))
+                        if 126 <= value <= 130:
+                            left_speed = 0  # Set speed to zero if joystick is near center
+                        else:
+                            left_speed = max(0, min(127, 128 - value))
+
                         print(f"Joystick Y: {value}")
 
         except BlockingIOError:
