@@ -39,8 +39,8 @@ try:
 
     while True:
         try:
-            event = controller.read()  # Read next available event (non-blocking)
-        except BlockingIOError:
+            event = next(controller.read())
+        except (BlockingIOError, StopIteration):
             continue  # No new events, keep looping
 
         if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
