@@ -169,8 +169,8 @@ def main():
     joystick_thread.start()
 
  # Start motor command streaming thread
- motor_thread = threading.Thread(target=send_motor_command, daemon=True)
-  motor_thread.start()
+    motor_thread = threading.Thread(target=send_motor_command, daemon=True)
+    motor_thread.start()
 
    try:
         while True:
