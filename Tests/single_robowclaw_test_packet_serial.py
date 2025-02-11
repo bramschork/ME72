@@ -7,6 +7,7 @@ roboclaw.Open()
 
 while True:
 
+    print('Start')
     roboclaw.ForwardM1(address, 64)
     sleep(2)
     roboclaw.ForwardM1(address, 0)
