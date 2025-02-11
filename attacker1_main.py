@@ -135,8 +135,8 @@ def main():
     controller.grab()
     print(f"Connected to {controller.name} at {controller.path}")
 
-    roboclaw.SetM1DefaultAccel(address, 64)  # Smooth acceleration for M1
-    roboclaw.SetM2DefaultAccel(address, 64)  # Smooth acceleration for M2
+    roboclaw.SetM1DefaultAccel(address, 16)  # Smooth acceleration for M1
+    roboclaw.SetM2DefaultAccel(address, 16)  # Smooth acceleration for M2
 
     # Starting speed Zero
     roboclaw.ForwardM1(address, 0)
