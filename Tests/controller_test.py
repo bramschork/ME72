@@ -45,7 +45,7 @@ try:
                         joystick_positions[axis_name] = event.value
                         # print(f"{axis_name}: {joystick_positions[axis_name]}")
                         print(
-                            f"Left Joystick Y: {joystick_positions['Left _Y']} | Right Joystick Y: {joystick_positions['Right_Y']}")
+                            f"Left Joystick Y: {joystick_positions['LEFT _Y']} | Right Joystick Y: {joystick_positions['RIGHT']}")
 
 except KeyboardInterrupt:
     print("\nExiting...")
