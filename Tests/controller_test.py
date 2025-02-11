@@ -43,6 +43,9 @@ try:
                 for axis_name, axis_code in AXIS_CODES.items():
                     if event.code == axis_code:
                         joystick_positions[axis_name] = event.value
-                        print(f"{axis_name}: {joystick_positions[axis_name]}")
+                        # print(f"{axis_name}: {joystick_positions[axis_name]}")
+                        print(
+                            f"Left Joystick Y: {joystick_positions['Left Joystick Y']} | Right Joystick Y: {joystick_positions['Right Joystick Y']}")
+
 except KeyboardInterrupt:
     print("\nExiting...")
