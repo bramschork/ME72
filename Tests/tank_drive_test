@@ -1,70 +1,57 @@
-import asyncio
 import evdev
 from evdev import InputDevice, ecodes
 from roboclaw_3 import Roboclaw
-
-# Addresses for Roboclaw
-controller_address = 0x80  # Default address
+import asyncio
 
 # Initialize Roboclaw
 roboclaw = Roboclaw("/dev/ttyS0", 115200)
 roboclaw.Open()
 
-# Axis codes for left and right joysticks
-AXIS_CODES = {
-    'LEFT_Y': ecodes.ABS_Y,
-    'RIGHT_Y': ecodes.ABS_RY,
-}
-
-# Initialize joystick positions
+# Joystick Axis Mapping
+AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
 joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
 
-# Locate the PS4 controller
+# Locate PS4 Controller
 
 
 def find_ps4_controller():
-    devices = [InputDevice(path) for path in evdev.list_devices()]
-    for device in devices:
+    for path in evdev.list_devices():
+        device = InputDevice(path)
         if "Wireless Controller" in device.name:
             return device
-    raise RuntimeError("PS4 controller not found! Ensure it's connected.")
+    raise RuntimeError("PS4 controller not found!")
 
 
-# Initialize controller
 controller = find_ps4_controller()
 print(f"Connected to {controller.name} at {controller.path}")
 
 
 async def poll_joystick():
-    """Non-blocking joystick polling using asyncio tasks."""
     print("JOYSTICKS HOT")
-
-    async for event in controller.async_read_loop():  # ✅ FIX: Use async for
+    async for event in controller.async_read_loop():
         if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
             for axis_name, axis_code in AXIS_CODES.items():
                 if event.code == axis_code:
                     joystick_positions[axis_name] = event.value
 
-        # Convert joystick input (0-256) to motor speed (0-127)
+        # Convert joystick input to motor speed (Forward only)
         left_speed = (
             joystick_positions['LEFT_Y'] - 128) // 2 if joystick_positions['LEFT_Y'] > 128 else 0
         right_speed = (
             joystick_positions['RIGHT_Y'] - 128) // 2 if joystick_positions['RIGHT_Y'] > 128 else 0
 
-        # Send motor commands only if speed is changing
-        roboclaw.ForwardM1(controller_address, left_speed)
-        roboclaw.ForwardM2(controller_address, right_speed)
+        # Send motor commands
+        roboclaw.ForwardM1(0x80, left_speed)
+        roboclaw.ForwardM2(0x80, right_speed)
 
-        # Print real-time updates
+        # Print values
         print(f"\rLEFT: {left_speed} | RIGHT: {right_speed}", end="")
 
-        # Wait 0.1s before polling again
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.1)  # Limit update rate
 
-# Run the async loop
 try:
     asyncio.run(poll_joystick())
 except KeyboardInterrupt:
-    roboclaw.ForwardM1(controller_address, 0)
-    roboclaw.ForwardM2(controller_address, 0)
+    roboclaw.ForwardM1(0x80, 0)
+    roboclaw.ForwardM2(0x80, 0)
     print("\nExiting...")
