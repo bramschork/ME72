@@ -69,14 +69,15 @@ def poll_joystick(controller):
     global left_speed
     while True:
         try:
-            event = controller.read_one()  # ✅ Use `read_one()` to avoid `BlockingIOError`
+            event = controller.read_one()  # Use `read_one()` to avoid `BlockingIOError`
             if event is None:
                 time.sleep(0.01)  # Prevents busy looping when no input
+                print('when am I printing')
                 continue
 
             if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-                with lock:
-                    if event.code == ecodes.ABS_Y:
+                if event.code == ecodes.ABS_Y:
+                    with lock:
                         joystick_positions['LEFT_Y'] = event.value
                         left_speed = max(
                             0, min(127, 128 - joystick_positions['LEFT_Y']))
@@ -111,4 +112,4 @@ def main():
         print("\nExiting...")
 
 
-main()  # ✅ Runs once instead of restarting repeatedly
+main()  # Runs once instead of restarting repeatedly
