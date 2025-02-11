@@ -1,8 +1,8 @@
-''''''
+'''
 from evdev import InputDevice, ecodes
 Joystick y axis. Home position is 128. Joystick down is 0, joystick up is 256
 Roboclaw takes a power input from 0 to 127
-'''
+
 
 
 import threading
