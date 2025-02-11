@@ -53,11 +53,6 @@ controller = find_ps4_controller()
 print(f"Connected to {controller.name} at {controller.path}")
 
 # Read and print joystick positions
-
-# Initialize joystick positions
-joystick_positions = {"Left Joystick Y": 0, "Right Joystick Y": 0}
-
-# Read and print joystick positions
 try:
     print("Reading joystick positions. Move the joysticks to see the output.")
     for event in controller.read_loop():
