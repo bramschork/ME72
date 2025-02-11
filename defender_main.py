@@ -153,21 +153,20 @@ def main():
     # Step 3: Confirm Configuration Was Saved
     config_status = roboclaw.GetConfig(address)
 
+    print(f"Roboclaw Config After EEPROM Save: {config_status}")
 
-print(f"Roboclaw Config After EEPROM Save: {config_status}")
+    roboclaw.SetM1DefaultAccel(address, 8)  # Smooth acceleration for M1
+    roboclaw.SetM2DefaultAccel(address, 8)  # Smooth acceleration for M2
 
-roboclaw.SetM1DefaultAccel(address, 8)  # Smooth acceleration for M1
-roboclaw.SetM2DefaultAccel(address, 8)  # Smooth acceleration for M2
+    # Starting speed Zero
+    roboclaw.ForwardM1(address, 0)
+    roboclaw.ForwardM2(address, 0)
+    print("Motors initialized to 0 speed")
 
-# Starting speed Zero
-roboclaw.ForwardM1(address, 0)
-roboclaw.ForwardM2(address, 0)
-print("Motors initialized to 0 speed")
-
-# Start joystick polling thread
-joystick_thread = threading.Thread(
-    target=poll_joystick, daemon=True, args=(controller,))
-joystick_thread.start()
+    # Start joystick polling thread
+    joystick_thread = threading.Thread(
+        target=poll_joystick, daemon=True, args=(controller,))
+    joystick_thread.start()
 
  # Start motor command streaming thread
  motor_thread = threading.Thread(target=send_motor_command, daemon=True)
