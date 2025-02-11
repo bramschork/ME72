@@ -39,16 +39,16 @@ try:
         print("Starting joystick polling thread.")
         for event in controller.read_loop():
             if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-                with lock:
-                    if event.code == ecodes.ABS_Y:
-                        joystick_positions['LEFT_Y'] = event.value
-                        try:
-                            Roboclaw.ForwardM1(
-                                address, 128 - joystick_positions['LEFT_Y'])
-                        except:
-                            pass
-                    # elif event.code == ecodes.ABS_RY:
-                        # joystick_positions['RIGHT_Y'] = event.value
+                if event.code == ecodes.ABS_Y:
+                    joystick_positions['LEFT_Y'] = event.value
+                    print(joystick_positions['LEFT_Y'])
+                    try:
+                        Roboclaw.ForwardM1(
+                            address, 128 - joystick_positions['LEFT_Y'])
+                    except:
+                        pass
+                # elif event.code == ecodes.ABS_RY:
+                    # joystick_positions['RIGHT_Y'] = event.value
 
 
 except KeyboardInterrupt:
