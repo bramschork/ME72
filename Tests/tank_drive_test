@@ -42,10 +42,10 @@ while True:
                             joystick_positions[axis_name] = event.value
                             if joystick_positions['LEFT_Y'] > 128:
                                 roboclaw.ForwardM1(
-                                    address, Joystick_positions['LEFT_Y']-128)
+                                    address, joystick_positions['LEFT_Y']-128)
                             print(
                                 f"Left Joystick Y: {joystick_positions['LEFT_Y']} | Right Joystick Y: {joystick_positions['RIGHT_Y']}")
-                            sleep(0.2)
+                            sleep(0.1)
 
     except KeyboardInterrupt:
         # Stop motors on exit
