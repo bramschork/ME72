@@ -66,3 +66,4 @@ while True:
         print("\nExiting...")
         roboclaw.ForwardM1(address, 0)
         roboclaw.ForwardM2(address, 0)
+        sys.exit(0)  # Ensure script exits cleanly
