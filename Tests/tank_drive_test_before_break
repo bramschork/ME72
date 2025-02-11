@@ -17,6 +17,9 @@ joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
 
 lock = threading.Lock()  # Lock to prevent overlapping motor commands
 
+
+global left_speed  # ✅ Ensures the value updates globally
+
 # Locate the PS4 controller
 
 
@@ -43,7 +46,11 @@ def send_motor_command(left_speed):
 
 
 def poll_joystick(left_speed, controller):
+    # Prevents blocking
     event = controller.read_one()
+    if event is None:
+        return  # ✅ Prevents blocking if no event is available
+
     if event != None and event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
         with lock:
             if event.code == ecodes.ABS_Y:
@@ -82,5 +89,4 @@ def main():
         print("\nExiting...")
 
 
-while True:
-    main()
+main()
