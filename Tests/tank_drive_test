@@ -35,34 +35,42 @@ controller = find_ps4_controller()
 print(f"Connected to {controller.name} at {controller.path}")
 
 
-async def read_joystick():
+async def poll_joystick():
+    """Non-blocking joystick polling using asyncio tasks."""
     print("JOYSTICKS HOT")
 
-    async for event in controller.async_read_loop():
-        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-            for axis_name, axis_code in AXIS_CODES.items():
-                if event.code == axis_code:
-                    joystick_positions[axis_name] = event.value
+    while True:
+        try:
+            event = await asyncio.wait_for(controller.async_read(), timeout=0.1)
 
-            # Convert joystick input (0-256) to motor speed (0-127)
-            left_speed = (
-                joystick_positions['LEFT_Y'] - 128) // 2 if joystick_positions['LEFT_Y'] > 128 else 0
-            right_speed = (
-                joystick_positions['RIGHT_Y'] - 128) // 2 if joystick_positions['RIGHT_Y'] > 128 else 0
+            if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+                for axis_name, axis_code in AXIS_CODES.items():
+                    if event.code == axis_code:
+                        joystick_positions[axis_name] = event.value
 
-            # Send motor commands only if speed is changing
-            roboclaw.ForwardM1(controller_address, left_speed)
-            roboclaw.ForwardM2(controller_address, right_speed)
+        except asyncio.TimeoutError:
+            # No event received, continue loop without blocking
+            pass
 
-            # Print real-time updates
-            print(f"\rLEFT: {left_speed} | RIGHT: {right_speed}", end="")
+        # Convert joystick input (0-256) to motor speed (0-127)
+        left_speed = (
+            joystick_positions['LEFT_Y'] - 128) // 2 if joystick_positions['LEFT_Y'] > 128 else 0
+        right_speed = (
+            joystick_positions['RIGHT_Y'] - 128) // 2 if joystick_positions['RIGHT_Y'] > 128 else 0
 
-            # Add a small delay to limit update frequency
-            await asyncio.sleep(0.1)
+        # Send motor commands only if speed is changing
+        roboclaw.ForwardM1(controller_address, left_speed)
+        roboclaw.ForwardM2(controller_address, right_speed)
+
+        # Print real-time updates
+        print(f"\rLEFT: {left_speed} | RIGHT: {right_speed}", end="")
+
+        # Wait 0.1s before polling again
+        await asyncio.sleep(0.1)
 
 # Run the async loop
 try:
-    asyncio.run(read_joystick())
+    asyncio.run(poll_joystick())
 except KeyboardInterrupt:
     roboclaw.ForwardM1(controller_address, 0)
     roboclaw.ForwardM2(controller_address, 0)
