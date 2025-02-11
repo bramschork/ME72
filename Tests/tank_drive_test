@@ -52,10 +52,11 @@ def send_motor_commands():
     while True:
         time.sleep(0.5)  # Send updates every 0.5s
         with lock:
-            left_speed = max(0, joystick_positions['LEFT_Y'] - 128)
+            left_speed = 128 - joystick_positions['LEFT_Y']
 
-        roboclaw.ForwardM1(address, left_speed)
-        print(f"Sent Left Speed: {left_speed}")
+        if left_speed > 0:
+            roboclaw.ForwardM1(address, left_speed)
+            print(f"Sent Left Speed: {left_speed}")
 
 
 # Start both threads
