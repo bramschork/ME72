@@ -34,8 +34,9 @@ def find_ps4_controller():
 def send_motor_command():
     global left_speed
     last_speed = -1  # Track last sent speed
+    last_update_time = time.time()  # Track last update time
+
     while True:
-        # Try acquiring lock without blocking
         acquired = lock.acquire(blocking=False)
         if acquired:
             try:
@@ -44,17 +45,20 @@ def send_motor_command():
                     roboclaw.Open()  # Attempt to reopen the connection
 
                 speed_to_send = left_speed  # Read speed inside the lock
-                if speed_to_send != last_speed:  # Only send if speed has changed
+
+                # Send command if speed has changed OR if no update for 0.2 seconds
+                if speed_to_send != last_speed or (time.time() - last_update_time > 0.2):
                     roboclaw.ForwardM1(address, speed_to_send)
                     print(f"Sent Speed to Roboclaw: {speed_to_send}")
                     last_speed = speed_to_send  # Update last sent speed
+                    last_update_time = time.time()  # Reset update time
 
             except Exception as e:
                 print(f"Error sending motor command: {e}")
             finally:
                 lock.release()  # Release lock to avoid blocking joystick updates
 
-        time.sleep(0.01)  # Ensures frequent updates
+        time.sleep(0.05)  # Ensures frequent updates
 
 # Function to continuously read joystick positions
 
