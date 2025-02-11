@@ -74,7 +74,7 @@ try:
                         if left_speed > 128:
                             roboclaw.ForwardM1(controller_address, left_speed)
                         else:
-                            rboclaw.ForwardM1(controller_address, 0)
+                            roboclaw.ForwardM1(controller_address, 0)
                         if right_speed > 128:
                             roboclaw.ForwardM2(controller_address, right_speed)
                         else:
