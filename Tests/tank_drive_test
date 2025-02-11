@@ -34,32 +34,24 @@ print(f"Connected to {controller.name} at {controller.path}")
 
 # Function to continuously read joystick positions
 
+try:
+    while True:
+        print("Starting joystick polling thread.")
+        for event in controller.read_loop():
+            if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+                with lock:
+                    if event.code == ecodes.ABS_Y:
+                        joystick_positions['LEFT_Y'] = event.value
+                        try:
+                            Roboclaw.ForwardM1(
+                                address, 128 - joystick_positions['LEFT_Y'])
+                        except:
+                            pass
+                    # elif event.code == ecodes.ABS_RY:
+                        # joystick_positions['RIGHT_Y'] = event.value
 
-def poll_joystick():
-    for event in controller.read_loop():
-        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-            if event.code == ecodes.ABS_Y:
-                joystick_positions['LEFT_Y'] = event.value
-                print(f"Left = {joystick_positions['LEFT_Y']}")
-            elif event.code == ecodes.ABS_RY:
-                joystick_positions['RIGHT_Y'] = event.value
 
-# Function to send motor commands every 0.5 seconds
-
-
-while True:
-    try:
-        poll_joystick()
-        left_speed = 128 - joystick_positions['LEFT_Y']
-        print('done polling')
-
-        if left_speed > 0:
-            roboclaw.ForwardM1(address, left_speed)
-            print(f"Sent Left Speed: {left_speed}")
-
-        time.sleep(0.25)  # Send updates every 0.5s
-
-    except KeyboardInterrupt:
-        roboclaw.ForwardM1(address, 0)
-        roboclaw.ForwardM2(address, 0)
-        print("\nExiting...")
+except KeyboardInterrupt:
+    roboclaw.ForwardM1(address, 0)
+    roboclaw.ForwardM2(address, 0)
+    print("\nExiting...")
