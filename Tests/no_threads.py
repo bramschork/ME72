@@ -51,11 +51,9 @@ def main():
                         0, min(127, 128 - value))
                     print(f"Joystick Y: {value}")
 
-            # Always send motor commands, even if joystick is idle
-            if left_speed != last_sent_speed:
-                roboclaw.ForwardM1(address, left_speed)
-                print(f"Sent Speed to Roboclaw: {left_speed}")
-                last_sent_speed = left_speed
+            roboclaw.ForwardM1(address, left_speed)
+            print(f"Sent Speed to Roboclaw: {left_speed}")
+            last_sent_speed = left_speed
 
             # Small delay for efficiency, prevents CPU overload
             time.sleep(0.005)
