@@ -5,7 +5,7 @@ import threading
 from roboclaw_3 import Roboclaw
 
 # Initialize Roboclaw
-roboclaw = Roboclaw("/dev/ttyS0", 115200)
+roboclaw = Roboclaw("/dev/ttyS0", 460800)
 roboclaw.Open()
 address = 0x80  # Roboclaw address
 
@@ -49,8 +49,7 @@ try:
                 print(joystick_positions['LEFT_Y'])
 
                 try:
-                    speed = max(
-                        0, min(127, 128 - joystick_positions['LEFT_Y']))
+                    speed = 128 - joystick_positions['LEFT_Y']
                     roboclaw.ForwardM1(address, speed)
                     print(f"Sent: {speed}")
                 except Exception as e:
