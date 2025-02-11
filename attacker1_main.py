@@ -4,6 +4,8 @@ import time
 import threading
 from roboclaw_3 import Roboclaw
 
+import atexit  # to turn off both motors
+
 # Initialize Roboclaw
 roboclaw = Roboclaw("/dev/ttyS0", 460800)
 roboclaw.Open()
@@ -20,6 +22,17 @@ left_speed = 0  # Motor 1 speed
 right_speed = 0  # Motor 2 speed
 
 # Locate the PS4 controller
+
+
+# Function to stop both motors
+def stop_motors():
+    print("\nStopping motors...")
+    roboclaw.ForwardM1(address, 0)
+    roboclaw.ForwardM2(address, 0)
+
+
+# Register the stop_motors function to run on exit
+atexit.register(stop_motors)
 
 
 def find_ps4_controller():
@@ -142,8 +155,6 @@ def main():
         while True:
             time.sleep(1)  # Keep the main thread alive
     except KeyboardInterrupt:
-        roboclaw.ForwardM1(address, 0)
-        roboclaw.ForwardM2(address, 0)
         print("\nExiting...")
 
 
