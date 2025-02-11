@@ -60,7 +60,10 @@ def send_motor_commands():
             left_speed = max(0, min(127, 128 - joystick_positions['LEFT_Y']))
 
         if left_speed != last_speed:
-            roboclaw.ForwardM1(address, left_speed)
+            try:
+                roboclaw.ForwardM1(address, left_speed)
+            except Exception as e:
+                print(e)
             last_speed = left_speed
             print(f"Sent Speed: {left_speed}")
 
