@@ -45,6 +45,7 @@ try:
 
             print(
                 f"Left Y: {joystick_positions['LEFT_Y']} | Right Y: {joystick_positions['RIGHT_Y']}")
+            sleep(0.2)
 
 
 except KeyboardInterrupt:
