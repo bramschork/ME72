@@ -12,7 +12,7 @@ motor_address = 0x80  # 128 - motor_roboclaw address
 shooter_address = 0x82  # 130 - shooter_roboclaw address
 
 # Second up from bottom pins facing right
-servo = Servo(12, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+# fservo = Servo(12, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
 
 
 # Initialize Roboclaw
@@ -68,11 +68,11 @@ def find_ps4_controller():
 
 def trigger_pulled():
     # Shooting
-    servo.max()
+    # servo.max()
     shooter_roboclaw.ForwardM1(shooter_address, 32)
     shooter_roboclaw.ForwardM2(shooter_address, 32)
     time.sleep(1)
-    servo.min()
+    # servo.min()
 
     # Back to intake
     shooter_roboclaw.BackwardM1(shooter_address, 8)
@@ -208,7 +208,7 @@ def main():
 
     shooter_roboclaw.BackwardM1(shooter_address, 8)
     shooter_roboclaw.BackwardM2(shooter_address, 8)
-    servo.min()  # Move to 0 degrees
+    # servo.min()  # Move to 0 degrees
 
     # Start polling threads
     joystick_thread = threading.Thread(
