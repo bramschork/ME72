@@ -17,11 +17,6 @@ servo = Servo(12, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
 # Locate the PS4 Controller
 
 
-def stop_motors():
-    roboclaw.ForwardM1(address, 0)
-    roboclaw.ForwardM2(address, 0)
-
-
 def find_ps4_controller():
     for path in evdev.list_devices():
         device = InputDevice(path)
@@ -55,9 +50,6 @@ def poll_trigger():
         if event.type == ecodes.EV_ABS and event.code == ecodes.ABS_RZ:  # R2 Trigger
             if event.value > 10:  # Adjust threshold as needed
                 trigger_pulled()
-        elif event.type == ecodes.EV_KEY and event.code == ecodes.BTN_DPAD_DOWN:
-            if event.value == 1:  # Button Pressed
-                stop_motors()
 
 
 while True:
@@ -65,4 +57,5 @@ while True:
         poll_trigger()
     except KeyboardInterrupt:
         print("\nExiting...")
-        stop_motors()
+        roboclaw.ForwardM1(address, 0)
+        roboclaw.ForwardM2(address, 0)
