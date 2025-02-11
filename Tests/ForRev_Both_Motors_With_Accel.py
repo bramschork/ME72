@@ -130,8 +130,6 @@ def poll_joystick(controller):
                         joystick_positions['RIGHT_Y'] = value
                         right_speed = value  # Directly store joystick value
                     print(f"Joystick Right Y: {value}")
-            elif event.type == ecodes.EV_KEY and event.code == ecodes.BTN_TR:  # R2 Trigger
-                print("Right Trigger Pressed!")
 
         except BlockingIOError:
             time.sleep(0.002)  # Minimize blocking delay
