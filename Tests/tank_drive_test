@@ -39,18 +39,11 @@ async def poll_joystick():
     """Non-blocking joystick polling using asyncio tasks."""
     print("JOYSTICKS HOT")
 
-    while True:
-        try:
-            event = await asyncio.wait_for(controller.async_read(), timeout=0.1)
-
-            if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-                for axis_name, axis_code in AXIS_CODES.items():
-                    if event.code == axis_code:
-                        joystick_positions[axis_name] = event.value
-
-        except asyncio.TimeoutError:
-            # No event received, continue loop without blocking
-            pass
+    async for event in controller.async_read_loop():  # ✅ FIX: Use async for
+        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+            for axis_name, axis_code in AXIS_CODES.items():
+                if event.code == axis_code:
+                    joystick_positions[axis_name] = event.value
 
         # Convert joystick input (0-256) to motor speed (0-127)
         left_speed = (
