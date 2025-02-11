@@ -4,6 +4,7 @@ import time
 import threading
 from roboclaw_3 import Roboclaw
 
+
 # Initialize Roboclaw
 roboclaw = Roboclaw("/dev/ttyS0", 460800)
 roboclaw.Open()
@@ -41,7 +42,7 @@ def send_motor_command():
         if acquired:
             try:
                 if not roboclaw._port:  # Check if serial port is open
-                    print("Error: Serial connection to Roboclaw is not open")
+                    # print("Error: Serial connection to Roboclaw is not open")
                     roboclaw.Open()  # Attempt to reopen the connection
 
                 speed_to_send = left_speed  # Read speed inside the lock
@@ -49,16 +50,17 @@ def send_motor_command():
                 # Send command if speed has changed OR if no update for 0.2 seconds
                 if speed_to_send != last_speed or (time.time() - last_update_time > 0.2):
                     roboclaw.ForwardM1(address, speed_to_send)
-                    print(f"Sent Speed to Roboclaw: {speed_to_send}")
+                    # print(f"Sent Speed to Roboclaw: {speed_to_send}")
                     last_speed = speed_to_send  # Update last sent speed
                     last_update_time = time.time()  # Reset update time
 
             except Exception as e:
-                print(f"Error sending motor command: {e}")
+                pass
+                # print(f"Error sending motor command: {e}")
             finally:
                 lock.release()  # Release lock to avoid blocking joystick updates
 
-        time.sleep(0.05)  # Ensures frequent updates
+        time.sleep(0.01)  # Ensures frequent updates
 
 # Function to continuously read joystick positions
 
@@ -69,7 +71,7 @@ def poll_joystick(controller):
         try:
             event = controller.read_one()  # ✅ Use `read_one()` to avoid `BlockingIOError`
             if event is None:
-                time.sleep(0.01)  # ✅ Prevents busy looping when no input
+                time.sleep(0.01)  # Prevents busy looping when no input
                 continue
 
             if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
@@ -78,10 +80,10 @@ def poll_joystick(controller):
                         joystick_positions['LEFT_Y'] = event.value
                         left_speed = max(
                             0, min(127, 128 - joystick_positions['LEFT_Y']))
-                        print(f"Joystick Y: {joystick_positions['LEFT_Y']}")
+                        # print(f"Joystick Y: {joystick_positions['LEFT_Y']}")
 
         except BlockingIOError:
-            time.sleep(0.01)  # ✅ Retry without spamming CPU
+            time.sleep(0.01)  # Retry without spamming CPU
 
 # Main function
 
@@ -89,7 +91,7 @@ def poll_joystick(controller):
 def main():
     controller = find_ps4_controller()
     controller.grab()
-    print(f"Connected to {controller.name} at {controller.path}")
+    # print(f"Connected to {controller.name} at {controller.path}")
 
     # Start joystick polling thread
     joystick_thread = threading.Thread(
