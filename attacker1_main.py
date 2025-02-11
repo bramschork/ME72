@@ -143,8 +143,6 @@ def main():
     roboclaw.ForwardM2(address, 0)
     print("Motors initialized to 0 speed")
 
-    roboclaw.SetM2Invert(address, 1)
-
     # Start joystick polling thread
     joystick_thread = threading.Thread(
         target=poll_joystick, daemon=True, args=(controller,))
