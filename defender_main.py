@@ -143,8 +143,8 @@ def main():
     print(f"Connected to {controller.name} at {controller.path}")
 
     # Set the Roboclaw to Packet Serial Mode and Baud Rate
-    roboclaw.SetConfig(address, 0x0000)  # Ensure Packet Serial Mode is set
-    roboclaw.SetBaudRate(460800)  # Set Baud Rate to 460800
+    roboclaw.SetConfig(address, 0x0003)  # Packet Serial Mode
+    roboclaw.SetConfig(address, 0x00E0)  # BaudRate 460800
 
     # Confirm settings
     config_status = roboclaw.ReadConfig(address)
