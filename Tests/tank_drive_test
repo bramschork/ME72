@@ -64,6 +64,6 @@ try:
                     if event.code == axis_code:
                         joystick_positions[axis_name] = event.value
                         print(f"{axis_name}: {joystick_positions[axis_name]}")
-                        time.sleep(0.5)
+                        sleep(0.5)
 except KeyboardInterrupt:
     print("\nExiting...")
