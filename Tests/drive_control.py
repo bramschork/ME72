@@ -32,14 +32,20 @@ def find_ps4_controller():
 
 def send_motor_command():
     global left_speed
+    last_speed = -1  # ✅ Track last sent speed to avoid unnecessary commands
     while True:
         with lock:
+            speed_to_send = left_speed  # ✅ Read speed inside the lock
+
+        if speed_to_send != last_speed:  # ✅ Only send if speed has changed
             try:
-                roboclaw.ForwardM1(address, left_speed)
-                print(f"Sent Speed: {left_speed}")
+                roboclaw.ForwardM1(address, speed_to_send)
+                print(f"Sent Speed: {speed_to_send}")
+                last_speed = speed_to_send  # ✅ Update last sent speed
             except Exception as e:
                 print(f"Error sending motor command: {e}")
-        time.sleep(0.05)  # ✅ Sends motor updates every 50ms
+
+        time.sleep(0.01)  # ✅ Sends motor updates every 10ms instead of 50ms
 
 # Function to continuously read joystick positions
 
@@ -47,19 +53,19 @@ def send_motor_command():
 def poll_joystick(controller):
     global left_speed
     while True:
-        event = controller.read_one()
-        if event is None:
-            continue  # ✅ Prevents blocking if no new joystick input
+        events = controller.read()  # ✅ Get all available events
+        if not events:
+            time.sleep(0.01)  # ✅ Prevents busy looping when no input
+            continue
 
-        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-            with lock:
-                if event.code == ecodes.ABS_Y:
-                    joystick_positions['LEFT_Y'] = event.value
-                    left_speed = max(
-                        0, min(127, 128 - joystick_positions['LEFT_Y']))
-                    # ✅ Debugging print
-                    print(f"Joystick Y: {joystick_positions['LEFT_Y']}")
-        time.sleep(0.05)  # ✅ Prevents CPU overload
+        for event in events:
+            if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+                with lock:
+                    if event.code == ecodes.ABS_Y:
+                        joystick_positions['LEFT_Y'] = event.value
+                        left_speed = max(
+                            0, min(127, 128 - joystick_positions['LEFT_Y']))
+                        print(f"Joystick Y: {joystick_positions['LEFT_Y']}")
 
 # Main function
 
@@ -80,7 +86,7 @@ def main():
 
     try:
         while True:
-            time.sleep(1)  # ✅ Keeps the main thread running
+            time.sleep(0.1)  # ✅ Keeps the main thread running
     except KeyboardInterrupt:
         roboclaw.ForwardM1(address, 0)
         roboclaw.ForwardM2(address, 0)
