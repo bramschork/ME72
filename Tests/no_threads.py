@@ -30,6 +30,8 @@ def find_ps4_controller():
 
 
 def main():
+    global left_speed  # Add this line to avoid UnboundLocalError
+
     controller = find_ps4_controller()
     controller.grab()
     print(f"Connected to {controller.name} at {controller.path}")
