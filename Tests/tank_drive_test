@@ -51,6 +51,7 @@ while True:
     try:
         poll_joystick()
         left_speed = 128 - joystick_positions['LEFT_Y']
+        print('done polling')
 
         if left_speed > 0:
             roboclaw.ForwardM1(address, left_speed)
