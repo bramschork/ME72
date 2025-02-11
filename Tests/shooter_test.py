@@ -33,6 +33,7 @@ def trigger_pulled():
     roboclaw.BackwardM2(address, 20)
     sleep(1)
     servo.max()
+    time.sleep(1)
     servo.min()
 
     # Back to intake
