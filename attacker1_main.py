@@ -117,6 +117,10 @@ def main():
     controller.grab()
     print(f"Connected to {controller.name} at {controller.path}")
 
+    # Set default acceleration for both motors
+    roboclaw.SetM1DefaultAccel(address, 5000)  # Set acceleration for M1
+    roboclaw.SetM2DefaultAccel(address, 5000)
+
     # Start joystick polling thread
     joystick_thread = threading.Thread(
         target=poll_joystick, daemon=True, args=(controller,))
