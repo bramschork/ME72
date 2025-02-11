@@ -34,22 +34,24 @@ def find_ps4_controller():
 def send_motor_command():
     global left_speed
     while True:
-        with lock:
-            try:
-                if not roboclaw._port:
-                    print("Error: Serial connection to Roboclaw is not open")
-                    roboclaw.Open()
+        try:
+            if not roboclaw._port:
+                print("Error: Serial connection to Roboclaw is not open")
+                roboclaw.Open()
 
-                # Send stop command if joystick is near center
-                if 126 <= left_speed <= 130:
-                    roboclaw.ForwardM1(address, 0)
-                    print(f"Sent Stop Command to Roboclaw")
-                else:
-                    roboclaw.ForwardM1(address, left_speed)
-                    print(f"Sent Speed to Roboclaw: {left_speed}")
+            # Read speed first, then send it outside the lock
+            with lock:
+                speed_to_send = left_speed
 
-            except Exception as e:
-                print(f"Error sending motor command: {e}")
+            if 126 <= speed_to_send <= 130:
+                roboclaw.ForwardM1(address, 0)
+                print(f"Sent Stop Command to Roboclaw")
+            else:
+                roboclaw.ForwardM1(address, speed_to_send)
+                print(f"Sent Speed to Roboclaw: {speed_to_send}")
+
+        except Exception as e:
+            print(f"Error sending motor command: {e}")
 
         time.sleep(0.05)  # Ensures a continuous stream every 50ms
 
