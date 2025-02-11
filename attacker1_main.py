@@ -207,7 +207,7 @@ def main():
     shooter_roboclaw.SetM2DefaultAccel(shooter_address, 8)
 
     shooter_roboclaw.BackwardM1(shooter_address, 8)
-    shooter_roboclaw.BackwardM2(shooter_address, 648)
+    shooter_roboclaw.BackwardM2(shooter_address, 8)
     servo.min()  # Move to 0 degrees
 
     # Start polling threads
