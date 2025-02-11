@@ -1,19 +1,9 @@
-'''
+import asyncio
 from evdev import InputDevice, ecodes
-Joystick y axis. Home position is 128. Joystick down is 0, joystick up is 256
-Roboclaw takes a power input from 0 to 127
-'''
-
-
-import threading
 from roboclaw_3 import Roboclaw
-from time import sleep
-import evdev
-from evdev import InputDevice, categorize, ecodes
 
-
-# Addresses for the two Roboclaws
-controller_address = 0x80  # 128 in hex
+# Addresses for Roboclaw
+controller_address = 0x80  # Default address
 
 # Initialize Roboclaw
 roboclaw = Roboclaw("/dev/ttyS0", 115200)
@@ -26,12 +16,9 @@ AXIS_CODES = {
 }
 
 # Initialize joystick positions
-joystick_positions = {
-    'LEFT_Y': 128,  # Neutral position
-    'RIGHT_Y': 128,  # Neutral position
-}
+joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
 
-# Locate the controller
+# Locate the PS4 controller
 
 
 def find_ps4_controller():
@@ -47,43 +34,35 @@ controller = find_ps4_controller()
 print(f"Connected to {controller.name} at {controller.path}")
 
 
-def move_motor(motor, address, speed, motor_num):
-    """Runs motor movement in a separate thread."""
-    speed = max(0, min(127, speed))  # Ensure speed is within 0-127 range
-    if motor_num == 1 and speed > 10:
-        motor.ForwardM1(address, 10)  # speed
-    elif motor_num == 2 and speed > 10:
-        motor.ForwardM2(address, 10)
-
-
-try:
+async def read_joystick():
     print("JOYSTICKS HOT")
-    for event in controller.read_loop():
-        if event.type == ecodes.EV_ABS:
 
-            # Joystick Event
-            if event.code in AXIS_CODES.values():
-                for axis_name, axis_code in AXIS_CODES.items():
-                    if event.code == axis_code:
-                        # Update joystick position
-                        joystick_positions[axis_name] = event.value
+    async for event in controller.async_read_loop():
+        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+            for axis_name, axis_code in AXIS_CODES.items():
+                if event.code == axis_code:
+                    joystick_positions[axis_name] = event.value
 
-                        left_speed = joystick_positions['LEFT_Y'] - 128
-                        right_speed = joystick_positions['RIGHT_Y'] - 128
+            # Convert joystick input (0-256) to motor speed (0-127)
+            left_speed = (
+                joystick_positions['LEFT_Y'] - 128) // 2 if joystick_positions['LEFT_Y'] > 128 else 0
+            right_speed = (
+                joystick_positions['RIGHT_Y'] - 128) // 2 if joystick_positions['RIGHT_Y'] > 128 else 0
 
-                        if left_speed > 128:
-                            roboclaw.ForwardM1(controller_address, left_speed)
-                        else:
-                            roboclaw.ForwardM1(controller_address, 0)
-                        if right_speed > 128:
-                            roboclaw.ForwardM2(controller_address, right_speed)
-                        else:
-                            roboclaw.ForwardM2(controller_address, 0)
-                        print(f'LEFT: {left_speed} | RIGHT {right_speed}')
+            # Send motor commands only if speed is changing
+            roboclaw.ForwardM1(controller_address, left_speed)
+            roboclaw.ForwardM2(controller_address, right_speed)
 
+            # Print real-time updates
+            print(f"\rLEFT: {left_speed} | RIGHT: {right_speed}", end="")
 
+            # Add a small delay to limit update frequency
+            await asyncio.sleep(0.1)
+
+# Run the async loop
+try:
+    asyncio.run(read_joystick())
 except KeyboardInterrupt:
-    # Stop motors on exit
     roboclaw.ForwardM1(controller_address, 0)
     roboclaw.ForwardM2(controller_address, 0)
     print("\nExiting...")
