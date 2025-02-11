@@ -64,9 +64,9 @@ try:
                         print(
                             f"Left Joystick Y: {joystick_positions['LEFT_Y']} | Right Joystick Y: {joystick_positions['RIGHT_Y']}")
 
-                        Roboclaw_1.ForwardM1(
+                        roboclaw_1.ForwardM1(
                             controller_address_1, joystick_positions['LEFT_Y']-120)
-                        Roboclaw_1.ForwardM2(
+                        roboclaw_1.ForwardM2(
                             controller_address_1, joystick_positions['RIGHT_Y']-120)
 
 
