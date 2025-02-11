@@ -57,7 +57,7 @@ def send_motor_command():
                 except Exception as e:
                     print(f"Error sending motor command: {e}")
 
-        time.sleep(0.002)  # Reduce sleep to 2ms to allow fast command updates
+        # time.sleep(0.002)  # Reduce sleep to 2ms to allow fast command updates
 
 # Function to continuously read joystick positions
 
