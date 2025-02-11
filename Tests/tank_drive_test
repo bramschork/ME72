@@ -5,7 +5,7 @@ import threading
 from roboclaw_3 import Roboclaw
 
 # Initialize Roboclaw
-roboclaw = Roboclaw("/dev/ttyS0", 460800)
+roboclaw = Roboclaw("/dev/ttyS0", 115200)
 roboclaw.Open()
 address = 0x80  # Roboclaw address
 
@@ -37,35 +37,26 @@ print(f"Connected to {controller.name} at {controller.path}")
 
 def poll_joystick():
     print("Starting joystick polling thread.")
-
-    while True:
-        event = controller.read_one()  # ✅ Use read_one() to prevent blocking
-
-        if event and event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+    for event in controller.read_loop():
+        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
             with lock:
                 if event.code == ecodes.ABS_Y:
                     joystick_positions['LEFT_Y'] = event.value
-                    # Faster print updates
-                    print(f"Joystick Y: {joystick_positions['LEFT_Y']}")
+                elif event.code == ecodes.ABS_RY:
+                    joystick_positions['RIGHT_Y'] = event.value
 
-# Function to send motor commands every 50ms (FAST RESPONSE)
+# Function to send motor commands every 0.5 seconds
 
 
 def send_motor_commands():
     print("Starting motor command thread.")
-    last_speed = None
     while True:
-        time.sleep(0.05)  # Send updates every 50ms (FAST)
+        time.sleep(0.5)  # Send updates every 0.5s
         with lock:
-            left_speed = max(0, min(127, 128 - joystick_positions['LEFT_Y']))
+            left_speed = max(0, joystick_positions['LEFT_Y'] - 128)
 
-        if left_speed != last_speed:
-            try:
-                roboclaw.ForwardM1(address, left_speed)
-            except Exception as e:
-                print(e)
-            last_speed = left_speed
-            print(f"Sent Speed: {left_speed}")
+        roboclaw.ForwardM1(address, left_speed)
+        print(f"Sent Left Speed: {left_speed}")
 
 
 # Start both threads
