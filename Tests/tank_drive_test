@@ -25,6 +25,7 @@ def find_ps4_controller():
 
 # Initialize controller
 controller = find_ps4_controller()
+controller.grab()  # Ensure exclusive access
 print(f"Connected to {controller.name} at {controller.path}")
 
 # Function to set motor speed (0-127 forward only)
@@ -43,11 +44,11 @@ try:
     print("Polling joystick every 20ms. Move the joysticks to control the motors.")
 
     while True:
-        left_speed = 0  # Always initialize
-        right_speed = 0  # Always initialize
+        try:
+            events = controller.read()  # Read joystick events
+        except BlockingIOError:
+            events = []  # No new events, continue without error
 
-        # Read available joystick events
-        events = controller.read()
         for event in events:
             if event.type == ecodes.EV_ABS:
                 if event.code == AXIS_CODES['LEFT_Y']:
