@@ -58,21 +58,22 @@ def send_motor_command():
                 speed_L = left_speed
                 speed_R = right_speed
 
-            # Motor 1 - Left Joystick Control
+            # Motor 1 - Left Joystick Control (M2 is Left)
             if 126 <= speed_L <= 130:  # Dead zone
-                roboclaw.ForwardM2(address, 0)
+                roboclaw.BackwardM2(address, 0)  # ✅ Reverse Stop
                 if last_left_speed != 0:
                     print("Sent Stop Command to Motor 1")
                     last_left_speed = 0
-            elif speed_L < 128:  # Forward
-                roboclaw.ForwardM2(address, 127 - speed_L)
+            elif speed_L < 128:  # Forward (Now Backward)
+                # Reverse Forward
+                roboclaw.BackwardM2(address, 127 - speed_L)
                 if last_left_speed != speed_L:
-                    print(f"Sent Forward Speed to Motor 1: {127 - speed_L}")
+                    print(f"Sent Reverse Speed to Motor 1: {127 - speed_L}")
                     last_left_speed = speed_L
-            else:  # Reverse
-                roboclaw.BackwardM2(address, speed_L - 128)
+            else:  # Reverse (Now Forward)
+                roboclaw.ForwardM2(address, speed_L - 128)  # ✅ Reverse Reverse
                 if last_left_speed != speed_L:
-                    print(f"Sent Reverse Speed to Motor 1: {speed_L - 128}")
+                    print(f"Sent Forward Speed to Motor 1: {speed_L - 128}")
                     last_left_speed = speed_L
 
             # Motor 2 - Right Joystick Control
