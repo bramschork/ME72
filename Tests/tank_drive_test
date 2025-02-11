@@ -29,53 +29,25 @@ controller = find_ps4_controller()
 controller.grab()  # Ensure exclusive access
 print(f"Connected to {controller.name} at {controller.path}")
 
-# Function to send motor commands in a separate thread
-
-
-def control_motors(left_speed, right_speed):
-    roboclaw.ForwardM1(address, left_speed)
-    roboclaw.ForwardM2(address, right_speed)
-
 
 # Poll joysticks every 0.5 seconds, print values, and send motor commands
-try:
-    print("Polling joystick every 0.5s. Move the joysticks to control the motors.")
+while True:
+    try:
+        print("Polling joystick every 0.5s. Move the joysticks to control the motors.")
+        # Roboclaw 1 - Motor 1
+        roboclaw_1.ForwardM1(controller_address_1, 20)
+        sleep(2)
+        roboclaw_1.ForwardM1(controller_address_1, 0)
+        sleep(0.5)
 
-    # while True:
-    # Read joystick events
-    for event in controller.read_loop():
-        if event.type == ecodes.EV_ABS:
-            if event.code == AXIS_CODES['LEFT_Y']:
-                joystick_positions['LEFT_Y'] = event.value
-            elif event.code == AXIS_CODES['RIGHT_Y']:
-                joystick_positions['RIGHT_Y'] = event.value
+        # Roboclaw 1 - Motor 2
+        roboclaw_1.ForwardM2(controller_address_1, 20)
+        sleep(2)
+        roboclaw_1.ForwardM2(controller_address_1, 0)
+        sleep(2)
 
-    # Convert joystick input to motor speed (Forward only)
-    # left_speed = max(
-    #    0, (joystick_positions['LEFT_Y'] - 128) // 2) if joystick_positions['LEFT_Y'] > 128 else 0
-    # right_speed = max(
-    #    0, (joystick_positions['RIGHT_Y'] - 128) // 2) if joystick_positions['RIGHT_Y'] > 128 else 0
-    left_speed = 20
-    right_speed = 20
-
-    roboclaw.ForwardM1(address, left_speed)
-    roboclaw.ForwardM2(addressm, left_speed)
-
-    # Print values in real-time every 0.5s
-    print(
-        f"\rLeft Motor: {left_speed} | Right Motor: {right_speed}", end="")
-
-    '''# Create a new thread to send motor values
-    motor_thread = threading.Thread(
-        target=control_motors, args=(left_speed, right_speed))
-    motor_thread.start()
-    motor_thread.join()  # Ensure the thread completes before continuing'''
-
-    # Wait 0.5 seconds before polling again
-    # time.sleep(0.5)
-
-except KeyboardInterrupt:
-    # Stop motors on exit
-    roboclaw.ForwardM1(address, 0)
-    roboclaw.ForwardM2(address, 0)
-    print("\nExiting...")
+    except KeyboardInterrupt:
+        # Stop motors on exit
+        roboclaw.ForwardM1(address, 0)
+        roboclaw.ForwardM2(address, 0)
+        print("\nExiting...")
