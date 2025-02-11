@@ -24,7 +24,7 @@ def joystick(shared_data):
     # first, connect to the PS4 controller
     for path in evdev.list_devices():
         controller = InputDevice(path)
-        if not "Wireless Controller" in device.name:
+        if not "Wireless Controller" in controller.name:
             raise RuntimeError("PS4 controller not found! Ensure it's connected.")
 
     # next, get data from controller
