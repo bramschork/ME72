@@ -44,7 +44,6 @@ try:
             print(
                 f"Left Y: {joystick_positions['LEFT_Y']} | Right Y: {joystick_positions['RIGHT_Y']}")
 
-            time.sleep(0.1)
 
 except KeyboardInterrupt:
     roboclaw.ForwardM1(address, 0)
