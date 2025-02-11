@@ -146,7 +146,7 @@ def main():
     roboclaw.SetConfig(address, 0x0003)  # Packet Serial Mode
     roboclaw.SetConfig(address, 0x00E0)  # BaudRate 460800f
 
-    config_status = roboclaw.ReadConfig(address)
+    config_status = roboclaw.GetConfig(address)
     print(f"Roboclaw Config: {config_status}")
 
     roboclaw.SetM1DefaultAccel(address, 8)  # Smooth acceleration for M1
