@@ -218,9 +218,9 @@ def main():
     motor_thread = threading.Thread(target=send_motor_command, daemon=True)
     motor_thread.start()
 
-    shooter_thread = threading.Thread(
-        target=shooter_motor_control, daemon=True)  # ADDED HERE
-    shooter_thread.start()
+    # shooter_thread = threading.Thread(
+    #    target=shooter_motor_control, daemon=True)  # ADDED HERE
+    # shooter_thread.start()
 
     try:
         while True:
