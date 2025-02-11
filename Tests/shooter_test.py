@@ -11,13 +11,18 @@ roboclaw.Open()
 servo = Servo(12, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
 
 while True:
-    servo.min()  # Move to 0 degrees
-    roboclaw.ForwardM1(address, 20)
-    roboclaw.ForwardM2(address, 20)
-    sleep(1)
+    try:
+        servo.min()  # Move to 0 degrees
+        roboclaw.ForwardM1(address, 20)
+        roboclaw.ForwardM2(address, 20)
+        sleep(1)
 
-    servo.max()  # Move to 180 degre
-    roboclaw.ForwardM1(address, 20)
-    roboclaw.ForwardM2(address, 20)
+        servo.max()  # Move to 180 degre
+        roboclaw.ForwardM1(address, 20)
+        roboclaw.ForwardM2(address, 20)
 
-    sleep(1)
+        sleep(1)
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        roboclaw.ForwardM1(address, 0)
+        roboclaw.ForwardM2(address, 0)
