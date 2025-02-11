@@ -1,18 +1,11 @@
-from roboclaw_3 import Roboclaw
-from gpiozero import Servo
-from time import sleep
 import evdev
 from evdev import InputDevice, ecodes
+from roboclaw_3 import Roboclaw
 
-
-address = 0x82  # 130 in hex
-
-# controller_address_2 = 0x82  # 128 in hex
+# Initialize Roboclaw
 roboclaw = Roboclaw("/dev/ttyS0", 460800)
 roboclaw.Open()
-
-# Second up from bottom pins facing right
-servo = Servo(12, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+address = 0x80  # Roboclaw address
 
 # Locate the PS4 Controller
 
@@ -28,21 +21,20 @@ def find_ps4_controller():
 
 
 def trigger_pulled():
-    servo.min()  # Move to 0 degrees
-    roboclaw.ForwardM1(address, 10)
-    roboclaw.ForwardM2(address, 10)
-    sleep(1)
+    print("Right Trigger (R2) Pulled!")
 
-    servo.max()  # Move to 180 degre
-    roboclaw.BackwardM1(address, 10)
-    roboclaw.BackwardM2(address, 10)
-
-    sleep(1)
-
-# Main loop to poll the trigger
+# Function to stop motors when D-pad Down is pressed
 
 
-def poll_trigger():
+def stop_motors():
+    print("D-Pad Down Pressed! Stopping motors...")
+    roboclaw.ForwardM1(address, 0)  # Stop Motor 1
+    roboclaw.ForwardM2(address, 0)  # Stop Motor 2
+
+# Main loop to poll trigger and D-pad
+
+
+def poll_controller():
     controller = find_ps4_controller()
     print(f"Connected to {controller.name} at {controller.path}")
 
@@ -51,11 +43,10 @@ def poll_trigger():
             if event.value > 10:  # Adjust threshold as needed
                 trigger_pulled()
 
+        elif event.type == ecodes.EV_KEY and event.code == ecodes.BTN_DPAD_DOWN:
+            if event.value == 1:  # Button Pressed
+                stop_motors()
 
-while True:
-    try:
-        poll_trigger()
-    except KeyboardInterrupt:
-        print("\nExiting...")
-        roboclaw.ForwardM1(address, 0)
-        roboclaw.ForwardM2(address, 0)
+
+# Run the script
+poll_controller()
