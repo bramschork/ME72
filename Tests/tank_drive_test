@@ -45,8 +45,8 @@ try:
                     try:
                         Roboclaw.ForwardM1(
                             address, 128 - joystick_positions['LEFT_Y'])
-                    except:
-                        pass
+                    except Exception as e:
+                        print(e)
                 # elif event.code == ecodes.ABS_RY:
                     # joystick_positions['RIGHT_Y'] = event.value
 
