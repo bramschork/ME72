@@ -12,6 +12,10 @@ roboclaw.Open()
 
 address = 0x80  # Roboclaw address
 
+LOWER_DEAD_ZONE = 132
+UPPER_DEAD_ZONE = 124
+
+
 # Joystick axis mappings
 AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
 
@@ -62,7 +66,7 @@ def send_motor_command():
                 speed_R = right_speed
 
             # Motor 1 - Left Joystick Control (M2 is Left)
-            if 126 <= speed_L <= 130:  # Dead zone
+            if LOWER_DEAD_ZONE <= speed_L <= UPPER_DEAD_ZONE:  # Dead zone
                 roboclaw.BackwardM2(address, 0)  # ✅ Reverse Stop
                 if last_left_speed != 0:
                     print("Sent Stop Command to Motor 1")
@@ -74,13 +78,13 @@ def send_motor_command():
                     print(f"Sent Reverse Speed to Motor 1: {127 - speed_L}")
                     last_left_speed = speed_L
             else:  # Reverse (Now Forward)
-                roboclaw.ForwardM2(address, speed_L - 128)  # ✅ Reverse Reverse
+                roboclaw.ForwardM2(address, speed_L - 128)  # Reverse Reverse
                 if last_left_speed != speed_L:
                     print(f"Sent Forward Speed to Motor 1: {speed_L - 128}")
                     last_left_speed = speed_L
 
             # Motor 2 - Right Joystick Control
-            if 126 <= speed_R <= 130:  # Dead zone
+            if LOWER_DEAD_ZONE <= speed_R <= UPPER_DEAD_ZONE:  # Dead zone
                 roboclaw.ForwardM1(address, 0)
                 if last_right_speed != 0:
                     print("Sent Stop Command to Motor 2")
