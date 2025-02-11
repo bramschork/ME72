@@ -32,51 +32,32 @@ controller = find_ps4_controller()
 controller.grab()  # Ensure exclusive access
 print(f"Connected to {controller.name} at {controller.path}")
 
-# Function to continuously read joystick positions (FAST)
+# Function to continuously read joystick positions
 
-
-def poll_joystick():
+try:
     print("Starting joystick polling thread.")
+
     while True:
         try:
-            event = controller.read_one()  # ✅ Read a single event, prevents blocking
-            if event and event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-                with lock:
-                    if event.code == ecodes.ABS_Y:
-                        joystick_positions['LEFT_Y'] = event.value
-        except BlockingIOError:
-            pass  # No new events, continue looping
+            # ✅ Extract the event from the generator
+            event = next(controller.read())
+        except (BlockingIOError, StopIteration):
+            continue  # No new events, keep looping
 
-# Function to send motor commands every 50ms (non-blocking)
+        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+            if event.code == ecodes.ABS_Y:
+                joystick_positions['LEFT_Y'] = event.value
+                print(joystick_positions['LEFT_Y'])
 
+                try:
+                    speed = max(
+                        0, min(127, 128 - joystick_positions['LEFT_Y']))
+                    roboclaw.ForwardM1(address, speed)
+                    print(f"Sent: {speed}")
+                except Exception as e:
+                    print(f"Roboclaw Error: {e}")
 
-def send_motor_commands():
-    print("Starting motor command thread.")
-    last_speed = None  # Track last sent speed to prevent redundant commands
-    while True:
-        time.sleep(0.05)  # Send updates every 50ms (20 updates/sec)
-        with lock:
-            left_speed = max(0, min(127, 128 - joystick_positions['LEFT_Y']))
-
-        if left_speed != last_speed:  # Only send if speed changed
-            # ✅ Uses SpeedM1 instead of ForwardM1
-            roboclaw.SpeedM1(address, left_speed)
-            last_speed = left_speed
-            print(f"Sent Left Speed: {left_speed}")
-
-
-# Start both threads
-joystick_thread = threading.Thread(target=poll_joystick, daemon=True)
-motor_thread = threading.Thread(target=send_motor_commands, daemon=True)
-
-joystick_thread.start()
-motor_thread.start()
-
-# Keep the main thread running
-try:
-    while True:
-        time.sleep(1)  # Prevents main thread from exiting
 except KeyboardInterrupt:
-    roboclaw.SpeedM1(address, 0)  # ✅ Stops motors smoothly
-    roboclaw.SpeedM2(address, 0)
+    roboclaw.ForwardM1(address, 0)
+    roboclaw.ForwardM2(address, 0)
     print("\nExiting...")
