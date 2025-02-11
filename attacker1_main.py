@@ -4,6 +4,8 @@ import time
 import threading
 from roboclaw_3 import Roboclaw
 
+from gpiozero import Servo
+
 import atexit  # to turn off both motors
 
 motor_address = 0x80  # 128 - motor_roboclaw address
@@ -154,12 +156,24 @@ def shooter_motor_control():
 
     while True:
         if shooter_active:
-            shooter_roboclaw.ForwardM1(shooter_address, shooter_speed)
-            shooter_roboclaw.ForwardM2(shooter_address, shooter_speed)
-            time.sleep(0.5)  # Simulate ramp-up time
+            shooter_roboclaw.ReverseM1(shooter_address, shooter_speed)
+            shooter_roboclaw.ReverseM2(shooter_address, shooter_speed)
+            time.sleep(2)  # Simulate ramp-up time
             print("Shooter Motors Up to Speed!")
+
+            servo = Servo(20, min_pulse_width=0.5/1000,
+                          max_pulse_width=2.5/1000)
+
+            servo.min()  # Move to 0 degrees
+            sleep(1)
+            servo.max()  # Move to 180 degrees
+
+            shooter_roboclaw.ForwardM1(shooter_address, 64)
+            shooter_roboclaw.ForwardM2(shooter_address, 64)
+
             shooter_active = False  # Reset after reaching speed
         time.sleep(0.01)  # Prevent CPU overload
+
 
 # Main function
 
@@ -174,6 +188,9 @@ def main():
     motor_roboclaw.SetM2DefaultAccel(motor_address, 8)
     shooter_roboclaw.SetM1DefaultAccel(shooter_address, 8)
     shooter_roboclaw.SetM2DefaultAccel(shooter_address, 8)
+
+    shooter_roboclaw.ForwardM1(shooter_address, 64)
+    shooter_roboclaw.ForwardM2(shooter_address, 64)
 
     stop_motors()  # Ensure motors are stopped at startup
 
