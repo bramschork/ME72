@@ -23,7 +23,7 @@ right_speed = 0  # Motor 2 speed
 # Ex. 1000 = Takes 1 second to ramp from 0 to 1,000 speed units
 # 5000 = Takes ~0.2 seconds to reach max speed
 # 65,535 = Instant acceleration (max setting)
-acceleration = 500
+acceleration = 5000
 
 # Locate the PS4 controller
 
@@ -52,23 +52,23 @@ def send_motor_command():
 
             # Always send a command, even if speed hasn't changed
             if 126 <= speed_L <= 130:
-                roboclaw.SpeedAccelM1()(address, accel=acceleration, 0)
+                roboclaw.SpeedAccelM1()(address, acceleration, 0)
                 if last_left_speed != 0:
                     print("Sent Stop Command to Motor 1")
                     last_left_speed = 0
             else:
-                roboclaw.SpeedAccelM1()(address, accel=acceleration, speed_L)
+                roboclaw.SpeedAccelM1()(address, acceleration, speed_L)
                 if last_left_speed != speed_L:
                     print(f"Sent Speed to Motor 1: {speed_L}")
                     last_left_speed = speed_L
 
             if 126 <= speed_R <= 130:
-                roboclaw.SpeedAccelM2()(address, accel=acceleration, 0)
+                roboclaw.SpeedAccelM2()(address, acceleration, 0)
                 if last_right_speed != 0:
                     print("Sent Stop Command to Motor 2")
                     last_right_speed = 0
             else:
-                roboclaw.SpeedAccelM2()(address, accel=acceleration, speed_R)
+                roboclaw.SpeedAccelM2()(address, acceleration, speed_R)
                 if last_right_speed != speed_R:
                     print(f"Sent Speed to Motor 2: {speed_R}")
                     last_right_speed = speed_R
