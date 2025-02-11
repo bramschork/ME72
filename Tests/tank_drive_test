@@ -30,27 +30,6 @@ controller = find_ps4_controller()
 controller.grab()  # Ensure exclusive access
 print(f"Connected to {controller.name} at {controller.path}")
 
-
-# Poll joysticks every 0.5 seconds, print values, and send motor commands
-while True:
-
-    print("Polling joystick every 0.5s. Move the joysticks to control the motors.")
-    # Roboclaw 1 - Motor 1
-    roboclaw.ForwardM1(address, 20)
-    sleep(2)
-    roboclaw.ForwardM1(address, 0)
-    sleep(0.5)
-
-    # Roboclaw 1 - Motor 2
-    roboclaw.ForwardM2(address, 20)
-    sleep(2)
-    roboclaw.ForwardM2(address, 0)
-    sleep(2)
-
-    roboclaw.ForwardM1(address, 0)
-    roboclaw.ForwardM2(address, 0)
-
-
 while True:
     # Read and print joystick positions
     try:
