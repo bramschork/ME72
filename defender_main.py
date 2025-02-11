@@ -10,7 +10,7 @@ import atexit  # to turn off both motors
 roboclaw = Roboclaw("/dev/ttyS0", 460800)
 roboclaw.Open()
 
-address = 0x82  # Roboclaw address
+address = 0x80  # Roboclaw address
 
 LOWER_DEAD_ZONE = 132
 UPPER_DEAD_ZONE = 124
