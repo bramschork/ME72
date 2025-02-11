@@ -1,4 +1,4 @@
-import time
+import sleep
 import threading
 import evdev
 from evdev import InputDevice, ecodes
@@ -45,6 +45,9 @@ while True:
         sleep(2)
         roboclaw.ForwardM2(address, 0)
         sleep(2)
+
+        roboclaw.ForwardM1(address, 0)
+        roboclaw.ForwardM2(address, 0)
 
     except KeyboardInterrupt:
         # Stop motors on exit
