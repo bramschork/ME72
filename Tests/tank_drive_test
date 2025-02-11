@@ -64,10 +64,12 @@ try:
                         print(
                             f"Left Joystick Y: {joystick_positions['LEFT_Y']} | Right Joystick Y: {joystick_positions['RIGHT_Y']}")
 
-                        roboclaw_1.ForwardM1(
-                            controller_address_1, joystick_positions['LEFT_Y']-120)
-                        roboclaw_1.ForwardM2(
-                            controller_address_1, joystick_positions['RIGHT_Y']-120)
+                        if joystick_positions['LEFT_Y'] > 128:
+                            roboclaw_1.ForwardM1(
+                                controller_address_1, joystick_positions['LEFT_Y']-120)
+                        if joystick_positions['RIGHT_Y'] > 128:
+                            roboclaw_1.ForwardM1(
+                                controller_address_1, joystick_positions['RIGHT_Y']-120)
 
 
 except KeyboardInterrupt:
