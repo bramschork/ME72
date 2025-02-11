@@ -34,8 +34,8 @@ def trigger_pulled():
     sleep(1)
 
     servo.max()  # Move to 180 degre
-    roboclaw.ReverseM1(address, 10)
-    roboclaw.ReverseM2(address, 10)
+    roboclaw.BackwardM1(address, 10)
+    roboclaw.BackwardM2(address, 10)
 
     sleep(1)
 
