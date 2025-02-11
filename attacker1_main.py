@@ -167,7 +167,7 @@ def poll_joystick(controller):
 # Shooter motor control function
 
 
-def shooter_motor_control():
+'''def shooter_motor_control():
     global shooter_active
     shooter_speed = 64  # Half speed (0-127 scale)
 
@@ -189,7 +189,7 @@ def shooter_motor_control():
             shooter_roboclaw.ForwardM2(shooter_address, 64)
 
             shooter_active = False  # Reset after reaching speed
-        time.sleep(0.01)  # Prevent CPU overload
+        time.sleep(0.01)  # Prevent CPU overload'''
 
 
 # Main function
