@@ -19,12 +19,6 @@ lock = threading.Lock()
 left_speed = 0  # Motor 1 speed
 right_speed = 0  # Motor 2 speed
 
-# Acceleration - speed increments per seconds
-# Ex. 1000 = Takes 1 second to ramp from 0 to 1,000 speed units
-# 5000 = Takes ~0.2 seconds to reach max speed
-# 65,535 = Instant acceleration (max setting)
-acceleration = 500
-
 # Locate the PS4 controller
 
 
@@ -105,15 +99,13 @@ def poll_joystick(controller):
                 if event.code == ecodes.ABS_Y:  # Left joystick
                     with lock:
                         joystick_positions['LEFT_Y'] = value
-                        left_speed = 0 if 126 <= value <= 130 else max(
-                            0, min(127, 128 - value))
+                        left_speed = value  # Directly store joystick value
                     print(f"Joystick Left Y: {value}")
 
                 elif event.code == ecodes.ABS_RY:  # Right joystick
                     with lock:
                         joystick_positions['RIGHT_Y'] = value
-                        right_speed = 0 if 126 <= value <= 130 else max(
-                            0, min(127, 128 - value))
+                        right_speed = value  # Directly store joystick value
                     print(f"Joystick Right Y: {value}")
 
         except BlockingIOError:
@@ -126,10 +118,6 @@ def main():
     controller = find_ps4_controller()
     controller.grab()
     print(f"Connected to {controller.name} at {controller.path}")
-
-    # Set default acceleration for both motors
-    roboclaw.SetM1DefaultAccel(address, 5000)  # Set acceleration for M1
-    roboclaw.SetM2DefaultAccel(address, 5000)
 
     # Start joystick polling thread
     joystick_thread = threading.Thread(
