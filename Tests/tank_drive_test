@@ -27,12 +27,6 @@ def find_ps4_controller():
             return device
     raise RuntimeError("PS4 controller not found! Ensure it's connected.")
 
-
-# Initialize controller
-controller = find_ps4_controller()
-controller.grab()  # Ensure exclusive access
-print(f"Connected to {controller.name} at {controller.path}")
-
 # Function to send motor commands in a side thread
 
 
@@ -66,6 +60,12 @@ def main():
     # motor_thread = threading.Thread(
     #     target=send_motor_command, daemon=True, args=(left_speed))
     # motor_thread.start()
+
+    # Initialize controller
+    controller = find_ps4_controller()
+    controller.grab()  # Ensure exclusive access
+    print(f"Connected to {controller.name} at {controller.path}")
+
     joystick_thread = threading.Thread(
         target=poll_joystick, daemon=True, args=(left_speed,))
     joystick_thread.start()
