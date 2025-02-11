@@ -71,7 +71,7 @@ def trigger_pulled():
     servo.max()
     shooter_roboclaw.ForwardM1(shooter_address, 32)
     shooter_roboclaw.ForwardM2(shooter_address, 32)
-    sleep(1)
+    time.sleep(1)
     servo.min()
 
     # Back to intake
