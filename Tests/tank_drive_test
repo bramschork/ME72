@@ -1,3 +1,4 @@
+import evdev
 from evdev import InputDevice, ecodes
 from roboclaw_3 import Roboclaw
 
