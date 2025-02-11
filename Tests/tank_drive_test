@@ -1,5 +1,4 @@
 import time
-from time import sleep
 import threading
 import evdev
 from evdev import InputDevice, ecodes
@@ -30,22 +29,34 @@ controller = find_ps4_controller()
 controller.grab()  # Ensure exclusive access
 print(f"Connected to {controller.name} at {controller.path}")
 
+# Function to send motor commands in a separate thread
+
+
+def control_motors(left_speed):
+    roboclaw.ForwardM1(address, left_speed)
+
+
 try:
-    print("Reading joystick positions. Move the joysticks to see the output.")
+    print("Polling joystick every 0.2s. Move the joysticks to control the motors.")
 
-    for event in controller.read_loop():
-        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-            joystick_positions['LEFT_Y'] = event.value if event.code == ecodes.ABS_Y else joystick_positions['LEFT_Y']
-            joystick_positions['RIGHT_Y'] = event.value if event.code == ecodes.ABS_RY else joystick_positions['RIGHT_Y']
+    while True:
+        # Read joystick events
+        for event in controller.read_loop():
+            if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+                joystick_positions['LEFT_Y'] = event.value if event.code == ecodes.ABS_Y else joystick_positions['LEFT_Y']
+                joystick_positions['RIGHT_Y'] = event.value if event.code == ecodes.ABS_RY else joystick_positions['RIGHT_Y']
 
-            # 0 to 256, 128 center. 0 us full forward
-            left_speed = 128 - joystick_positions['LEFT_Y']
+        # Convert joystick input to motor speed
+        left_speed = max(0, 128 - joystick_positions['LEFT_Y'])
 
-            roboclaw.ForwardM1(address, left_speed)
+        # Start a new thread to send motor commands without blocking
+        motor_thread = threading.Thread(
+            target=control_motors, args=(left_speed,))
+        motor_thread.start()
+        motor_thread.join()  # Ensure the thread completes
 
-            print(
-                f"Left Y: {joystick_positions['LEFT_Y']} | Right Y: {joystick_positions['RIGHT_Y']}")
-            sleep(0.2)
+        # Print values in real-time
+        print(f"Left Speed: {left_speed}")
 
 
 except KeyboardInterrupt:
