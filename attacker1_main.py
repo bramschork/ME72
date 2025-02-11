@@ -1,210 +1,75 @@
+import time
+import evdev
+from evdev import InputDevice, ecodes
 from roboclaw_3 import Roboclaw
 
-from evdev import InputDevice, list_devices, ecodes
+# Initialize Roboclaw
+roboclaw = Roboclaw("/dev/ttyS0", 115200)
+roboclaw.Open()
+address = 0x80  # Roboclaw address
 
-import threading
-import time
-import glob
+# Joystick axis mappings
+AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
+joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
 
-
-########## ROBOCLAW INIT  ##########
-# Addresses for the two Roboclaws
-motor_roboclaw_address = 0x80  # 128 in hex
-mechanism_roboclaw_address = 0x82  # 130 in hex
-
-# Initialize both Roboclaws
-motor_roboclaw = Roboclaw("/dev/ttyS0", 115200)
-mechanism_roboclaw = Roboclaw("/dev/ttyS0", 115200)
-
-# Open serial communication
-motor_roboclaw.Open()
-mechanism_roboclaw.Open()
-#####################################
-
-MECHANISM_MOTOR_SPEED = 64  # half-speed, since full speed is 127
-
-# Joystick Deadzone threshold
-DEADZONE = 5
-
-# Find PS4 controller for inputs
-
-
-# Axis codes for left and right joysticks
-AXIS_CODES = {
-    'LEFT_X': ecodes.ABS_X,
-    'LEFT_Y': ecodes.ABS_Y,
-    'RIGHT_X': ecodes.ABS_RX,
-    'RIGHT_Y': ecodes.ABS_RY,
-}
-
-# Initialize joystick positions
-joystick_positions = {
-    'LEFT_X': 128,
-    'LEFT_Y': 128,
-    'RIGHT_X': 128,
-    'RIGHT_Y': 128,
-}
+# Locate the PS4 controller
 
 
 def find_ps4_controller():
-    """
-    Finds and returns the first detected PS4 controller.
-
-    Returns:
-        InputDevice: The PS4 controller device.
-
-    Raises:
-        RuntimeError: If no PS4 controller is found.
-
-    Notes:
-        evdev (Event Device) interacts with the PS4 controller as an input device.
-            Listens to joystick movements, button presses, and touchpad inputs.
-            Used for reading inputs like analog stick positions and button presses. 
-    """
-
-    devices = [InputDevice(path) for path in list_devices()]
-    for device in devices:
-        if "Wireless Controller" in device.name:  # Name for PS4 controller
+    for path in evdev.list_devices():
+        device = InputDevice(path)
+        if "Wireless Controller" in device.name:
             return device
     raise RuntimeError("PS4 controller not found! Ensure it's connected.")
 
-# Hidraw for light bar and rumble control
 
-
-# Initialize the PS4 controller
+# Initialize controller
 controller = find_ps4_controller()
 print(f"Connected to {controller.name} at {controller.path}")
 
-
-# Normalize joystick values (0–256 to -127 to 127)
-
-
-def normalize(value):
-    # If within deadzone, treat as zero
-    # If value is greater than 123 and less than 133, treat as 0
-    if 128 - DEADZONE <= value <= 128 + DEADZONE:
-        return 0
-    # ABOVE SCALE IS 0 to 256. Now convert!
-    return value - 128  # New scale is from -128 to 128
-
-# Tank drive mixed mode function
+# Function to set motor speed (0-127 forward only)
 
 
-def tank_drive(left_x, left_y, right_x, right_y):
-    # Normalize inputs
-    left_y = normalize(left_y)  # Forward/Reverse for Motor 1
-    right_y = normalize(right_y)  # Forward/Reverse for Motor 2
-    left_x = normalize(left_x)  # Turning for Motor 1
-    right_x = normalize(right_x)  # Turning for Motor 2
-
-    # Calculate mixed motor speeds
-    left_motor_speed = left_y  # Left joystick controls Motor 1
-    right_motor_speed = right_y  # Right joystick controls Motor 2
-
-    motor_roboclaw.ForwardBackwardM1(
-        motor_roboclaw_address, left_motor_speed)  # Motor 1
-    motor_roboclaw.ForwardBackwardM2(
-        motor_roboclaw_address, right_motor_speed)  # Motor 2
+def set_motor_speed(motor, speed):
+    speed = max(0, min(127, speed))  # Clamp speed between 0 and 127
+    if motor == 1:
+        roboclaw.ForwardM1(address, speed)
+    elif motor == 2:
+        roboclaw.ForwardM2(address, speed)
 
 
-def monitor_and_check_motor_speed(target_current=2.0, tolerance=0.5, check_interval=0.1):
-    """
-    Monitors the motor current until it stabilizes at the target speed.
-    Once the motors are up to speed, this function returns.
-
-    Args:
-        target_current (float): Expected steady-state current (in Amps).
-        tolerance (float): Allowed variation from the target current.
-        check_interval (float): Time in seconds between checks.
-
-    Returns:
-        bool: True when motors reach target speed.
-    """
-    while True:
-        # Read motor currents (converted from mA to A)
-        m1_current = mechanism_roboclaw.ReadCurrents(
-            mechanism_roboclaw_address)[1] / 100.0
-        m2_current = mechanism_roboclaw.ReadCurrents(
-            mechanism_roboclaw_address)[2] / 100.0
-
-        # Check if both motors are within the target range
-        if (
-            abs(m1_current - target_current) <= tolerance and
-            abs(m2_current - target_current) <= tolerance
-        ):
-            print("Motors are up to speed!")
-            return True  # Exit and return once motors stabilize
-
-        time.sleep(check_interval)  # Wait before checking again
-
-
-# Read joystick inputs and control motors
+# Poll joysticks every 20ms and send values to motors
 try:
-    print("JOYSTICKS HOT")
-    for event in controller.read_loop():
-        if event.type == ecodes.EV_ABS:
+    print("Polling joystick every 20ms. Move the joysticks to control the motors.")
 
-            # Joystick Event
-            if event.code in AXIS_CODES.values():
-                for axis_name, axis_code in AXIS_CODES.items():
-                    if event.code == axis_code:
-                        # Update joystick position
-                        joystick_positions[axis_name] = event.value
+    while True:
+        # Read all available joystick events
+        for event in controller.read():
+            if event.type == ecodes.EV_ABS:
+                if event.code == AXIS_CODES['LEFT_Y']:
+                    joystick_positions['LEFT_Y'] = event.value
+                elif event.code == AXIS_CODES['RIGHT_Y']:
+                    joystick_positions['RIGHT_Y'] = event.value
 
-                        # Determine deadzone or actual value
-                        if 128 - DEADZONE <= event.value <= 128 + DEADZONE:
-                            # print(f"{axis_name}: Deadzone")
-                            pass
-                        else:
-                            # print(f"{axis_name}: {event.value}")
-                            pass
+        # Convert joystick input to motor speed (Forward only)
+        left_speed = (
+            joystick_positions['LEFT_Y'] - 128) // 2 if joystick_positions['LEFT_Y'] > 128 else 0
+        right_speed = (
+            joystick_positions['RIGHT_Y'] - 128) // 2 if joystick_positions['RIGHT_Y'] > 128 else 0
 
-                        # Call tank_drive with updated joystick positions
-                        tank_drive(
-                            joystick_positions['LEFT_X'],
-                            joystick_positions['LEFT_Y'],
-                            joystick_positions['RIGHT_X'],
-                            joystick_positions['RIGHT_Y']
-                        )
+        # Send motor commands
+        set_motor_speed(1, left_speed)
+        set_motor_speed(2, right_speed)
 
-            # Right Trigger / Mechanism Event
+        # Print values in real-time
+        print(
+            f"\rLeft Motor: {left_speed} | Right Motor: {right_speed}", end="")
 
-            # Handle R2 (Right Trigger) press for motor control and monitoring
-            if event.code == ecodes.ABS_RZ:
-                trigger_value = event.value
+        # Wait 20ms before polling again
+        time.sleep(0.1)
 
-                if trigger_value > 10:  # Trigger pulled
-                    set_lightbar_color(255, 0, 0)  # Set light bar red
-
-                    # Set mechanism motors: M1 forward, M2 reverse
-                    mechanism_roboclaw.ForwardM1(
-                        mechanism_roboclaw_address, MECHANISM_MOTOR_SPEED)
-                    mechanism_roboclaw.BackwardM2(
-                        mechanism_roboclaw_address, MECHANISM_MOTOR_SPEED)
-
-                    def monitor_and_stop_motors():
-                        """Runs monitor function and stops motors when it's done."""
-                        if monitor_and_check_motor_speed():
-                            # Stop mechanism motors after reaching speed
-                            mechanism_roboclaw.ForwardM1(
-                                mechanism_roboclaw_address, 0)
-                            mechanism_roboclaw.BackwardM2(
-                                mechanism_roboclaw_address, 0)
-                            print("Mechanism motors stopped.")
-
-                    # Start monitoring motor speed in a separate thread
-                    motor_monitor_thread = threading.Thread(
-                        target=monitor_and_stop_motors,
-                        daemon=True
-                    )
-                    motor_monitor_thread.start()
-
-                else:  # Trigger released
-                    set_lightbar_color(0, 255, 0)  # Set light bar green
-
-                    # Stop mechanism motors
-                    mechanism_roboclaw.ForwardM1(mechanism_roboclaw_address, 0)
-                    mechanism_roboclaw.BackwardM2(
-                        mechanism_roboclaw_address, 0)
 except KeyboardInterrupt:
+    # Stop motors on exit
+    set_motor_speed(1, 0)
+    set_motor_speed(2, 0)
     print("\nExiting...")
