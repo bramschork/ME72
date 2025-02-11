@@ -2,86 +2,6 @@
 from evdev import InputDevice, ecodes
 Joystick y axis. Home position is 128. Joystick down is 0, joystick up is 256
 Roboclaw takes a power input from 0 to 127
-
-
-# Addresses for the two Roboclaws
-controller_address_1 = 0x80  # 128 in hex
-controller_address_2 = 0x82  # 130 in hex
-
-# Initialize both Roboclaws
-roboclaw_1 = Roboclaw("/dev/ttyS0", 115200)
-roboclaw_2 = Roboclaw("/dev/ttyS0", 115200)
-
-# Open serial communication
-roboclaw_1.Open()
-roboclaw_2.Open()
-
-# Axis codes for left and right joysticks
-AXIS_CODES = {
-    'LEFT_X': ecodes.ABS_X,
-    'LEFT_Y': ecodes.ABS_Y,
-    'RIGHT_X': ecodes.ABS_RX,
-    'RIGHT_Y': ecodes.ABS_RY,
-}
-
-# Initialize joystick positions
-joystick_positions = {
-    'LEFT_X': 0,
-    'LEFT_Y': 0,
-    'RIGHT_X': 0,
-    'RIGHT_Y': 0,
-}
-
-# Locate the controller
-
-
-def find_ps4_controller():
-    devices = [InputDevice(path) for path in evdev.list_devices()]
-    for device in devices:
-        if "Wireless Controller" in device.name:
-            return device
-    raise RuntimeError("PS4 controller not found! Ensure it's connected.")
-
-
-# Initialize controller
-controller = find_ps4_controller()
-print(f"Connected to {controller.name} at {controller.path}")
-
-
-def move_motor(motor, address, speed):
-    """Runs motor movement in a separate thread."""
-    if speed > 127:
-        speed = 127  # Ensure max speed is within valid range
-    motor.ForwardM1(address, speed)
-
-
-try:
-    print("Reading joystick positions. Move the joysticks to see the output.")
-    for event in controller.read_loop():
-        if event.type == ecodes.EV_ABS:
-            if event.code in AXIS_CODES.values():
-                for axis_name, axis_code in AXIS_CODES.items():
-                    if event.code == axis_code:
-                        joystick_positions[axis_name] = event.value
-                        print(
-                            f"Left Joystick Y: {joystick_positions['LEFT_Y']} | Right Joystick Y: {joystick_positions['RIGHT_Y']}")
-
-                        # Handle left joystick movement
-                        if joystick_positions['LEFT_Y'] > 128:
-                            speed = joystick_positions['LEFT_Y'] - 120
-                            threading.Thread(target=move_motor, args=(
-                                roboclaw_1, controller_address_1, speed), daemon=True).start()
-
-                        # Handle right joystick movement
-                        if joystick_positions['RIGHT_Y'] > 128:
-                            speed = joystick_positions['RIGHT_Y'] - 120
-                            threading.Thread(target=move_motor, args=(
-                                roboclaw_1, controller_address_1, speed), daemon=True).start()
-
-except KeyboardInterrupt:
-    roboclaw_1.ForwardM1(controller_address_1, 0)
-    roboclaw_1.ForwardM2(controller_address_1, 0)
-    print("\nExiting...")
 '''
 
 
@@ -130,10 +50,10 @@ print(f"Connected to {controller.name} at {controller.path}")
 def move_motor(motor, address, speed, motor_num):
     """Runs motor movement in a separate thread."""
     speed = max(0, min(127, speed))  # Ensure speed is within 0-127 range
-    if motor_num == 1:
-        motor.ForwardM1(address, speed)
-    elif motor_num == 2:
-        motor.ForwardM2(address, speed)
+    if motor_num == 1 and speed > 10:
+        motor.ForwardM1(address, 10)  # speed
+    elif motor_num == 2 and speed > 10:
+        motor.ForwardM2(address, 10)
 
 
 try:
