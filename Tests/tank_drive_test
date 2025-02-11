@@ -32,33 +32,37 @@ controller = find_ps4_controller()
 controller.grab()  # Ensure exclusive access
 print(f"Connected to {controller.name} at {controller.path}")
 
-# Function to continuously read joystick positions
+# Function to continuously read joystick positions (FAST)
 
 
 def poll_joystick():
     print("Starting joystick polling thread.")
     while True:
         try:
-            for event in controller.read():  # ✅ Read multiple events at once
-                if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-                    with lock:
-                        if event.code == ecodes.ABS_Y:
-                            joystick_positions['LEFT_Y'] = event.value
+            event = controller.read_one()  # ✅ Read a single event, prevents blocking
+            if event and event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+                with lock:
+                    if event.code == ecodes.ABS_Y:
+                        joystick_positions['LEFT_Y'] = event.value
         except BlockingIOError:
             pass  # No new events, continue looping
 
-# Function to send motor commands every 0.05 seconds (FAST RESPONSE)
+# Function to send motor commands every 50ms (non-blocking)
 
 
 def send_motor_commands():
     print("Starting motor command thread.")
+    last_speed = None  # Track last sent speed to prevent redundant commands
     while True:
         time.sleep(0.05)  # Send updates every 50ms (20 updates/sec)
         with lock:
             left_speed = max(0, min(127, 128 - joystick_positions['LEFT_Y']))
 
-        roboclaw.ForwardM1(address, left_speed)
-        print(f"Sent Left Speed: {left_speed}")
+        if left_speed != last_speed:  # Only send if speed changed
+            # ✅ Uses SpeedM1 instead of ForwardM1
+            roboclaw.SpeedM1(address, left_speed)
+            last_speed = left_speed
+            print(f"Sent Left Speed: {left_speed}")
 
 
 # Start both threads
@@ -73,6 +77,6 @@ try:
     while True:
         time.sleep(1)  # Prevents main thread from exiting
 except KeyboardInterrupt:
-    roboclaw.ForwardM1(address, 0)
-    roboclaw.ForwardM2(address, 0)
+    roboclaw.SpeedM1(address, 0)  # ✅ Stops motors smoothly
+    roboclaw.SpeedM2(address, 0)
     print("\nExiting...")
