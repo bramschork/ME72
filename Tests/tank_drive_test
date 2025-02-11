@@ -39,7 +39,7 @@ try:
             joystick_positions['RIGHT_Y'] = event.value if event.code == ecodes.ABS_RY else joystick_positions['RIGHT_Y']
 
             left_speed = max(0, joystick_positions['LEFT_Y'] - 128)
-            roboclaw.ForwardM1(address, left_speed)
+            # roboclaw.ForwardM1(address, left_speed)
 
             print(
                 f"Left Y: {joystick_positions['LEFT_Y']} | Right Y: {joystick_positions['RIGHT_Y']}")
