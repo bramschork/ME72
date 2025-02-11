@@ -60,7 +60,6 @@ def send_motor_commands():
 
 
 # Start both threads
-joystick_thread = threading.Thread(target=poll_joystick, daemon=True)
 motor_thread = threading.Thread(target=send_motor_commands, daemon=True)
 
 joystick_thread.start()
@@ -69,7 +68,7 @@ motor_thread.start()
 # Keep the main thread running
 try:
     while True:
-        time.sleep(1)  # Prevents main thread from exiting
+        poll_joystick()
 except KeyboardInterrupt:
     roboclaw.ForwardM1(address, 0)
     roboclaw.ForwardM2(address, 0)
