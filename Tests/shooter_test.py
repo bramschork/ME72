@@ -29,10 +29,10 @@ def find_ps4_controller():
 
 def trigger_pulled():
     # Shooting
+    servo.max()
     roboclaw.BackwardM1(address, 20)
     roboclaw.BackwardM2(address, 20)
     sleep(1)
-    servo.max()
     time.sleep(1)
     servo.min()
 
