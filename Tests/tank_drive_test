@@ -14,6 +14,7 @@ AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
 
 # Shared variable for joystick position
 joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
+
 lock = threading.Lock()  # Lock to prevent overlapping motor commands
 motor_busy = False  # Flag to track if motor thread is running
 
@@ -83,7 +84,7 @@ joystick_thread.start()
 # Keep the main thread running
 try:
     while True:
-        time.sleep(1)  # Prevents main thread from exiting
+        time.sleep(0.01)  # Prevents main thread from exiting
 except KeyboardInterrupt:
     roboclaw.ForwardM1(address, 0)
     roboclaw.ForwardM2(address, 0)
