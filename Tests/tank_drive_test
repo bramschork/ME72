@@ -36,14 +36,13 @@ print(f"Connected to {controller.name} at {controller.path}")
 
 
 def poll_joystick():
-    print("Starting joystick polling thread.")
     for event in controller.read_loop():
         if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-            with lock:
-                if event.code == ecodes.ABS_Y:
-                    joystick_positions['LEFT_Y'] = event.value
-                elif event.code == ecodes.ABS_RY:
-                    joystick_positions['RIGHT_Y'] = event.value
+            if event.code == ecodes.ABS_Y:
+                joystick_positions['LEFT_Y'] = event.value
+                print(f"Left = {joystick_positions['LEFT_Y']}")
+            elif event.code == ecodes.ABS_RY:
+                joystick_positions['RIGHT_Y'] = event.value
 
 # Function to send motor commands every 0.5 seconds
 
