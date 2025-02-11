@@ -1,6 +1,7 @@
 import evdev
 from evdev import InputDevice, ecodes
 import time
+import threading
 from roboclaw_3 import Roboclaw
 
 # Initialize Roboclaw
@@ -11,10 +12,9 @@ address = 0x80  # Roboclaw address
 # Joystick axis mappings
 AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
 
-# Initialize joystick positions (centered)
+# Shared variables for joystick positions
 joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
-# Tracks last sent speeds to avoid redundant updates
-last_sent_speeds = {'LEFT_Y': 128, 'RIGHT_Y': 128}
+lock = threading.Lock()  # Lock for thread safety
 
 # Locate the PS4 controller
 
@@ -32,35 +32,44 @@ controller = find_ps4_controller()
 controller.grab()  # Ensure exclusive access
 print(f"Connected to {controller.name} at {controller.path}")
 
-# Function to send motor commands
+# Function to continuously read joystick positions
 
 
-def send_motor_commands(left_speed):
-    roboclaw.ForwardM1(address, left_speed)
-
-
-try:
-    print("Polling joystick. New values will be sent immediately.")
-
+def poll_joystick():
+    print("Starting joystick polling thread.")
     for event in controller.read_loop():
         if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-            if event.code == ecodes.ABS_Y:
-                joystick_positions['LEFT_Y'] = event.value
-            elif event.code == ecodes.ABS_RY:
-                joystick_positions['RIGHT_Y'] = event.value
+            with lock:
+                if event.code == ecodes.ABS_Y:
+                    joystick_positions['LEFT_Y'] = event.value
+                elif event.code == ecodes.ABS_RY:
+                    joystick_positions['RIGHT_Y'] = event.value
 
-            # Convert joystick input to motor speed (Forward only)
-            left_speed = max(0, (joystick_positions['LEFT_Y'] - 128))
+# Function to send motor commands every 0.5 seconds
 
-            # Only send new commands if the speed has changed
-            if left_speed != last_sent_speeds['LEFT_Y']:
-                send_motor_commands(left_speed)
-                # Update last sent speed
-                last_sent_speeds['LEFT_Y'] = left_speed
 
-                # Print updates
-                print(f"New Left Speed: {left_speed}")
+def send_motor_commands():
+    print("Starting motor command thread.")
+    while True:
+        time.sleep(0.5)  # Send updates every 0.5s
+        with lock:
+            left_speed = max(0, joystick_positions['LEFT_Y'] - 128)
 
+        roboclaw.ForwardM1(address, left_speed)
+        print(f"Sent Left Speed: {left_speed}")
+
+
+# Start both threads
+joystick_thread = threading.Thread(target=poll_joystick, daemon=True)
+motor_thread = threading.Thread(target=send_motor_commands, daemon=True)
+
+joystick_thread.start()
+motor_thread.start()
+
+# Keep the main thread running
+try:
+    while True:
+        time.sleep(1)  # Prevents main thread from exiting
 except KeyboardInterrupt:
     roboclaw.ForwardM1(address, 0)
     roboclaw.ForwardM2(address, 0)
