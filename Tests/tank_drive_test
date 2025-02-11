@@ -1,3 +1,9 @@
+'''
+Joystick y axis. Home position is 128. Joystick down is 0, joystick up is 256
+Roboclaw takes a power input from 0 to 127
+'''
+
+
 from roboclaw_3 import Roboclaw
 from time import sleep
 import evdev
@@ -46,33 +52,27 @@ def find_ps4_controller():
 controller = find_ps4_controller()
 print(f"Connected to {controller.name} at {controller.path}")
 
-# 5% power (127 * 0.05 ≈ 6)
-power = 6
-
-
-# roboclaw_2.ForwardM2(controller_address_2, power)
-# roboclaw_2.ForwardM2(controller_address_2, 0)
-
-
 # Read and print joystick positions
 
 # Initialize joystick positions
 joystick_positions = {"Left Joystick Y": 0, "Right Joystick Y": 0}
 
+# Read and print joystick positions
 try:
     print("Reading joystick positions. Move the joysticks to see the output.")
-
     for event in controller.read_loop():
-        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-            for axis_name, axis_code in AXIS_CODES.items():
-                if event.code == axis_code:
-                    joystick_positions[axis_name] = event.value
+        if event.type == ecodes.EV_ABS:
+            if event.code in AXIS_CODES.values():
+                for axis_name, axis_code in AXIS_CODES.items():
+                    if event.code == axis_code:
+                        joystick_positions[axis_name] = event.value
+                        print(
+                            f"Left Joystick Y: {joystick_positions['LEFT_Y']} | Right Joystick Y: {joystick_positions['RIGHT_Y']}")
 
-        # Print every tenth of a second on the same line
-        sleep(0.1)
-        print(
-            f"Left Joystick Y: {joystick_positions['Left Joystick Y']} | Right Joystick Y: {joystick_positions['Right Joystick Y']}")
-
+                        Roboclaw_1.ForwardM1(
+                            controller_address_1, joystick_positions['LEFT_Y']-120)
+                        Roboclaw_1.ForwardM2(
+                            controller_address_1, joystick_positions['RIGHT_Y']-120)
 
 except KeyboardInterrupt:
     print("\nExiting...")
