@@ -79,7 +79,7 @@ try:
                             roboclaw.ForwardM2(controller_address, right_speed)
                         else:
                             roboclaw.ForwardM2(controller_address, 0)
-                        rint(f'LEFT: {left_speed} | RIGHT {right_speed}')
+                        print(f'LEFT: {left_speed} | RIGHT {right_speed}')
 
 
 except KeyboardInterrupt:
