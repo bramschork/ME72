@@ -53,12 +53,12 @@ def send_motor_command():
 def poll_joystick(controller):
     global left_speed
     while True:
-        events = controller.read()  # ✅ Get all available events
-        if not events:
-            time.sleep(0.01)  # ✅ Prevents busy looping when no input
-            continue
+        try:
+            event = controller.read_one()  # ✅ Use `read_one()` to avoid `BlockingIOError`
+            if event is None:
+                time.sleep(0.01)  # ✅ Prevents busy looping when no input
+                continue
 
-        for event in events:
             if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
                 with lock:
                     if event.code == ecodes.ABS_Y:
@@ -66,6 +66,9 @@ def poll_joystick(controller):
                         left_speed = max(
                             0, min(127, 128 - joystick_positions['LEFT_Y']))
                         print(f"Joystick Y: {joystick_positions['LEFT_Y']}")
+
+        except BlockingIOError:
+            time.sleep(0.01)  # ✅ Retry without spamming CPU
 
 # Main function
 
