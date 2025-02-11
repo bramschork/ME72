@@ -51,10 +51,12 @@ try:
                     joystick_positions['RIGHT_Y'] = event.value
 
         # Convert joystick input to motor speed (Forward only)
-        left_speed = max(
-            0, (joystick_positions['LEFT_Y'] - 128) // 2) if joystick_positions['LEFT_Y'] > 128 else 0
-        right_speed = max(
-            0, (joystick_positions['RIGHT_Y'] - 128) // 2) if joystick_positions['RIGHT_Y'] > 128 else 0
+        # left_speed = max(
+        #    0, (joystick_positions['LEFT_Y'] - 128) // 2) if joystick_positions['LEFT_Y'] > 128 else 0
+        # right_speed = max(
+        #    0, (joystick_positions['RIGHT_Y'] - 128) // 2) if joystick_positions['RIGHT_Y'] > 128 else 0
+        left_speed = 20
+        right_speed = 20
 
         # Print values in real-time every 0.5s
         print(
