@@ -43,8 +43,8 @@ try:
                     joystick_positions['LEFT_Y'] = event.value
                     print(joystick_positions['LEFT_Y'])
                     try:
-                        Roboclaw.m1ForwardM1(
-                            self, address, 128 - joystick_positions['LEFT_Y'])
+                        roboclaw.ForwardM1(
+                            address, 128 - joystick_positions['LEFT_Y'])
                     except Exception as e:
                         print(e)
                 # elif event.code == ecodes.ABS_RY:
