@@ -58,15 +58,18 @@ try:
         left_speed = 20
         right_speed = 20
 
+        roboclaw.ForwardM1(address, left_speed)
+        roboclaw.ForwardM2(addressm, left_speed)
+
         # Print values in real-time every 0.5s
         print(
             f"\rLeft Motor: {left_speed} | Right Motor: {right_speed}", end="")
 
-        # Create a new thread to send motor values
+        '''# Create a new thread to send motor values
         motor_thread = threading.Thread(
             target=control_motors, args=(left_speed, right_speed))
         motor_thread.start()
-        motor_thread.join()  # Ensure the thread completes before continuing
+        motor_thread.join()  # Ensure the thread completes before continuing'''
 
         # Wait 0.5 seconds before polling again
         time.sleep(0.5)
