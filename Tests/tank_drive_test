@@ -35,15 +35,15 @@ while True:
     try:
         print("Polling joystick every 0.5s. Move the joysticks to control the motors.")
         # Roboclaw 1 - Motor 1
-        roboclaw_1.ForwardM1(controller_address_1, 20)
+        roboclaw.ForwardM1(address, 20)
         sleep(2)
-        roboclaw_1.ForwardM1(controller_address_1, 0)
+        roboclaw.ForwardM1(address, 0)
         sleep(0.5)
 
         # Roboclaw 1 - Motor 2
-        roboclaw_1.ForwardM2(controller_address_1, 20)
+        roboclaw.ForwardM2(address, 20)
         sleep(2)
-        roboclaw_1.ForwardM2(controller_address_1, 0)
+        roboclaw.ForwardM2(address, 0)
         sleep(2)
 
     except KeyboardInterrupt:
