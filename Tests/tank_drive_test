@@ -42,7 +42,7 @@ def send_motor_command(left_speed):
 # Function to continuously read joystick positions
 
 
-def poll_joystick(left_speed):
+def poll_joystick(left_speed, controller):
     event = controller.read_one()
     if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
         with lock:
@@ -67,7 +67,7 @@ def main():
     print(f"Connected to {controller.name} at {controller.path}")
 
     joystick_thread = threading.Thread(
-        target=poll_joystick, daemon=True, args=(left_speed,))
+        target=poll_joystick, daemon=True, args=(left_speed, controller))
     joystick_thread.start()
 
     try:
