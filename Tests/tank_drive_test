@@ -4,6 +4,7 @@ Roboclaw takes a power input from 0 to 127
 '''
 
 
+import threading
 from roboclaw_3 import Roboclaw
 from time import sleep
 import evdev
@@ -52,7 +53,14 @@ def find_ps4_controller():
 controller = find_ps4_controller()
 print(f"Connected to {controller.name} at {controller.path}")
 
-# Read and print joystick positions
+
+def move_motor(motor, address, speed):
+    """Runs motor movement in a separate thread."""
+    if speed > 127:
+        speed = 127  # Ensure max speed is within valid range
+    motor.ForwardM1(address, speed)
+
+
 try:
     print("Reading joystick positions. Move the joysticks to see the output.")
     for event in controller.read_loop():
@@ -64,13 +72,19 @@ try:
                         print(
                             f"Left Joystick Y: {joystick_positions['LEFT_Y']} | Right Joystick Y: {joystick_positions['RIGHT_Y']}")
 
+                        # Handle left joystick movement
                         if joystick_positions['LEFT_Y'] > 128:
-                            roboclaw_1.ForwardM1(
-                                controller_address_1, joystick_positions['LEFT_Y']-120)
-                        if joystick_positions['RIGHT_Y'] > 128:
-                            roboclaw_1.ForwardM1(
-                                controller_address_1, joystick_positions['RIGHT_Y']-120)
+                            speed = joystick_positions['LEFT_Y'] - 120
+                            threading.Thread(target=move_motor, args=(
+                                roboclaw_1, controller_address_1, speed), daemon=True).start()
 
+                        # Handle right joystick movement
+                        if joystick_positions['RIGHT_Y'] > 128:
+                            speed = joystick_positions['RIGHT_Y'] - 120
+                            threading.Thread(target=move_motor, args=(
+                                roboclaw_1, controller_address_1, speed), daemon=True).start()
 
 except KeyboardInterrupt:
+    roboclaw_1.ForwardM1(controller_address_1, 0)
+    roboclaw_1.ForwardM2(controller_address_1, 0)
     print("\nExiting...")
