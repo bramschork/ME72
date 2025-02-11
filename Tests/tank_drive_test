@@ -35,24 +35,26 @@ print(f"Connected to {controller.name} at {controller.path}")
 # Function to continuously read joystick positions
 
 try:
+    print("Starting joystick polling thread.")
+
     while True:
-        print("Starting joystick polling thread.")
-        for event in controller.read_loop():
-            if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-                if event.code == ecodes.ABS_Y:
-                    joystick_positions['LEFT_Y'] = event.value
-                    print(joystick_positions['LEFT_Y'])
-                    try:
-                        roboclaw.ForwardM1(
-                            address, 128 - joystick_positions['LEFT_Y'])
-                        print(
-                            f"Sent: {128 - joystick_positions['LEFT_Y']}")
+        try:
+            event = controller.read()  # Read next available event (non-blocking)
+        except BlockingIOError:
+            continue  # No new events, keep looping
 
-                    except Exception as e:
-                        print(e)
-                # elif event.code == ecodes.ABS_RY:
-                    # joystick_positions['RIGHT_Y'] = event.value
+        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+            if event.code == ecodes.ABS_Y:
+                joystick_positions['LEFT_Y'] = event.value
+                print(joystick_positions['LEFT_Y'])
 
+                try:
+                    speed = max(
+                        0, min(127, 128 - joystick_positions['LEFT_Y']))
+                    roboclaw.ForwardM1(address, speed)
+                    print(f"Sent: {speed}")
+                except Exception as e:
+                    print(f"Roboclaw Error: {e}")
 
 except KeyboardInterrupt:
     roboclaw.ForwardM1(address, 0)
