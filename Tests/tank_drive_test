@@ -5,16 +5,17 @@ import threading
 from roboclaw_3 import Roboclaw
 
 # Initialize Roboclaw
-roboclaw = Roboclaw("/dev/ttyS0", 115200)
+roboclaw = Roboclaw("/dev/ttyS0", 460800)
 roboclaw.Open()
 address = 0x80  # Roboclaw address
 
 # Joystick axis mappings
 AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
 
-# Shared variables for joystick positions
+# Shared variable for joystick position
 joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
-lock = threading.Lock()  # Lock for thread safety
+lock = threading.Lock()  # Lock to prevent overlapping motor commands
+motor_busy = False  # Flag to track if motor thread is running
 
 # Locate the PS4 controller
 
@@ -32,39 +33,52 @@ controller = find_ps4_controller()
 controller.grab()  # Ensure exclusive access
 print(f"Connected to {controller.name} at {controller.path}")
 
+# Function to send motor commands in a side thread
+
+
+def send_motor_command(left_speed):
+    global motor_busy
+    try:
+        with lock:
+            motor_busy = True
+            roboclaw.ForwardM1(address, left_speed)
+            print(f"Sent Speed: {left_speed}")
+    except Exception as e:
+        print(f"Error sending motor command: {e}")
+    finally:
+        motor_busy = False  # Unlock after sending command
+
 # Function to continuously read joystick positions
 
 
 def poll_joystick():
+    global motor_busy
     print("Starting joystick polling thread.")
-    for event in controller.read_loop():
-        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
+
+    while True:
+        event = controller.read_one()  # ✅ Non-blocking joystick read
+        if event and event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
             with lock:
                 if event.code == ecodes.ABS_Y:
                     joystick_positions['LEFT_Y'] = event.value
-                elif event.code == ecodes.ABS_RY:
-                    joystick_positions['RIGHT_Y'] = event.value
+                    # Real-time updates
+                    print(f"Joystick Y: {joystick_positions['LEFT_Y']}")
 
-# Function to send motor commands every 0.5 seconds
+                left_speed = max(
+                    0, min(127, 128 - joystick_positions['LEFT_Y']))
 
-
-def send_motor_commands():
-    print("Starting motor command thread.")
-    while True:
-        time.sleep(0.5)  # Send updates every 0.5s
-        with lock:
-            left_speed = max(0, joystick_positions['LEFT_Y'] - 128)
-
-        roboclaw.ForwardM1(address, left_speed)
-        print(f"Sent Left Speed: {left_speed}")
+            # Try to send the motor command in a separate thread
+            if not motor_busy:
+                motor_thread = threading.Thread(
+                    target=send_motor_command, args=(left_speed,))
+                motor_thread.start()
+            else:
+                print("Motor thread busy, skipping update.")
 
 
-# Start both threads
+# Start the main joystick polling thread
 joystick_thread = threading.Thread(target=poll_joystick, daemon=True)
-motor_thread = threading.Thread(target=send_motor_commands, daemon=True)
-
 joystick_thread.start()
-motor_thread.start()
 
 # Keep the main thread running
 try:
