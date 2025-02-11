@@ -1,18 +1,9 @@
-'''
-from evdev import InputDevice, ecodes
-Joystick y axis. Home position is 128. Joystick down is 0, joystick up is 256
-Roboclaw takes a power input from 0 to 127
-'''
-
-
-import threading
+import time
 from roboclaw_3 import Roboclaw
-from time import sleep
 import evdev
-from evdev import InputDevice, categorize, ecodes
+from evdev import InputDevice, ecodes
 
-
-# Addresses for the two Roboclaws
+# Addresses for the Roboclaw motor controller
 controller_address = 0x80  # 128 in hex
 
 # Initialize Roboclaw
@@ -46,33 +37,29 @@ def find_ps4_controller():
 controller = find_ps4_controller()
 print(f"Connected to {controller.name} at {controller.path}")
 
+# Track last update time
+last_update_time = time.time()
 
-def move_motor(motor, address, speed, motor_num):
-    """Runs motor movement in a separate thread."""
-    speed = max(0, min(127, speed))  # Ensure speed is within 0-127 range
-    if motor_num == 1 and speed > 10:
-        motor.ForwardM1(address, 10)  # speed
-    elif motor_num == 2 and speed > 10:
-        motor.ForwardM2(address, 10)
-
+print("Reading joystick positions. Move the joysticks to control the motors.")
 
 try:
-    print("Reading joystick positions. Move the joysticks to control the motors.")
     for event in controller.read_loop():
         if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
             for axis_name, axis_code in AXIS_CODES.items():
                 if event.code == axis_code:
                     joystick_positions[axis_name] = event.value
 
+        # Only update motors every 0.1 seconds
+        if time.time() - last_update_time >= 0.1:
+            last_update_time = time.time()
+
             # Convert joystick position (0-256) to motor speed (0-127)
             left_speed = max(0, min(127, joystick_positions['LEFT_Y'] // 2))
             right_speed = max(0, min(127, joystick_positions['RIGHT_Y'] // 2))
 
-            # Start threads to move motors
-            threading.Thread(target=move_motor, args=(
-                roboclaw, controller_address, left_speed, 1), daemon=True).start()
-            threading.Thread(target=move_motor, args=(
-                roboclaw, controller_address, right_speed, 2), daemon=True).start()
+            # Send motor commands
+            roboclaw.ForwardM1(controller_address, left_speed)
+            roboclaw.ForwardM2(controller_address, right_speed)
 
             # Print values in one line
             print(
