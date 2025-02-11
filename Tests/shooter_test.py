@@ -30,13 +30,13 @@ def find_ps4_controller():
 def trigger_pulled():
     # Shooting
     servo.max()
-    roboclaw.BackwardM1(address, 20)
+    roboclaw.ForwardM1(address, 20)
     roboclaw.ForwardM2(address, 20)
     sleep(1)
     servo.min()
 
     # Back to intake
-    roboclaw.ForwardM2(address, 20)
+    roboclaw.BackwardM1(address, 20)
     roboclaw.BackwardM2(address, 20)
 
 # Main loop to poll the trigger
