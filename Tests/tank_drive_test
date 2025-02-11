@@ -39,7 +39,7 @@ print(f"Connected to {controller.name} at {controller.path}")
 def send_motor_command(left_speed):
     try:
         with lock:
-            roboclaw.ForwardM1(address, left_speed)
+            roboclaw.M1Forward(address, left_speed)
             print(f"Sent Speed: {left_speed}")
     except Exception as e:
         print(f"Error sending motor command: {e}")
