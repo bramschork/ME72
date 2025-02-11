@@ -142,31 +142,38 @@ def main():
     controller.grab()
     print(f"Connected to {controller.name} at {controller.path}")
 
-    # Set the Roboclaw to Packet Serial Mode and Baud Rate
-    roboclaw.SetConfig(address, 0x0003)  # Packet Serial Mode
-    roboclaw.SetConfig(address, 0x00E0)  # BaudRate 460800f
+    # Step 1: Set Roboclaw to Packet Serial Mode
+    roboclaw.SetConfig(address, 0x0003)  # Enable Packet Serial Mode
+    roboclaw.SetConfig(address, 0x00E0)  # Set Baud Rate to 460800
 
+    # Step 2: Write Settings to EEPROM to Make Persistent
+    eeprom_result = roboclaw.WriteNVM(address)
+    print(f"EEPROM Write Result: {eeprom_result}")
+
+    # Step 3: Confirm Configuration Was Saved
     config_status = roboclaw.GetConfig(address)
-    print(f"Roboclaw Config: {config_status}")
 
-    roboclaw.SetM1DefaultAccel(address, 8)  # Smooth acceleration for M1
-    roboclaw.SetM2DefaultAccel(address, 8)  # Smooth acceleration for M2
 
-    # Starting speed Zero
-    roboclaw.ForwardM1(address, 0)
-    roboclaw.ForwardM2(address, 0)
-    print("Motors initialized to 0 speed")
+print(f"Roboclaw Config After EEPROM Save: {config_status}")
 
-    # Start joystick polling thread
-    joystick_thread = threading.Thread(
-        target=poll_joystick, daemon=True, args=(controller,))
-    joystick_thread.start()
+roboclaw.SetM1DefaultAccel(address, 8)  # Smooth acceleration for M1
+roboclaw.SetM2DefaultAccel(address, 8)  # Smooth acceleration for M2
 
-    # Start motor command streaming thread
-    motor_thread = threading.Thread(target=send_motor_command, daemon=True)
-    motor_thread.start()
+# Starting speed Zero
+roboclaw.ForwardM1(address, 0)
+roboclaw.ForwardM2(address, 0)
+print("Motors initialized to 0 speed")
 
-    try:
+# Start joystick polling thread
+joystick_thread = threading.Thread(
+    target=poll_joystick, daemon=True, args=(controller,))
+joystick_thread.start()
+
+ # Start motor command streaming thread
+ motor_thread = threading.Thread(target=send_motor_command, daemon=True)
+  motor_thread.start()
+
+   try:
         while True:
             time.sleep(1)  # Keep the main thread alive
     except KeyboardInterrupt:
