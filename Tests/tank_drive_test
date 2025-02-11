@@ -4,13 +4,6 @@ Joystick y axis. Home position is 128. Joystick down is 0, joystick up is 256
 Roboclaw takes a power input from 0 to 127
 
 
-
-import threading
-from roboclaw_3 import Roboclaw
-from time import sleep
-import evdev
-from evdev import InputDevice, categorize, ecodes
-
 # Addresses for the two Roboclaws
 controller_address_1 = 0x80  # 128 in hex
 controller_address_2 = 0x82  # 130 in hex
@@ -90,6 +83,13 @@ except KeyboardInterrupt:
     roboclaw_1.ForwardM2(controller_address_1, 0)
     print("\nExiting...")
 '''
+
+
+import threading
+from roboclaw_3 import Roboclaw
+from time import sleep
+import evdev
+from evdev import InputDevice, categorize, ecodes
 
 
 # Addresses for the two Roboclaws
