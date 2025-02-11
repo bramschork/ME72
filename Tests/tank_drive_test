@@ -43,10 +43,10 @@ try:
                     joystick_positions['LEFT_Y'] = event.value
                     print(joystick_positions['LEFT_Y'])
                     try:
-                        roboclaw.ForwardM1(address, max(
-                            0, min(127, 128 - joystick_positions['LEFT_Y'])))
+                        roboclaw.ForwardM1(
+                            address, 128 - joystick_positions['LEFT_Y'])
                         print(
-                            f"Sent: {min(127, 128 - joystick_positions['LEFT_Y'])}")
+                            f"Sent: {128 - joystick_positions['LEFT_Y']}")
 
                     except Exception as e:
                         print(e)
