@@ -15,10 +15,6 @@ roboclaw_2 = Roboclaw("/dev/ttyS0", 115200)
 roboclaw_1.Open()
 roboclaw_2.Open()
 
-# Initialize controller
-controller = find_ps4_controller()
-print(f"Connected to {controller.name} at {controller.path}")
-
 # Axis codes for left and right joysticks
 AXIS_CODES = {
     'LEFT_X': ecodes.ABS_X,
@@ -45,6 +41,10 @@ def find_ps4_controller():
             return device
     raise RuntimeError("PS4 controller not found! Ensure it's connected.")
 
+
+# Initialize controller
+controller = find_ps4_controller()
+print(f"Connected to {controller.name} at {controller.path}")
 
 # 5% power (127 * 0.05 ≈ 6)
 power = 6
