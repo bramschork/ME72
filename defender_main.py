@@ -172,7 +172,7 @@ def main():
     motor_thread = threading.Thread(target=send_motor_command, daemon=True)
     motor_thread.start()
 
-   try:
+    try:
         while True:
             time.sleep(1)  # Keep the main thread alive
     except KeyboardInterrupt:
