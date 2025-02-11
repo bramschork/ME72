@@ -23,7 +23,7 @@ right_speed = 0  # Motor 2 speed
 # Ex. 1000 = Takes 1 second to ramp from 0 to 1,000 speed units
 # 5000 = Takes ~0.2 seconds to reach max speed
 # 65,535 = Instant acceleration (max setting)
-acceleration = 5000
+acceleration = 500
 
 # Locate the PS4 controller
 
