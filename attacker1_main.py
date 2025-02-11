@@ -11,6 +11,10 @@ import atexit  # to turn off both motors
 motor_address = 0x80  # 128 - motor_roboclaw address
 shooter_address = 0x82  # 130 - shooter_roboclaw address
 
+# Second up from bottom pins facing right
+servo = Servo(12, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+
+
 # Initialize Roboclaw
 motor_roboclaw = Roboclaw("/dev/ttyS0", 460800)
 shooter_roboclaw = Roboclaw("/dev/ttyS0", 460800)
@@ -60,6 +64,19 @@ def find_ps4_controller():
     raise RuntimeError("PS4 controller not found! Ensure it's connected.")
 
 # Function to continuously send motor commands
+
+
+def trigger_pulled():
+    # Shooting
+    servo.max()
+    roboclaw.ForwardM1(address, 32)
+    roboclaw.ForwardM2(address, 32)
+    sleep(1)
+    servo.min()
+
+    # Back to intake
+    roboclaw.BackwardM1(address, 8)
+    roboclaw.BackwardM2(address, 8)
 
 
 def send_motor_command():
@@ -140,9 +157,9 @@ def poll_joystick(controller):
                         right_speed = value
                     print(f"Joystick Right Y: {value}")
 
-            elif event.type == ecodes.EV_KEY and event.code == ecodes.BTN_TR:  # R2 Trigger
-                print("Right Trigger Pressed!")
-                shooter_active = True  # Activate shooter
+            elif event.type == ecodes.EV_ABS and event.code == ecodes.ABS_RZ:  # R2 Trigger
+                if event.value > 10:  # Adjust threshold as needed
+                    trigger_pulled()
 
         except BlockingIOError:
             time.sleep(0.002)  # Minimize blocking delay
@@ -189,10 +206,9 @@ def main():
     shooter_roboclaw.SetM1DefaultAccel(shooter_address, 8)
     shooter_roboclaw.SetM2DefaultAccel(shooter_address, 8)
 
-    shooter_roboclaw.ForwardM1(shooter_address, 64)
-    shooter_roboclaw.ForwardM2(shooter_address, 64)
-
-    stop_motors()  # Ensure motors are stopped at startup
+    shooter_roboclaw.BackwardM1(shooter_address, 8)
+    shooter_roboclaw.BackwardM2(shooter_address, 648)
+    servo.min()  # Move to 0 degrees
 
     # Start polling threads
     joystick_thread = threading.Thread(
