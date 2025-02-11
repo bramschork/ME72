@@ -65,7 +65,7 @@ def send_motor_command():
                     print("Sent Stop Command to Motor 1")
                     last_left_speed = 0
             elif speed_L < 128:  # Forward
-                roboclaw.ForwaedM2(address, 127 - speed_L)
+                roboclaw.ForwardM2(address, 127 - speed_L)
                 if last_left_speed != speed_L:
                     print(f"Sent Forward Speed to Motor 1: {127 - speed_L}")
                     last_left_speed = speed_L
