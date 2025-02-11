@@ -43,18 +43,12 @@ def set_motor_speed(motor, speed):
 try:
     print("Polling joystick every 20ms. Move the joysticks to control the motors.")
 
-    while True:
-        try:
-            events = controller.read()  # Read joystick events
-        except BlockingIOError:
-            events = []  # No new events, continue without error
-
-        for event in events:
-            if event.type == ecodes.EV_ABS:
-                if event.code == AXIS_CODES['LEFT_Y']:
-                    joystick_positions['LEFT_Y'] = event.value
-                elif event.code == AXIS_CODES['RIGHT_Y']:
-                    joystick_positions['RIGHT_Y'] = event.value
+    for event in controller.read_loop():  # ✅ FIXED: Uses read_loop() instead of read()
+        if event.type == ecodes.EV_ABS:
+            if event.code == AXIS_CODES['LEFT_Y']:
+                joystick_positions['LEFT_Y'] = event.value
+            elif event.code == AXIS_CODES['RIGHT_Y']:
+                joystick_positions['RIGHT_Y'] = event.value
 
         # Convert joystick input to motor speed (Forward only)
         left_speed = max(
