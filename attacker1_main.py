@@ -24,11 +24,14 @@ right_speed = 0  # Motor 2 speed
 # Locate the PS4 controller
 
 
-# Function to stop both motors
 def stop_motors():
     print("\nStopping motors...")
-    roboclaw.ForwardM1(address, 0)
-    roboclaw.ForwardM2(address, 0)
+    roboclaw.ForwardM1(address, 0)  # Force Stop Right Motor (M1)
+    roboclaw.ForwardM2(address, 0)  # Force Stop Left Motor (M2)
+    roboclaw.BackwardM1(address, 0)  # Ensure No Reverse Movement
+    roboclaw.BackwardM2(address, 0)  # Ensure No Reverse Movement
+    roboclaw.SpeedM1(address, 0)  # Final Check
+    roboclaw.SpeedM2(address, 0)  # Final Check
 
 
 # Register the stop_motors function to run on exit
@@ -157,6 +160,7 @@ def main():
             time.sleep(1)  # Keep the main thread alive
     except KeyboardInterrupt:
         print("\nExiting...")
+        stop_motors()  # ✅ Ensure motors stop before exiting
 
 
 main()
