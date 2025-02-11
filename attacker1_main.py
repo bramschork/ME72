@@ -122,6 +122,11 @@ def main():
     roboclaw.SetM1DefaultAccel(address, 128)  # Smooth acceleration for M1
     roboclaw.SetM2DefaultAccel(address, 128)  # Smooth acceleration for M2
 
+    # Starting speed Zero
+    roboclaw.ForwardM1(address, 0)
+    roboclaw.ForwardM2(address, 0)
+    print("Motors initialized to 0 speed")
+
     # Start joystick polling thread
     joystick_thread = threading.Thread(
         target=poll_joystick, daemon=True, args=(controller,))
