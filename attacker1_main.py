@@ -43,8 +43,11 @@ try:
     print("Polling joystick every 20ms. Move the joysticks to control the motors.")
 
     while True:
+        left_speed, right_speed = 0, 0  # Ensure they are always defined
+
         # Read all available joystick events
-        for event in controller.read():
+        events = controller.read()
+        for event in events:
             if event.type == ecodes.EV_ABS:
                 if event.code == AXIS_CODES['LEFT_Y']:
                     joystick_positions['LEFT_Y'] = event.value
@@ -66,7 +69,7 @@ try:
             f"\rLeft Motor: {left_speed} | Right Motor: {right_speed}", end="")
 
         # Wait 20ms before polling again
-        time.sleep(0.1)
+        time.sleep(0.02)
 
 except KeyboardInterrupt:
     # Stop motors on exit
