@@ -55,7 +55,7 @@ def send_motor_command():
                     last_update_time = time.time()  # Reset update time
 
             except Exception as e:
-                pass
+                print(e)
                 # print(f"Error sending motor command: {e}")
             finally:
                 lock.release()  # Release lock to avoid blocking joystick updates
@@ -71,8 +71,8 @@ def poll_joystick(controller):
         try:
             event = controller.read_one()  # Use `read_one()` to avoid `BlockingIOError`
             if event is None:
-                time.sleep(0.01)  # Prevents busy looping when no input
-                print('when am I printing')
+                # Prevents looping when no input / changes on controller
+                time.sleep(0.01)
                 continue
 
             if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
@@ -83,8 +83,8 @@ def poll_joystick(controller):
                             0, min(127, 128 - joystick_positions['LEFT_Y']))
                         # print(f"Joystick Y: {joystick_positions['LEFT_Y']}")
 
-        except BlockingIOError:
-            time.sleep(0.01)  # Retry without spamming CPU
+        except Exception as e:
+            print(e)
 
 # Main function
 
@@ -105,7 +105,7 @@ def main():
 
     try:
         while True:
-            time.sleep(0.1)  # ✅ Keeps the main thread running
+            time.sleep(0.1)  # Keeps the main thread running
     except KeyboardInterrupt:
         roboclaw.ForwardM1(address, 0)
         roboclaw.ForwardM2(address, 0)
