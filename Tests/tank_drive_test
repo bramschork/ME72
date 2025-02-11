@@ -62,8 +62,6 @@ joystick_positions = {"Left Joystick Y": 0, "Right Joystick Y": 0}
 try:
     print("Reading joystick positions. Move the joysticks to see the output.")
 
-    last_print_time = time.time()
-
     for event in controller.read_loop():
         if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
             for axis_name, axis_code in AXIS_CODES.items():
@@ -71,11 +69,10 @@ try:
                     joystick_positions[axis_name] = event.value
 
         # Print every tenth of a second on the same line
-        if time.time() - last_print_time >= 0.1:
-            sys.stdout.write(f"\rLeft Joystick Y: {joystick_positions['Left Joystick Y']}, "
-                             f"Right Joystick Y: {joystick_positions['Right Joystick Y']}   ")
-            sys.stdout.flush()
-            last_print_time = time.time()
+        sleep(0.1)
+        print(
+            f"Left Joystick Y: {joystick_positions['Left Joystick Y']} | Right Joystick Y: {joystick_positions['Right Joystick Y']}")
+
 
 except KeyboardInterrupt:
     print("\nExiting...")
