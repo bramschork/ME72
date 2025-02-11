@@ -56,7 +56,8 @@ def poll_trigger():
             if event.value > 10:  # Adjust threshold as needed
                 trigger_pulled()
         elif event.type == ecodes.EV_KEY and event.code == ecodes.BTN_DPAD_DOWN:
-            stop_motors()
+            if event.value == 1:  # Button Pressed
+                stop_motors()
 
 
 while True:
