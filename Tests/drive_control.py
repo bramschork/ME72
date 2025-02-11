@@ -7,6 +7,7 @@ from roboclaw_3 import Roboclaw
 # Initialize Roboclaw
 roboclaw = Roboclaw("/dev/ttyS0", 460800)
 roboclaw.Open()
+
 address = 0x80  # Roboclaw address
 
 # Joystick axis mappings
@@ -15,7 +16,7 @@ AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
 # Shared variable for joystick position
 joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
 lock = threading.Lock()
-left_speed = 0  # ✅ Global variable for speed
+left_speed = 0  # Global variable for speed
 
 # Locate the PS4 controller
 
