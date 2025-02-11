@@ -28,22 +28,21 @@ def find_ps4_controller():
 
 
 def trigger_pulled():
-    servo.max()  # Move to 0 degrees
-    roboclaw.ForwardM1(address, 10)
-    roboclaw.ForwardM2(address, 10)
-    sleep(1)
-
-    servo.min()  # Move to 180 degre
+    # Shooting
     roboclaw.BackwardM1(address, 10)
     roboclaw.BackwardM2(address, 10)
-
     sleep(1)
+    servo.max()
+    servo.min()
+
+    # Back to intake
+    roboclaw.ForwardM1(address, 10)
+    roboclaw.ForwardM2(address, 10)
 
 # Main loop to poll the trigger
 
 
 def poll_trigger():
-    servo.min()  # Move to 0 degrees
     controller = find_ps4_controller()
     print(f"Connected to {controller.name} at {controller.path}")
 
@@ -51,6 +50,12 @@ def poll_trigger():
         if event.type == ecodes.EV_ABS and event.code == ecodes.ABS_RZ:  # R2 Trigger
             if event.value > 10:  # Adjust threshold as needed
                 trigger_pulled()
+
+
+# Set to intake
+roboclaw.ForwardM1(address, 10)
+roboclaw.ForwardM2(address, 10)
+servo.min()  # Move to 0 degrees
 
 
 while True:
