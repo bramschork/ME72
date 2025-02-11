@@ -67,7 +67,7 @@ def main():
     #     target=send_motor_command, daemon=True, args=(left_speed))
     # motor_thread.start()
     joystick_thread = threading.Thread(
-        target=poll_joystick, daemon=True, args=(left_speed))
+        target=poll_joystick, daemon=True, args=(left_speed,))
     joystick_thread.start()
 
     try:
