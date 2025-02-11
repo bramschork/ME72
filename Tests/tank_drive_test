@@ -78,7 +78,7 @@ try:
                         if right_speed > 128:
                             roboclaw.ForwardM2(controller_address, right_speed)
                         else:
-                            rboclaw.ForwardM2(controller_address, 0)
+                            roboclaw.ForwardM2(controller_address, 0)
 
 
 except KeyboardInterrupt:
