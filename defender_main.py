@@ -73,12 +73,13 @@ def send_motor_command():
                     last_left_speed = 0
             elif speed_L < 128:  # Forward (Now Backward)
                 # Reverse Forward
-                roboclaw.ForwardM1(address, 127 - speed_L)
+                roboclaw.ForwardM1(address, (127 - speed_L)/2)
                 if last_left_speed != speed_L:
                     print(f"Sent Reverse Speed to Motor 1: {127 - speed_L}")
                     last_left_speed = speed_L
             else:  # Reverse (Now Forward)
-                roboclaw.BackwardM1(address, speed_L - 128)  # Reverse Reverse
+                # Reverse Reverse
+                roboclaw.BackwardM1(address, (speed_L - 128)/2)
                 if last_left_speed != speed_L:
                     print(f"Sent Forward Speed to Motor 1: {speed_L - 128}")
                     last_left_speed = speed_L
@@ -90,12 +91,12 @@ def send_motor_command():
                     print("Sent Stop Command to Motor 2")
                     last_right_speed = 0
             elif speed_R < 128:  # Forward
-                roboclaw.ForwardM2(address, 127 - speed_R)
+                roboclaw.BackwardM2(address, (127 - speed_R)/2)
                 if last_right_speed != speed_R:
                     print(f"Sent Forward Speed to Motor 2: {127 - speed_R}")
                     last_right_speed = speed_R
             else:  # Reverse
-                roboclaw.BackwardM2(address, speed_R - 128)
+                roboclaw.ForwardM2(address, (speed_R - 128)/2)
                 if last_right_speed != speed_R:
                     print(f"Sent Reverse Speed to Motor 2: {speed_R - 128}")
                     last_right_speed = speed_R
