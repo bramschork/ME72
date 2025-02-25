@@ -17,3 +17,6 @@ while True:
     sleep(2)
     roboclaw.ForwardM2(address, 0)
     sleep(2)
+
+    error_status = roboclaw.ReadError(address)
+    print(f"Error Status: {error_status}")
