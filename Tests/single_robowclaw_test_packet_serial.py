@@ -1,6 +1,6 @@
 from roboclaw_3 import Roboclaw
 from time import sleep
-address = 0x82  # 128 in hex
+address = 0x80  # 128 in hex
 # controller_address_2 = 0x82  # 128 in hex
 roboclaw = Roboclaw("/dev/ttyS0", 460800)
 roboclaw.Open()
