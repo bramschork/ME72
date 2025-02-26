@@ -17,7 +17,7 @@ shooter_roboclaw = Roboclaw("/dev/ttyS0", 38400)
 
 # Open Serial Ports with Roboclaws
 motor_roboclaw.Open()
-shooter_motor_roboclaw.Open()
+shooter_roboclaw.Open()
 
 motor_address = 0x80  # 128 - motor_motor_roboclaw address
 shooter_address = 0x82  # 130 - shooter_motor_roboclaw address
