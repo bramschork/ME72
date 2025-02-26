@@ -8,7 +8,7 @@ from math import ceil
 import atexit  # to turn off both motors
 
 # Initialize Roboclaw
-roboclaw = Roboclaw("/dev/ttyS0", 460800)
+roboclaw = Roboclaw("/dev/ttyS0", 38400)
 roboclaw.Open()
 
 address = 0x80  # Roboclaw address
