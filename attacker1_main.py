@@ -16,8 +16,8 @@ shooter_address = 0x82  # 130 - shooter_roboclaw address
 
 
 # Initialize Roboclaw
-motor_roboclaw = Roboclaw("/dev/ttyS0", 460800)
-shooter_roboclaw = Roboclaw("/dev/ttyS0", 460800)
+motor_roboclaw = Roboclaw("/dev/ttyS0", 38400)
+shooter_roboclaw = Roboclaw("/dev/ttyS0", 38400)
 
 motor_roboclaw.Open()
 shooter_roboclaw.Open()
