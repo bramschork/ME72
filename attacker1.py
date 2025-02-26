@@ -46,7 +46,7 @@ def stop_motors():
     motor_roboclaw.ForwardM2(motor_address, 0)
 
     shooter_roboclaw.ForwardM1(motor_address, 0)
-    shooter_roboclaw_roboclaw.ForwardM2(motor_address, 0)
+    shooter_roboclaw.ForwardM2(motor_address, 0)
 
 
 def stop_shooter():
