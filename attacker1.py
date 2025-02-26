@@ -2,7 +2,7 @@ import evdev
 from evdev import InputDevice, ecodes
 import time
 import threading
-from motor_roboclaw_3 import Roboclaw
+from roboclaw_3 import Roboclaw
 from math import ceil
 
 # To turn off both motors
@@ -16,7 +16,7 @@ motor_roboclaw = Roboclaw("/dev/ttyS0", 38400)
 shooter_roboclaw = Roboclaw("/dev/ttyS0", 38400)
 
 # Open Serial Ports with Roboclaws
-motor_motor_roboclaw.Open()
+motor_roboclaw.Open()
 shooter_motor_roboclaw.Open()
 
 motor_address = 0x80  # 128 - motor_motor_roboclaw address
