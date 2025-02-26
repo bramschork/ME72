@@ -167,11 +167,14 @@ def poll_joystick(controller):
                             # Run motor backward at speed 64
                             shooter_roboclaw.BackwardM1(shooter_address, 32)
                             shooter_roboclaw.BackwardM2(shooter_address, 32)
+                            intake = True
+                            print('Jogging')
                         else:
                             shooter_roboclaw.BackwardM1(
                                 shooter_address, 0)   # Stop the motor
                             shooter_roboclaw.BackwardM2(
                                 shooter_address, 0)   # Stop the motor
+                            intake = False
 
                 elif event.type == ecodes.EV_ABS and event.code == ecodes.ABS_RZ:  # R2 Trigger
                     if event.value > 10:  # Adjust threshold as needed
