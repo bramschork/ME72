@@ -207,7 +207,7 @@ def poll_joystick(controller):
                 # Print "L1" when the L1 button is pressed
                 if event.code == ecodes.BTN_TL and event.value == 1:
                     shooter_roboclaw.BackwardM1(shooter_address, 16)
-                    shooter_roboclaw.BackwardM1(shooter_address, 16)
+                    shooter_roboclaw.BackwardM2(shooter_address, 16)
                     # print('L1')
 
                     # Start the timer thread with a delay of, for example, 5 seconds
