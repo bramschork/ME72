@@ -180,24 +180,7 @@ def poll_joystick(controller):
                         right_speed = value  # Directly store joystick value
                     print(f"Joystick Right Y: {value}")
 
-                elif event.type == ecodes.EV_ABS and event.code == ecodes.ABS_Z:  # L2 Trigger Jogging
-                    if event.value > 10:  # Adjust threshold as needed
-                        if not intake:
-                            print('INTAKING')
-                            intake = True
-                            # Run motor backward at speed 64
-                            shooter_roboclaw.BackwardM1(shooter_address, 32)
-                            shooter_roboclaw.BackwardM2(shooter_address, 32)
-                            time.sleep(0.5)
-                        else:
-                            print('Stopping Again')
-                            intake = False
-                            shooter_roboclaw.BackwardM1(
-                                shooter_address, 0)   # Stop the motor
-                        shooter_roboclaw.BackwardM2(
-                            shooter_address, 0)   # Stop the motor
-
-                if event.type == ecodes.EV_ABS and event.code == ecodes.ABS_Z:
+                elif event.type == ecodes.EV_ABS and event.code == ecodes.ABS_Z:
                     # Only toggle when the trigger is fully pressed (adjust threshold if needed)
                     if event.value > 200:  # Adjust this threshold as needed
                         # Toggle motor state
