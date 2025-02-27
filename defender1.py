@@ -132,6 +132,8 @@ def poll_joystick(controller):
                         joystick_positions['RIGHT_Y'] = value
                         right_speed = value  # Directly store joystick value
                     print(f"Joystick Right Y: {value}")
+                error_status = shooter_roboclaw.ReadError(shooter_address)
+                print(f"Error Status: {error_status}")
 
         except BlockingIOError:
             time.sleep(0.002)  # Minimize blocking delay
