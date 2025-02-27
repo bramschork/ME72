@@ -115,13 +115,13 @@ class Roboclaw:
         return
 
     def crc_update(self, data):
-        self._crc ^= (data << 8)
-        for _ in range(8):
-            if self._crc & 0x8000:
-                self._crc = (self._crc << 1) ^ 0x1021
+        self._crc = self._crc ^ (data << 8)
+        for bit in range(0, 8):
+            if (self._crc & 0x8000) == 0x8000:
+                self._crc = ((self._crc << 1) ^ 0x1021)
             else:
                 self._crc = self._crc << 1
-        self._crc &= 0xFFFF  # ensure CRC remains 16-bit
+        return
 
     def _sendcommand(self, address, command):
         self.crc_clear()
@@ -143,8 +143,8 @@ class Roboclaw:
 
     def _readbyte(self):
         data = self._port.read(1)
-        if data:
-            val = data[0]
+        if len(data):
+            val = ord(data)
             self.crc_update(val)
             return (1, val)
         return (0, 0)
@@ -297,9 +297,10 @@ class Roboclaw:
 
     def _writechecksum(self):
         self._writeword(self._crc & 0xFFFF)
-        ack = self._readbyte()
-        if ack[0] and ack[1] == 0xFF:
-            return True
+        val = self._readbyte()
+        if (len(val) > 0):
+            if val[0]:
+                return True
         return False
 
     def _write0(self, address, cmd):
@@ -1077,7 +1078,7 @@ class Roboclaw:
     def Open(self):
         try:
             self._port = serial.Serial(
-                port=self.comport, baudrate=self.rate, timeout=0.1, interCharTimeout=self.timeout)
+                port=self.comport, baudrate=self.rate, timeout=1, interCharTimeout=self.timeout)
         except:
             return 0
         return 1
