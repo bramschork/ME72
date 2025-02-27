@@ -2,35 +2,40 @@ import time
 from roboclaw_3 import Roboclaw
 
 # Serial Configuration
-serial_port = "/dev/ttyS0"  # Adjust to your serial port
-baud_rate = 38400             # Match this with the RoboClaw baud rate
+serial_port = "/dev/serial0"  # Use /dev/serial0 for Raspberry Pi
+baudrate = 38400              # Match this with the new baud rate
 address = 0x80                # Default RoboClaw address
 
 # Initialize RoboClaw Object
-roboclaw = Roboclaw(serial_port, baud_rate)
+roboclaw = Roboclaw(serial_port, baudrate)
 
 # Open Serial Connection
-roboclaw.Open()
+if roboclaw.Open():
+    print("Connected to RoboClaw.")
+else:
+    print("Failed to connect to RoboClaw.")
+    exit()
 
 
-def read_eeprom_settings():
-    print("Reading EEPROM settings...")
-    for i in range(255):  # EEPROM addresses range from 0 to 254
-        try:
-            # Read EEPROM address
-            value = roboclaw.ReadEeprom(address, i)
+def set_baud_rate_38400():
+    print("Setting Baud Rate to 38400...")
 
-            # Check if read was successful
-            if value[0]:
-                # Decode bytes to hex format to handle non-ASCII characters
-                byte_value = value[1].to_bytes(1, 'big')
-                print(f"EEPROM Address {i}: {byte_value.hex().upper()}")
-            else:
-                print(f"Failed to read EEPROM address {i}")
-        except Exception as e:
-            print(f"Error reading EEPROM address {i}: {e}")
+    # Baud Rate Code for 38400 is 0x04
+    baud_rate_code = 0x04
+
+    # Set Configuration Command
+    # 0x62 is SETCONFIG command
+    success = roboclaw._write2(address, roboclaw.Cmd.SETCONFIG, baud_rate_code)
+
+    if success:
+        print("Baud rate set to 38400. Saving to EEPROM...")
+        # Save the new baud rate to EEPROM to make it permanent
+        roboclaw.WriteNVM(address)
+        print("Baud rate saved to EEPROM.")
+    else:
+        print("Failed to set baud rate.")
 
 
 if __name__ == "__main__":
-    read_eeprom_settings()
-    roboclaw.Close()
+    set_baud_rate_38400()
+    roboclaw._port.close()
