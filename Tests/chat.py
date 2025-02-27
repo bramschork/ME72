@@ -1,72 +1,149 @@
-#!/usr/bin/env python3
 import serial
-import struct
 import time
 
 
-def crc16(data: bytes) -> int:
-    """
-    Calculate the CRC-16 used by RoboClaw.
-    Uses the polynomial 0x1021.
-    """
-    crc = 0
-    for b in data:
-        crc ^= b << 8
-        for _ in range(8):
-            if crc & 0x8000:
-                crc = (crc << 1) ^ 0x1021
-            else:
-                crc <<= 1
-            crc &= 0xFFFF  # ensure crc remains 16-bit
+def crc_update(crc, data):
+    crc ^= (data << 8)
+    for _ in range(8):
+        if crc & 0x8000:
+            crc = ((crc << 1) ^ 0x1021) & 0xFFFF
+        else:
+            crc = (crc << 1) & 0xFFFF
     return crc
 
 
-def get_version(ser: serial.Serial, address: int = 0x80) -> str:
-    """
-    Sends the GETVERSION command (command code 21) to the RoboClaw and returns the firmware version string.
+def get_version(ser, address):
+    GETVERSION = 21  # command code for GETVERSION
+    ser.reset_input_buffer()
+    crc = 0
+    # Send address and command
+    ser.write(address.to_bytes(1, 'big'))
+    crc = crc_update(crc, address)
+    ser.write(GETVERSION.to_bytes(1, 'big'))
+    crc = crc_update(crc, GETVERSION)
 
-    Parameters:
-      ser      - an open serial.Serial instance
-      address  - the RoboClaw address (default is 0x80; adjust if necessary)
+    # Read up to 48 bytes until a null byte is encountered
+    version = ""
+    for _ in range(48):
+        byte = ser.read(1)
+        if len(byte) == 0:
+            break
+        val = byte[0]
+        crc = crc_update(crc, val)
+        if val == 0:
+            break
+        version += chr(val)
 
-    Returns:
-      A string containing the firmware version info.
-    """
-    command = 21  # GETVERSION command code (0x15 in hex)
-    # Construct the packet: [address, command] followed by a 16-bit CRC.
-    packet = bytes([address, command])
-    crc = crc16(packet)
-    packet += struct.pack('>H', crc)  # pack as big-endian unsigned short
+    # Read the 2-byte checksum from RoboClaw
+    checksum_bytes = ser.read(2)
+    if len(checksum_bytes) != 2:
+        return None
+    received_crc = (checksum_bytes[0] << 8) | checksum_bytes[1]
+    if crc != received_crc:
+        return None  # checksum error
+    return version
 
-    # Write the packet to the serial port
-    ser.write(packet)
-    # Give the RoboClaw a moment to process and reply
-    time.sleep(0.1)
 
-    # Read the response.
-    # The response length can vary; here we read up to 64 bytes.
-    response = ser.read(64)
+def get_main_battery(ser, address):
+    GETMBATT = 24  # command code for GETMBATT
+    ser.reset_input_buffer()
+    crc = 0
+    ser.write(address.to_bytes(1, 'big'))
+    crc = crc_update(crc, address)
+    ser.write(GETMBATT.to_bytes(1, 'big'))
+    crc = crc_update(crc, GETMBATT)
 
-    # Return decoded text, ignoring non-ASCII bytes if needed.
-    return response.decode('ascii', errors='ignore')
+    # Read 2 bytes (battery voltage)
+    data_bytes = ser.read(2)
+    if len(data_bytes) != 2:
+        return None
+    value = (data_bytes[0] << 8) | data_bytes[1]
+    crc = crc_update(crc, data_bytes[0])
+    crc = crc_update(crc, data_bytes[1])
+
+    # Read 2-byte checksum
+    checksum_bytes = ser.read(2)
+    if len(checksum_bytes) != 2:
+        return None
+    received_crc = (checksum_bytes[0] << 8) | checksum_bytes[1]
+    if crc != received_crc:
+        return None  # checksum error
+    return value
+
+
+def get_eeprom(ser, address, ee_addr):
+    READEEPROM = 252  # command code for READ EEPROM
+    ser.reset_input_buffer()
+    crc = 0
+    # Send address, command, and EEPROM address byte
+    ser.write(address.to_bytes(1, 'big'))
+    crc = crc_update(crc, address)
+    ser.write(READEEPROM.to_bytes(1, 'big'))
+    crc = crc_update(crc, READEEPROM)
+    ser.write(ee_addr.to_bytes(1, 'big'))
+    crc = crc_update(crc, ee_addr)
+
+    # Read the 2-byte word stored in EEPROM at ee_addr
+    data_bytes = ser.read(2)
+    if len(data_bytes) != 2:
+        return None
+    value = (data_bytes[0] << 8) | data_bytes[1]
+    crc = crc_update(crc, data_bytes[0])
+    crc = crc_update(crc, data_bytes[1])
+
+    # Read the 2-byte checksum
+    checksum_bytes = ser.read(2)
+    if len(checksum_bytes) != 2:
+        return None
+    received_crc = (checksum_bytes[0] << 8) | checksum_bytes[1]
+    if crc != received_crc:
+        return None  # checksum error
+    return value
+
+
+def print_eeprom_info(ser, address, start=0, count=16):
+    print("EEPROM contents:")
+    for ee_addr in range(start, start + count):
+        value = get_eeprom(ser, address, ee_addr)
+        if value is None:
+            print(f"  EEPROM[0x{ee_addr:02X}]: Error reading data")
+        else:
+            # Print the EEPROM word as a hexadecimal value
+            print(f"  EEPROM[0x{ee_addr:02X}]: 0x{value:04X}")
+        time.sleep(0.01)  # small delay between reads
 
 
 def main():
-    # Set the correct serial port and baud rate for your Raspberry Pi and RoboClaw.
-    port = "/dev/ttyS0"  # e.g., /dev/ttyAMA0 or /dev/serial0 might be used instead
-    baudrate = 38400    # adjust baud rate to match your RoboClaw settings
+    # Use the serial port as requested
+    port = '/dev/serial0'  # use '/dev/serial0'
+    baudrate = 38400
+    address = 0x80         # default RoboClaw address
 
     try:
-        ser = serial.Serial(port, baudrate, timeout=1)
-    except serial.SerialException as e:
-        print(f"Error opening serial port: {e}")
+        ser = serial.Serial(port, baudrate, timeout=0.1)
+    except Exception as e:
+        print("Error opening serial port:", e)
         return
 
-    version = get_version(ser)
-    print("Firmware version:", version.strip())
+    time.sleep(0.1)  # Allow time for the port to settle
+
+    version = get_version(ser, address)
+    if version is None:
+        print("Failed to read firmware version (checksum error or timeout)")
+    else:
+        print("Firmware Version:", version)
+
+    mbatt = get_main_battery(ser, address)
+    if mbatt is None:
+        print("Failed to read main battery voltage (checksum error or timeout)")
+    else:
+        # The raw value may need scaling based on your RoboClaw datasheet
+        print("Main Battery Voltage (raw reading):", mbatt)
+
+    print_eeprom_info(ser, address, start=0, count=16)
 
     ser.close()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
