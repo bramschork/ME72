@@ -1,17 +1,15 @@
+#!/usr/bin/env python3
 import serial
 import time
-import evdev
-from evdev import InputDevice, ecodes, list_devices
-import threading
-import atexit
 from math import ceil
+import threading
 
-# Global lock for serial port access
+# Global serial lock so that only one command is active at a time
 serial_lock = threading.Lock()
 
-###############################
-# Minimal RoboClaw Protocol Functions
-###############################
+#################################
+# Low‐Level Helper Functions
+#################################
 
 
 def crc_update(crc, data):
@@ -24,8 +22,25 @@ def crc_update(crc, data):
     return crc
 
 
+def write0(ser, address, cmd, retries=3):
+    for _ in range(retries):
+        with serial_lock:
+            ser.reset_input_buffer()
+            crc = 0
+            ser.write(address.to_bytes(1, 'big'))
+            crc = crc_update(crc, address)
+            ser.write(cmd.to_bytes(1, 'big'))
+            crc = crc_update(crc, cmd)
+            ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
+            ser.write((crc & 0xFF).to_bytes(1, 'big'))
+            ack = ser.read(1)
+        if len(ack) == 1 and ack[0] != 0:
+            return True
+        time.sleep(0.01)
+    return False
+
+
 def write1(ser, address, cmd, value, retries=3):
-    """Send a command with a single byte argument."""
     for _ in range(retries):
         with serial_lock:
             ser.reset_input_buffer()
@@ -46,7 +61,7 @@ def write1(ser, address, cmd, value, retries=3):
 
 
 def writeS2(ser, address, cmd, value, retries=3):
-    """Send a command with a 2-byte (word) argument."""
+    # Sends a command with a 16-bit value.
     for _ in range(retries):
         with serial_lock:
             ser.reset_input_buffer()
@@ -71,7 +86,7 @@ def writeS2(ser, address, cmd, value, retries=3):
 
 
 def write4(ser, address, cmd, value, retries=3):
-    """Send a command with a 4-byte argument."""
+    # Sends a command with a 4-byte (long) argument.
     for _ in range(retries):
         with serial_lock:
             ser.reset_input_buffer()
@@ -93,8 +108,8 @@ def write4(ser, address, cmd, value, retries=3):
     return False
 
 
-def read4(ser, address, cmd, retries=3):
-    """Send a command (with no extra args) and read a 4-byte signed value."""
+def readN(ser, address, cmd, n, retries=3):
+    # Sends a command and reads back n bytes of data (followed by a 2-byte checksum)
     for _ in range(retries):
         with serial_lock:
             ser.reset_input_buffer()
@@ -103,8 +118,8 @@ def read4(ser, address, cmd, retries=3):
             crc = crc_update(crc, address)
             ser.write(cmd.to_bytes(1, 'big'))
             crc = crc_update(crc, cmd)
-            data = ser.read(4)
-            if len(data) != 4:
+            data = ser.read(n)
+            if len(data) != n:
                 continue
             for byte in data:
                 crc = crc_update(crc, byte)
@@ -113,203 +128,259 @@ def read4(ser, address, cmd, retries=3):
                 continue
         received_crc = (checksum[0] << 8) | checksum[1]
         if crc == received_crc:
-            return int.from_bytes(data, 'big', signed=True)
+            return data
         time.sleep(0.01)
     return None
 
-# Command functions (using RoboClaw command codes)
+#################################
+# Roboclaw Class Definition
+#################################
 
 
-def forwardM1(ser, address, value):
-    return write1(ser, address, 0, value)
+class Roboclaw:
+    # Command enumeration (subset of full commands; add more as needed)
+    class Cmd:
+        M1FORWARD = 0
+        M1BACKWARD = 1
+        M2FORWARD = 4
+        M2BACKWARD = 5
+        GETM1ENC = 16
+        GETM2ENC = 17
+        GETM1SPEED = 18
+        GETM2SPEED = 19
+        RESETENC = 20
+        GETVERSION = 21
+        SETM1ENCCOUNT = 22
+        SETM2ENCCOUNT = 23
+        GETMBATT = 24
+        GETLBATT = 25
+        SETMINLB = 26
+        SETMAXLB = 27
+        M1DUTY = 32
+        M2DUTY = 33
+        MIXEDDUTY = 34
+        M1SPEED = 35
+        M2SPEED = 36
+        MIXEDSPEED = 37
+        SETM1DEFAULTACCEL = 68
+        SETM2DEFAULTACCEL = 69
+        GETERROR = 90
+        # Add additional commands as desired
 
+    def __init__(self, port, baudrate, timeout=0.1, address=0x80):
+        self.port_name = port
+        self.baudrate = baudrate
+        self.timeout = timeout
+        self.address = address
+        self.ser = None
 
-def backwardM1(ser, address, value):
-    return write1(ser, address, 1, value)
-
-
-def forwardM2(ser, address, value):
-    return write1(ser, address, 4, value)
-
-
-def backwardM2(ser, address, value):
-    return write1(ser, address, 5, value)
-
-
-def speedM1(ser, address, value):
-    return write1(ser, address, 35, value)
-
-
-def speedM2(ser, address, value):
-    return write1(ser, address, 36, value)
-
-
-def setM1DefaultAccel(ser, address, accel):
-    return write4(ser, address, 68, accel)
-
-
-def setM2DefaultAccel(ser, address, accel):
-    return write4(ser, address, 69, accel)
-
-
-def readError(ser, address):
-    # GETERROR command code is 90
-    return read4(ser, address, 90)
-
-
-def stop_motors(ser, address):
-    print("\nStopping motors...")
-    forwardM1(ser, address, 0)
-    forwardM2(ser, address, 0)
-    backwardM1(ser, address, 0)
-    backwardM2(ser, address, 0)
-    speedM1(ser, address, 0)
-    speedM2(ser, address, 0)
-
-###############################
-# Joystick and Motor Control Code
-###############################
-
-
-# Dead zone settings (adjust as needed)
-LOWER_DEAD_ZONE = 136
-UPPER_DEAD_ZONE = 120
-
-# Joystick axis mappings
-AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
-joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
-lock = threading.Lock()
-left_speed = 0   # Global variable for Motor 1 (LEFT_Y)
-right_speed = 0  # Global variable for Motor 2 (RIGHT_Y)
-
-
-def find_ps4_controller():
-    for path in list_devices():
-        device = InputDevice(path)
-        if "Wireless Controller" in device.name:
-            return device
-    raise RuntimeError("PS4 controller not found! Ensure it's connected.")
-
-
-def poll_joystick(controller, ser, address):
-    global left_speed, right_speed
-    while True:
-        event = controller.read_one()
-        if event is None:
-            time.sleep(0.002)
-            continue
-        if event.type == ecodes.EV_ABS and event.code in AXIS_CODES.values():
-            value = event.value
-            if event.code == ecodes.ABS_Y:
-                with lock:
-                    joystick_positions['LEFT_Y'] = value
-                    left_speed = value
-                print(f"Joystick Left Y: {value}")
-            elif event.code == ecodes.ABS_RY:
-                with lock:
-                    joystick_positions['RIGHT_Y'] = value
-                    right_speed = value
-                print(f"Joystick Right Y: {value}")
-            # Read error status (wrapped with serial_lock inside readError)
-            err = readError(ser, address)
-            print(f"Error Status: {err}")
-
-
-def send_motor_command(ser, address):
-    global left_speed, right_speed
-    last_left_speed = -1
-    last_right_speed = -1
-    while True:
+    def open(self):
         try:
-            with lock:
-                speed_L = left_speed
-                speed_R = right_speed
-
-            # Motor 1 control (LEFT joystick)
-            if LOWER_DEAD_ZONE <= speed_L <= UPPER_DEAD_ZONE:
-                forwardM1(ser, address, 0)
-                if last_left_speed != 0:
-                    print("Sent Stop Command to Motor 1")
-                    last_left_speed = 0
-            elif speed_L < 128:
-                val = ceil((127 - speed_L) / 2)
-                forwardM1(ser, address, val)
-                if last_left_speed != speed_L:
-                    print(f"Sent Reverse Speed to Motor 1: {val}")
-                    last_left_speed = speed_L
-            else:
-                val = ceil((speed_L - 128) / 2)
-                backwardM1(ser, address, val)
-                if last_left_speed != speed_L:
-                    print(f"Sent Forward Speed to Motor 1: {val}")
-                    last_left_speed = speed_L
-
-            # Motor 2 control (RIGHT joystick)
-            if LOWER_DEAD_ZONE <= speed_R <= UPPER_DEAD_ZONE:
-                forwardM2(ser, address, 0)
-                if last_right_speed != 0:
-                    print("Sent Stop Command to Motor 2")
-                    last_right_speed = 0
-            elif speed_R < 128:
-                val = ceil((127 - speed_R) / 2)
-                backwardM2(ser, address, val)
-                if last_right_speed != speed_R:
-                    print(f"Sent Forward Speed to Motor 2: {val}")
-                    last_right_speed = speed_R
-            else:
-                val = ceil((speed_R - 128) / 2)
-                forwardM2(ser, address, val)
-                if last_right_speed != speed_R:
-                    print(f"Sent Reverse Speed to Motor 2: {val}")
-                    last_right_speed = speed_R
-
+            self.ser = serial.Serial(
+                self.port_name, self.baudrate, timeout=self.timeout)
         except Exception as e:
-            print(f"Error sending motor command: {e}")
-        time.sleep(0.02)
+            print("Error opening serial port:", e)
+            return False
+        time.sleep(0.1)
+        return True
 
-###############################
-# Main Function
-###############################
+    def close(self):
+        if self.ser:
+            self.ser.close()
+            self.ser = None
+
+    # Motor Commands
+    def forwardM1(self, value):
+        return write1(self.ser, self.address, self.Cmd.M1FORWARD, value)
+
+    def backwardM1(self, value):
+        return write1(self.ser, self.address, self.Cmd.M1BACKWARD, value)
+
+    def forwardM2(self, value):
+        return write1(self.ser, self.address, self.Cmd.M2FORWARD, value)
+
+    def backwardM2(self, value):
+        return write1(self.ser, self.address, self.Cmd.M2BACKWARD, value)
+
+    def setM1Duty(self, duty):
+        return writeS2(self.ser, self.address, self.Cmd.M1DUTY, duty)
+
+    def setM2Duty(self, duty):
+        return writeS2(self.ser, self.address, self.Cmd.M2DUTY, duty)
+
+    def setMixedDuty(self, duty1, duty2):
+        # MIXEDDUTY command sends two 16-bit values in sequence.
+        with serial_lock:
+            self.ser.reset_input_buffer()
+            crc = 0
+            self.ser.write(self.address.to_bytes(1, 'big'))
+            crc = crc_update(crc, self.address)
+            self.ser.write(self.Cmd.MIXEDDUTY.to_bytes(1, 'big'))
+            crc = crc_update(crc, self.Cmd.MIXEDDUTY)
+            # Write duty for M1
+            high1 = (duty1 >> 8) & 0xFF
+            low1 = duty1 & 0xFF
+            self.ser.write(high1.to_bytes(1, 'big'))
+            crc = crc_update(crc, high1)
+            self.ser.write(low1.to_bytes(1, 'big'))
+            crc = crc_update(crc, low1)
+            # Write duty for M2
+            high2 = (duty2 >> 8) & 0xFF
+            low2 = duty2 & 0xFF
+            self.ser.write(high2.to_bytes(1, 'big'))
+            crc = crc_update(crc, high2)
+            self.ser.write(low2.to_bytes(1, 'big'))
+            crc = crc_update(crc, low2)
+            self.ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
+            self.ser.write((crc & 0xFF).to_bytes(1, 'big'))
+            ack = self.ser.read(1)
+        return (len(ack) == 1 and ack[0] != 0)
+
+    # Encoder Commands
+    def getM1Encoder(self):
+        data = readN(self.ser, self.address, self.Cmd.GETM1ENC, 4)
+        if data:
+            return int.from_bytes(data, 'big', signed=True)
+        return None
+
+    def getM2Encoder(self):
+        data = readN(self.ser, self.address, self.Cmd.GETM2ENC, 4)
+        if data:
+            return int.from_bytes(data, 'big', signed=True)
+        return None
+
+    def resetEncoders(self):
+        return write0(self.ser, self.address, self.Cmd.RESETENC)
+
+    # Battery Commands
+    def getMainBattery(self):
+        data = readN(self.ser, self.address, self.Cmd.GETMBATT, 2)
+        if data:
+            return int.from_bytes(data, 'big')
+        return None
+
+    def getLogicBattery(self):
+        data = readN(self.ser, self.address, self.Cmd.GETLBATT, 2)
+        if data:
+            return int.from_bytes(data, 'big')
+        return None
+
+    def setMinLogicBattery(self, value):
+        return write1(self.ser, self.address, self.Cmd.SETMINLB, value)
+
+    def setMaxLogicBattery(self, value):
+        return write1(self.ser, self.address, self.Cmd.SETMAXLB, value)
+
+    # Speed Commands (for example purposes, simple serial commands)
+    def setM1Speed(self, speed):
+        return write1(self.ser, self.address, self.Cmd.M1SPEED, speed)
+
+    def setM2Speed(self, speed):
+        return write1(self.ser, self.address, self.Cmd.M2SPEED, speed)
+
+    # Acceleration Commands
+    def setM1DefaultAccel(self, accel):
+        return write4(self.ser, self.address, self.Cmd.SETM1DEFAULTACCEL, accel)
+
+    def setM2DefaultAccel(self, accel):
+        return write4(self.ser, self.address, self.Cmd.SETM2DEFAULTACCEL, accel)
+
+    # Error and Version
+    def getError(self):
+        # GETERROR returns a 4-byte value.
+        data = readN(self.ser, self.address, self.Cmd.GETERROR, 4)
+        if data:
+            return int.from_bytes(data, 'big', signed=True)
+        return None
+
+    def getVersion(self):
+        with serial_lock:
+            self.ser.reset_input_buffer()
+            crc = 0
+            self.ser.write(self.address.to_bytes(1, 'big'))
+            crc = crc_update(crc, self.address)
+            self.ser.write(self.Cmd.GETVERSION.to_bytes(1, 'big'))
+            crc = crc_update(crc, self.Cmd.GETVERSION)
+            version = ""
+            # Read up to 48 bytes (null-terminated string)
+            for _ in range(48):
+                byte = self.ser.read(1)
+                if len(byte) == 0:
+                    break
+                val = byte[0]
+                crc = crc_update(crc, val)
+                if val == 0:
+                    break
+                version += chr(val)
+            checksum = self.ser.read(2)
+        if len(checksum) == 2:
+            received_crc = (checksum[0] << 8) | checksum[1]
+            if crc == received_crc:
+                return version
+        return None
+
+#################################
+# Example Usage (Main Function)
+#################################
 
 
 def main():
+    # Use /dev/serial0 as requested.
     port = '/dev/serial0'
     baudrate = 38400
-    address = 0x80
-    try:
-        ser = serial.Serial(port, baudrate, timeout=0.1)
-    except Exception as e:
-        print("Error opening serial port:", e)
+    address = 0x80  # Default address
+
+    rc = Roboclaw(port, baudrate, timeout=0.1, address=address)
+    if not rc.open():
+        print("Failed to open serial port.")
         return
 
-    time.sleep(0.1)
-    setM1DefaultAccel(ser, address, 8)
-    setM2DefaultAccel(ser, address, 8)
-    forwardM1(ser, address, 0)
-    forwardM2(ser, address, 0)
-    print("Motors initialized to 0 speed")
+    print("Roboclaw opened successfully.")
+    print("Firmware Version:", rc.getVersion())
+    print("Main Battery Voltage (raw):", rc.getMainBattery())
+    print("Logic Battery Voltage (raw):", rc.getLogicBattery())
 
-    controller = find_ps4_controller()
-    controller.grab()
-    print(f"Connected to {controller.name} at {controller.path}")
+    # Set default acceleration for both motors
+    if rc.setM1DefaultAccel(8):
+        print("Motor 1 acceleration set.")
+    else:
+        print("Failed to set Motor 1 acceleration.")
+    if rc.setM2DefaultAccel(8):
+        print("Motor 2 acceleration set.")
+    else:
+        print("Failed to set Motor 2 acceleration.")
 
-    # Start threads for joystick polling and motor command sending
-    joystick_thread = threading.Thread(
-        target=poll_joystick, args=(controller, ser, address), daemon=True)
-    joystick_thread.start()
+    # Demo: Power cycle motors (on for 1 second, off for 1 second, 10 cycles)
+    cycles = 10
+    on_duty = 1000  # Example duty value for "on"
+    off_duty = 0
 
-    motor_thread = threading.Thread(
-        target=send_motor_command, args=(ser, address), daemon=True)
-    motor_thread.start()
+    for i in range(cycles):
+        print(f"Cycle {i+1}: Turning motors ON")
+        if not rc.setM1Duty(on_duty):
+            print("Failed to set Motor 1 duty")
+        if not rc.setM2Duty(on_duty):
+            print("Failed to set Motor 2 duty")
+        time.sleep(1)
+        print(f"Cycle {i+1}: Turning motors OFF")
+        if not rc.setM1Duty(off_duty):
+            print("Failed to set Motor 1 duty")
+        if not rc.setM2Duty(off_duty):
+            print("Failed to set Motor 2 duty")
+        time.sleep(1)
 
-    atexit.register(stop_motors, ser, address)
+    # Read encoder values (if connected and running)
+    enc1 = rc.getM1Encoder()
+    enc2 = rc.getM2Encoder()
+    print("Encoder Motor 1:", enc1)
+    print("Encoder Motor 2:", enc2)
 
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("\nExiting...")
-        stop_motors(ser, address)
+    # Read error status
+    err = rc.getError()
+    print("Error Status:", err)
+
+    rc.close()
+    print("Roboclaw closed.")
 
 
 if __name__ == '__main__':
