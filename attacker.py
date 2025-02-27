@@ -25,6 +25,24 @@ shooter_address = 0x82  # 130 - shooter_motor_roboclaw address
 LOWER_DEAD_ZONE = 134
 UPPER_DEAD_ZONE = 116
 
+# Button codes for L1, L2, R1, and R2
+BUTTON_CODES = {
+    'L1': ecodes.BTN_TL,
+    'R1': ecodes.BTN_TR,
+}
+
+# Trigger codes for L2 and R2 (Analog triggers)
+TRIGGER_CODES = {
+    'L2': ecodes.ABS_Z,
+    'R2': ecodes.ABS_RZ,
+}
+
+button_states = {
+    'L1': False,
+    'R1': False,
+    'L2': False,
+    'R,
+}
 
 # Joystick axis mappings
 AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
@@ -136,6 +154,7 @@ def send_motor_command():
 
 
 intake = False
+motor_running = False
 
 
 def poll_joystick(controller):
@@ -178,20 +197,30 @@ def poll_joystick(controller):
                         shooter_roboclaw.BackwardM2(
                             shooter_address, 0)   # Stop the motor
 
-                elif event.type == ecodes.EV_ABS and event.code == ecodes.ABS_RZ:  # R2 Trigger
-                    if event.value > 10:  # Adjust threshold as needed
-                        shooter_roboclaw.ForwardM1(shooter_address, 64)
-                        shooter_roboclaw.ForwardM2(shooter_address, 64)
+                if event.type == ecodes.EV_ABS and event.code == ecodes.ABS_Z:
+                    # Only toggle when the trigger is fully pressed (adjust threshold if needed)
+                    if event.value > 200:  # Adjust this threshold as needed
+                        # Toggle motor state
+                        motor_running = not motor_running
 
-                        servo.max()  # Move to 0 degrees
+                        # Set motor speed based on state
+                        if motor_running:
+                            shooter_roboclaw.ForwardM1(shooter_address, 64)
+                            shooter_roboclaw.ForwardM2(shooter_address, 64)
+                            print("Motors running at speed 64")
+                        else:
+                            shooter_roboclaw.ForwardM1(shooter_address, 0)
+                            shooter_roboclaw.ForwardM2(shooter_address, 0)
+                            print("Motors stopped")
 
-                        # Cancel previous timer if it exists
-                        if stop_timer is not None:
-                            stop_timer.cancel()
-
-                        # Start a new timer to stop the motors after 5 seconds
-                        stop_timer = threading.Timer(1.5, stop_motors)
-                        stop_timer.start()
+                        # Debounce: Wait for trigger release to avoid rapid toggling
+                        while event.value > 200:
+                            events = controller.read_loop()
+                            for e in events:
+                                if e.type == ecodes.EV_ABS and e.code == ecodes.ABS_Z:
+                                    event = e
+                                    shooter_roboclaw.ForwardM2(
+                                        shooter_address, 64)
 
         except BlockingIOError:
             time.sleep(0.002)  # Minimize blocking delay

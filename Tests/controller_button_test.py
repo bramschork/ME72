@@ -38,14 +38,6 @@ TRIGGER_CODES = {
     'R2': ecodes.ABS_RZ,
 }
 
-# Initialize joystick positions and button states
-joystick_positions = {
-    'LEFT_X': 0,
-    'LEFT_Y': 0,
-    'RIGHT_X': 0,
-    'RIGHT_Y': 0,
-}
-
 button_states = {
     'L1': False,
     'R1': False,
