@@ -66,10 +66,10 @@ def main():
     print("Firmware version:", version.strip())
 
     version = get_version(ser, 24)
-    print("Battery version:", version.strip())
+    # print("Battery version:", version.strip())
 
-    version = get_version(ser, 94)
-    print("EEPROM:", version.strip())
+    # version = get_version(ser, 94)
+    # print("EEPROM:", version.strip())
 
     ser.close()
 
