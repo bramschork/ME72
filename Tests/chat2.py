@@ -21,66 +21,40 @@ def crc16(data: bytes) -> int:
     return crc
 
 
-def get_version(ser: serial.Serial, address: int = 0x80) -> str:
+def get_version(ser: serial.Serial, address: int = 0x80, command: int = 21) -> str:
     """
     Sends the GETVERSION command (command code 21) to the RoboClaw and returns the firmware version string.
+
+    Parameters:
+      ser      - an open serial.Serial instance
+      address  - the RoboClaw address (default is 0x80; adjust if necessary)
+
+    Returns:
+      A string containing the firmware version info.
     """
-    command = 21  # GETVERSION command code
+    # command = 21  # GETVERSION command code (0x15 in hex)
+    # Construct the packet: [address, command] followed by a 16-bit CRC.
     packet = bytes([address, command])
     crc = crc16(packet)
-    packet += struct.pack('>H', crc)
+    packet += struct.pack('>H', crc)  # pack as big-endian unsigned short
 
-    # Flush any leftover input before sending a new command.
-    ser.reset_input_buffer()
-
+    # Write the packet to the serial port
     ser.write(packet)
+    # Give the RoboClaw a moment to process and reply
     time.sleep(0.1)
 
+    # Read the response.
+    # The response length can vary; here we read up to 64 bytes.
     response = ser.read(64)
+
+    # Return decoded text, ignoring non-ASCII bytes if needed.
     return response.decode('ascii', errors='ignore')
 
 
-def read_eeprom_settings(ser: serial.Serial, address: int = 0x80) -> tuple:
-    """
-    Sends the Read Settings from EEPROM command (command code 95) to the RoboClaw and returns the settings.
-
-    According to the documentation:
-      Send: [Address, 95]
-      Receive: [Enc1Mode, Enc2Mode, CRC(2 bytes)]
-
-    Raises:
-      Exception if the response is incomplete or the CRC check fails.
-    """
-    command = 95  # EEPROM settings command
-    # Flush input buffer to remove any previous data.
-    ser.reset_input_buffer()
-
-    packet = bytes([address, command])
-    ser.write(packet)
-    # Increase delay in case the response is slower.
-    time.sleep(0.2)
-
-    response = ser.read(4)
-    if len(response) != 4:
-        # For debugging: print out any data that was received.
-        print(f"Debug: Received raw data: {response}")
-        raise Exception("Incomplete response from EEPROM settings command.")
-
-    enc1_mode, enc2_mode = response[0], response[1]
-    received_crc = struct.unpack('>H', response[2:])[0]
-    calculated_crc = crc16(response[:2])
-
-    if received_crc != calculated_crc:
-        raise Exception(
-            f"CRC mismatch: received {received_crc:04X}, calculated {calculated_crc:04X}")
-
-    return enc1_mode, enc2_mode
-
-
 def main():
-    # Adjust if necessary (e.g., /dev/ttyAMA0 or /dev/serial0)
-    port = "/dev/ttyS0"
-    baudrate = 38400    # Must match your RoboClaw settings
+    # Set the correct serial port and baud rate for your Raspberry Pi and RoboClaw.
+    port = "/dev/ttyS0"  # e.g., /dev/ttyAMA0 or /dev/serial0 might be used instead
+    baudrate = 38400    # adjust baud rate to match your RoboClaw settings
 
     try:
         ser = serial.Serial(port, baudrate, timeout=1)
@@ -88,19 +62,14 @@ def main():
         print(f"Error opening serial port: {e}")
         return
 
-    try:
-        version = get_version(ser)
-        print("Firmware version:", version.strip())
-    except Exception as e:
-        print("Error getting version:", e)
+    version = get_version(ser, 21)
+    print("Firmware version:", version.strip())
 
-    try:
-        enc1_mode, enc2_mode = read_eeprom_settings(ser)
-        print("EEPROM Settings:")
-        print(f"  Encoder 1 Mode: {enc1_mode}")
-        print(f"  Encoder 2 Mode: {enc2_mode}")
-    except Exception as e:
-        print("Error reading EEPROM settings:", e)
+    version = get_version(ser, 24)
+    print("Battery version:", version.strip())
+
+    version = get_version(ser, 94)
+    print("EEPROM:", version.strip())
 
     ser.close()
 
