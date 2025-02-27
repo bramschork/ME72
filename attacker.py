@@ -25,25 +25,6 @@ shooter_address = 0x82  # 130 - shooter_motor_roboclaw address
 LOWER_DEAD_ZONE = 134
 UPPER_DEAD_ZONE = 116
 
-# Button codes for L1, L2, R1, and R2
-BUTTON_CODES = {
-    'L1': ecodes.BTN_TL,
-    'R1': ecodes.BTN_TR,
-}
-
-# Trigger codes for L2 and R2 (Analog triggers)
-TRIGGER_CODES = {
-    'L2': ecodes.ABS_Z,
-    'R2': ecodes.ABS_RZ,
-}
-
-button_states = {
-    'L1': False,
-    'R1': False,
-    'L2': False,
-    'R,
-}
-
 # Joystick axis mappings
 AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
 
