@@ -46,7 +46,7 @@ def writeS2(ser, address, cmd, value, retries=3):
 
 
 def set_motor_duty(ser, address, motor, duty):
-    # For RoboClaw, motor 1 duty command is 32 and motor 2 is 33.
+    # For RoboClaw, motor 1 duty command is 32 and motor 2 duty command is 33.
     if motor == 1:
         cmd = 32
     elif motor == 2:
@@ -78,7 +78,6 @@ def map_joystick_to_duty(joy_value):
         return 0
     # Map [128, 256] linearly to [0, 127]
     duty = int((joy_value - 128) * 127 / 128)
-    # Clamp to valid range
     return max(0, min(duty, 127))
 
 # --- Main loop combining controller and motor control ---
@@ -126,15 +125,19 @@ def main():
                 right_duty = map_joystick_to_duty(
                     joystick_positions['RIGHT_Y'])
 
-                # Debug print: show raw values and mapped duty values.
-                print(f"Left Joystick: {joystick_positions['LEFT_Y']} -> Duty: {left_duty} | "
-                      f"Right Joystick: {joystick_positions['RIGHT_Y']} -> Duty: {right_duty}")
+                # Debug prints: show raw and mapped values.
+                print(
+                    f"Left Joystick Raw: {joystick_positions['LEFT_Y']} -> Mapped Duty: {left_duty}")
+                print(
+                    f"Right Joystick Raw: {joystick_positions['RIGHT_Y']} -> Mapped Duty: {right_duty}")
 
                 # Send commands to motors.
-                if not set_motor_duty(ser, address, 1, left_duty):
-                    print("Failed to update Motor 1 duty")
-                if not set_motor_duty(ser, address, 2, right_duty):
-                    print("Failed to update Motor 2 duty")
+                left_success = set_motor_duty(ser, address, 1, left_duty)
+                right_success = set_motor_duty(ser, address, 2, right_duty)
+                print(
+                    f"Sent left motor duty {left_duty}, success: {left_success}")
+                print(
+                    f"Sent right motor duty {right_duty}, success: {right_success}")
     except KeyboardInterrupt:
         print("\nExiting...")
     finally:
