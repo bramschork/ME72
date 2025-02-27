@@ -9,7 +9,7 @@ address = 0x80  # Roboclaw address
 
 
 def ramp_motor_speed():
-    response = roboclaw.ReadEeprom(address, speed)
+    response = roboclaw.ReadEeprom(address, 38400)
     print(response)
 
 
