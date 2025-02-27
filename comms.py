@@ -25,11 +25,8 @@ def set_baud_rate_38400():
 
     # Set Configuration Command
     # 0x62 is SETCONFIG command
-    try:
-        success = roboclaw._write2(
-            address, roboclaw.Cmd.SETCONFIG, baud_rate_code)
-    except Exception as e:
-        print(e)
+    success = roboclaw._write2(
+        address, roboclaw.Cmd.SETCONFIG, baud_rate_code)
 
     if success:
         print("Baud rate set to 38400. Saving to EEPROM...")
