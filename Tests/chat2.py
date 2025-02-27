@@ -32,7 +32,7 @@ def get_version(ser: serial.Serial, address: int = 0x80, command: int = 21) -> s
     Returns:
       A string containing the firmware version info.
     """
-    command = 21  # GETVERSION command code (0x15 in hex)
+    # command = 21  # GETVERSION command code (0x15 in hex)
     # Construct the packet: [address, command] followed by a 16-bit CRC.
     packet = bytes([address, command])
     crc = crc16(packet)
