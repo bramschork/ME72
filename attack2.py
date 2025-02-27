@@ -62,7 +62,6 @@ def stop_motors():
 def stop_shooter():
     shooter_roboclaw.ForwardM1(shooter_address, 0)
     shooter_roboclaw.ForwardM2(shooter_address, 0)
-    servo.min()
     print("Motors stopped")
 
 
