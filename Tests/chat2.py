@@ -46,20 +46,6 @@ def writeS2(ser, address, cmd, value, retries=3):
     return False
 
 
-def stop_motors():
-    print("\nStopping motors...")
-    roboclaw.ForwardM1(address, 0)  # Force Stop Right Motor (M1)
-    roboclaw.ForwardM2(address, 0)  # Force Stop Left Motor (M2)
-    roboclaw.BackwardM1(address, 0)  # Ensure No Reverse Movement
-    roboclaw.BackwardM2(address, 0)  # Ensure No Reverse Movement
-    roboclaw.SpeedM1(address, 0)  # Final Check
-    roboclaw.SpeedM2(address, 0)  # Final Check
-
-
-# Register the stop_motors function to run on exit
-atexit.register(stop_motors)
-
-
 def find_ps4_controller():
     for path in evdev.list_devices():
         device = InputDevice(path)
@@ -101,8 +87,6 @@ def poll_joystick(controller):
                         joystick_positions['RIGHT_Y'] = value
                         right_speed = value  # Directly store joystick value
                     print(f"Joystick Right Y: {value}")
-                error_status = roboclaw.ReadError(address)
-                print(f"Error Status: {error_status}")
 
         except BlockingIOError:
             time.sleep(0.002)  # Minimize blocking delay
@@ -158,9 +142,6 @@ if __name__ == '__main__':
     controller = find_ps4_controller()
     controller.grab()
     print(f"Connected to {controller.name} at {controller.path}")
-
-    # roboclaw.SetM1DefaultAccel(address, 8)  # Smooth acceleration for M1
-    # roboclaw.SetM2DefaultAccel(address, 8)  # Smooth acceleration for M2
 
     # Start joystick polling thread
     joystick_thread = threading.Thread(
