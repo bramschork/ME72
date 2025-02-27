@@ -1,3 +1,6 @@
+# ATTACK 2 BUTTONS WORKING
+
+
 import evdev
 from evdev import InputDevice, ecodes
 import time
