@@ -74,6 +74,7 @@ def process_trigger_event(event, threshold=200):
         # Reset toggle flag when trigger is released
         toggle_in_progress = False
         print('THRESHOLD')
+        event.value
         print(threshold)
 ############################################################
 ############################################################
