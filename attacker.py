@@ -22,8 +22,8 @@ shooter_roboclaw.Open()
 motor_address = 0x80  # 128 - motor_motor_roboclaw address
 shooter_address = 0x82  # 130 - shooter_motor_roboclaw address
 
-LOWER_DEAD_ZONE = 136
-UPPER_DEAD_ZONE = 120
+LOWER_DEAD_ZONE = 134
+UPPER_DEAD_ZONE = 116
 
 
 # Joystick axis mappings
@@ -163,18 +163,18 @@ def poll_joystick(controller):
 
                 elif event.type == ecodes.EV_ABS and event.code == ecodes.ABS_Z:  # L2 Trigger Jogging
                     if event.value > 10:  # Adjust threshold as needed
-                        if not intake:  # if currently intaking
+                        if not intake:
+                            intake = True
                             # Run motor backward at speed 64
                             shooter_roboclaw.BackwardM1(shooter_address, 32)
                             shooter_roboclaw.BackwardM2(shooter_address, 32)
-                            intake = True
-                            print('Jogging')
+                            time.sleep(0.5)
                         else:
+                            intake = False
                             shooter_roboclaw.BackwardM1(
                                 shooter_address, 0)   # Stop the motor
-                            shooter_roboclaw.BackwardM2(
-                                shooter_address, 0)   # Stop the motor
-                            intake = False
+                        shooter_roboclaw.BackwardM2(
+                            shooter_address, 0)   # Stop the motor
 
                 elif event.type == ecodes.EV_ABS and event.code == ecodes.ABS_RZ:  # R2 Trigger
                     if event.value > 10:  # Adjust threshold as needed
