@@ -21,18 +21,21 @@ def set_baud_rate_38400():
     print("Setting Baud Rate to 38400...")
 
     # Baud Rate Code for 38400 is 0x04
-    baud_rate_code = 0x0060
+    baud_rate_code = 0x04
 
     # Set Configuration Command
     # 0x62 is SETCONFIG command
-    success = roboclaw._write2(address, roboclaw.Cmd.SETCONFIG, baud_rate_code)
+    try:
+        success = roboclaw._write2(
+            address, roboclaw.Cmd.SETCONFIG, baud_rate_code)
+    except Exception as e:
+        print(e)
 
     if success:
         print("Baud rate set to 38400. Saving to EEPROM...")
         # Save the new baud rate to EEPROM to make it permanent
         roboclaw.WriteNVM(address)
         print("Baud rate saved to EEPROM.")
-
     else:
         print("Failed to set baud rate.")
 
