@@ -12,112 +12,50 @@ def crc_update(crc, data):
     return crc
 
 
-def get_version(ser, address):
-    GETVERSION = 21  # command code for GETVERSION
-    ser.reset_input_buffer()
-    crc = 0
-    # Send address and command
-    ser.write(address.to_bytes(1, 'big'))
-    crc = crc_update(crc, address)
-    ser.write(GETVERSION.to_bytes(1, 'big'))
-    crc = crc_update(crc, GETVERSION)
-
-    # Read up to 48 bytes until a null byte is encountered
-    version = ""
-    for _ in range(48):
-        byte = ser.read(1)
-        if len(byte) == 0:
-            break
-        val = byte[0]
-        crc = crc_update(crc, val)
-        if val == 0:
-            break
-        version += chr(val)
-
-    # Read the 2-byte checksum from RoboClaw
-    checksum_bytes = ser.read(2)
-    if len(checksum_bytes) != 2:
-        return None
-    received_crc = (checksum_bytes[0] << 8) | checksum_bytes[1]
-    if crc != received_crc:
-        return None  # checksum error
-    return version
+def writeS2(ser, address, cmd, value, retries=3):
+    # This function sends a command with a 16-bit value (using a “writesword” style command)
+    for _ in range(retries):
+        ser.reset_input_buffer()
+        crc = 0
+        # Send address
+        ser.write(address.to_bytes(1, 'big'))
+        crc = crc_update(crc, address)
+        # Send command
+        ser.write(cmd.to_bytes(1, 'big'))
+        crc = crc_update(crc, cmd)
+        # Send value as a 2-byte word (big-endian)
+        high = (value >> 8) & 0xFF
+        low = value & 0xFF
+        ser.write(high.to_bytes(1, 'big'))
+        crc = crc_update(crc, high)
+        ser.write(low.to_bytes(1, 'big'))
+        crc = crc_update(crc, low)
+        # Send the calculated checksum (2 bytes)
+        ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
+        ser.write((crc & 0xFF).to_bytes(1, 'big'))
+        # Read one acknowledgment byte; nonzero indicates success.
+        ack = ser.read(1)
+        if len(ack) == 1 and ack[0] != 0:
+            return True
+        time.sleep(0.01)
+    return False
 
 
-def get_main_battery(ser, address):
-    GETMBATT = 24  # command code for GETMBATT
-    ser.reset_input_buffer()
-    crc = 0
-    ser.write(address.to_bytes(1, 'big'))
-    crc = crc_update(crc, address)
-    ser.write(GETMBATT.to_bytes(1, 'big'))
-    crc = crc_update(crc, GETMBATT)
-
-    # Read 2 bytes (battery voltage)
-    data_bytes = ser.read(2)
-    if len(data_bytes) != 2:
-        return None
-    value = (data_bytes[0] << 8) | data_bytes[1]
-    crc = crc_update(crc, data_bytes[0])
-    crc = crc_update(crc, data_bytes[1])
-
-    # Read 2-byte checksum
-    checksum_bytes = ser.read(2)
-    if len(checksum_bytes) != 2:
-        return None
-    received_crc = (checksum_bytes[0] << 8) | checksum_bytes[1]
-    if crc != received_crc:
-        return None  # checksum error
-    return value
-
-
-def get_eeprom(ser, address, ee_addr):
-    READEEPROM = 252  # command code for READ EEPROM
-    ser.reset_input_buffer()
-    crc = 0
-    # Send address, command, and EEPROM address byte
-    ser.write(address.to_bytes(1, 'big'))
-    crc = crc_update(crc, address)
-    ser.write(READEEPROM.to_bytes(1, 'big'))
-    crc = crc_update(crc, READEEPROM)
-    ser.write(ee_addr.to_bytes(1, 'big'))
-    crc = crc_update(crc, ee_addr)
-
-    # Read the 2-byte word stored in EEPROM at ee_addr
-    data_bytes = ser.read(2)
-    if len(data_bytes) != 2:
-        return None
-    value = (data_bytes[0] << 8) | data_bytes[1]
-    crc = crc_update(crc, data_bytes[0])
-    crc = crc_update(crc, data_bytes[1])
-
-    # Read the 2-byte checksum
-    checksum_bytes = ser.read(2)
-    if len(checksum_bytes) != 2:
-        return None
-    received_crc = (checksum_bytes[0] << 8) | checksum_bytes[1]
-    if crc != received_crc:
-        return None  # checksum error
-    return value
-
-
-def print_eeprom_info(ser, address, start=0, count=16):
-    print("EEPROM contents:")
-    for ee_addr in range(start, start + count):
-        value = get_eeprom(ser, address, ee_addr)
-        if value is None:
-            print(f"  EEPROM[0x{ee_addr:02X}]: Error reading data")
-        else:
-            # Print the EEPROM word as a hexadecimal value
-            print(f"  EEPROM[0x{ee_addr:02X}]: 0x{value:04X}")
-        time.sleep(0.01)  # small delay between reads
+def set_motor_duty(ser, address, motor, duty):
+    # For RoboClaw, motor 1 duty command is 32 and motor 2 duty command is 33.
+    if motor == 1:
+        cmd = 32
+    elif motor == 2:
+        cmd = 33
+    else:
+        raise ValueError("Motor must be 1 or 2")
+    return writeS2(ser, address, cmd, duty)
 
 
 def main():
-    # Use the serial port as requested
-    port = '/dev/serial0'  # use '/dev/serial0'
+    port = '/dev/serial0'   # Use /dev/serial0 as requested.
     baudrate = 38400
-    address = 0x80         # default RoboClaw address
+    address = 0x80          # Default RoboClaw address.
 
     try:
         ser = serial.Serial(port, baudrate, timeout=0.1)
@@ -125,22 +63,30 @@ def main():
         print("Error opening serial port:", e)
         return
 
-    time.sleep(0.1)  # Allow time for the port to settle
+    # Allow port to settle
+    time.sleep(0.1)
 
-    version = get_version(ser, address)
-    if version is None:
-        print("Failed to read firmware version (checksum error or timeout)")
-    else:
-        print("Firmware Version:", version)
+    cycles = 10      # Number of on/off cycles; adjust as needed.
+    # Example duty value for "on" (adjust based on your motor specs).
+    on_duty = 1000
+    off_duty = 0     # Duty value to turn the motor off.
 
-    mbatt = get_main_battery(ser, address)
-    if mbatt is None:
-        print("Failed to read main battery voltage (checksum error or timeout)")
-    else:
-        # The raw value may need scaling based on your RoboClaw datasheet
-        print("Main Battery Voltage (raw reading):", mbatt)
+    for i in range(cycles):
+        print(f"Cycle {i+1}: Turning motors ON")
+        # Set both motors to on_duty
+        if not set_motor_duty(ser, address, 1, on_duty):
+            print("Failed to set Motor 1 duty")
+        if not set_motor_duty(ser, address, 2, on_duty):
+            print("Failed to set Motor 2 duty")
+        time.sleep(1)  # Motors on for 1 second
 
-    print_eeprom_info(ser, address, start=0, count=16)
+        print(f"Cycle {i+1}: Turning motors OFF")
+        # Set both motors to off_duty (stopping the motors)
+        if not set_motor_duty(ser, address, 1, off_duty):
+            print("Failed to set Motor 1 duty")
+        if not set_motor_duty(ser, address, 2, off_duty):
+            print("Failed to set Motor 2 duty")
+        time.sleep(1)  # Motors off for 1 second
 
     ser.close()
 
