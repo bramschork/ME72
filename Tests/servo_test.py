@@ -9,5 +9,5 @@ while True:
     servo.value = -1
     sleep(1)
     # servo.max()  # Move to 180 degrees
-    servo.value = 1
+    # servo.value = 1
     sleep(1)
