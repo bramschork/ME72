@@ -1,29 +1,30 @@
 import time
-from roboclaw_3 import Roboclaw
+from roboclaw import Roboclaw
 
-# Windows COM port example: "COM3"
-# Linux tty port example: "/dev/ttyACM0"
-# Replace with your actual port
-port = "/dev/ttyS0"
-baud_rate = 38400
+# Serial Configuration
+serial_port = "/dev/serial0"  # Adjust to your serial port
+baud_rate = 38400             # Match this with the RoboClaw baud rate
+address = 0x80                # Default RoboClaw address
 
-# Create RoboClaw object
-roboclaw = Roboclaw(port, baud_rate)
+# Initialize RoboClaw Object
+roboclaw = Roboclaw(serial_port, baud_rate)
 
-# Open serial port
+# Open Serial Connection
 roboclaw.Open()
-
-# RoboClaw device address
-address = 0x80  # Default address; change if different
 
 
 def read_eeprom_settings():
     print("Reading EEPROM settings...")
     for i in range(255):  # EEPROM addresses range from 0 to 254
         try:
+            # Read EEPROM address
             value = roboclaw.ReadEeprom(address, i)
-            if value[0]:  # If read is successful
-                print(f"EEPROM Address {i}: {value[1]}")
+
+            # Check if read was successful
+            if value[0]:
+                # Decode bytes to hex format to handle non-ASCII characters
+                byte_value = value[1].to_bytes(1, 'big')
+                print(f"EEPROM Address {i}: {byte_value.hex().upper()}")
             else:
                 print(f"Failed to read EEPROM address {i}")
         except Exception as e:
