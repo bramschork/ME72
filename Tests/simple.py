@@ -38,7 +38,7 @@ def cycle_motors_and_check_ack():
     print(f"Error Status: {error_status}")
 
     # Wait for 2 seconds
-    time.sleep(2)
+    time.sleep(0.5)
 
     # Stop Motors
     print("Stopping Motors...")
@@ -47,5 +47,9 @@ def cycle_motors_and_check_ack():
 
 
 if __name__ == "__main__":
-    cycle_motors_and_check_ack()
+    i = 0
+    while i <= 20:
+        cycle_motors_and_check_ack()
+        i += 1
+        print(i)
     roboclaw._port.close()
