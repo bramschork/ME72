@@ -21,7 +21,7 @@ def set_baud_rate_38400():
     print("Setting Baud Rate to 38400...")
 
     # Baud Rate Code for 38400 is 0x04
-    baud_rate_code = 0x04
+    baud_rate_code = 0x0060
 
     # Set Configuration Command
     # 0x62 is SETCONFIG command
