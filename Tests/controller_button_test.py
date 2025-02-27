@@ -57,17 +57,17 @@ button_states = {
 try:
     print("Reading joystick positions and button presses...")
     for event in controller.read_loop():
-            # Triggers (Analog input)
-            if event.code in TRIGGER_CODES.values():
-                for trigger_name, trigger_code in TRIGGER_CODES.items():
-                    if event.code == trigger_code:
-                        pressed = event.value > 0
-                        if button_states[trigger_name] != pressed:
-                            button_states[trigger_name] = pressed
-                            if pressed:
-                                print(f"{trigger_name} pressed")
-                            else:
-                                print(f"{trigger_name} released")
+        # Triggers (Analog input)
+        if event.code in TRIGGER_CODES.values():
+            for trigger_name, trigger_code in TRIGGER_CODES.items():
+                if event.code == trigger_code:
+                    pressed = event.value > 0
+                    if button_states[trigger_name] != pressed:
+                        button_states[trigger_name] = pressed
+                        if pressed:
+                            print(f"{trigger_name} pressed")
+                        else:
+                            print(f"{trigger_name} released")
 
         # Button Presses (Digital input)
         if event.type == ecodes.EV_KEY:
