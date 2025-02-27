@@ -57,7 +57,7 @@ def send_motor_command():
     # M1 is RIGHT
     # M2 is LEFT
     global left_speed, right_speed
-    last_left_speed = 0  # Track last sent speed for Motor 1
+    last_left_speed = 0  # Track last sent speed for Motor 1 #CHANGED FROM NEG 1
     last_right_speed = 0  # Track last sent speed for Motor 2
 
     while True:

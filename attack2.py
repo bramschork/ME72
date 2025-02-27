@@ -2,7 +2,7 @@ import evdev
 from evdev import InputDevice, ecodes
 import time
 import threading
-from drive_roboclaw_3 import Roboclaw
+from roboclaw_3 import Roboclaw
 from math import ceil
 
 import atexit
