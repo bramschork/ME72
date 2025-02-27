@@ -1,8 +1,8 @@
 import time
-from roboclaw import Roboclaw
+from roboclaw_3 import Roboclaw
 
 # Serial Configuration
-serial_port = "/dev/serial0"  # Adjust to your serial port
+serial_port = "/dev/ttyS0"  # Adjust to your serial port
 baud_rate = 38400             # Match this with the RoboClaw baud rate
 address = 0x80                # Default RoboClaw address
 
