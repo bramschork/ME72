@@ -132,7 +132,7 @@ def poll_joystick(controller):
                         joystick_positions['RIGHT_Y'] = value
                         right_speed = value  # Directly store joystick value
                     print(f"Joystick Right Y: {value}")
-                error_status = roboclaw.ReadError(shooter_address)
+                error_status = roboclaw.ReadError(address)
                 print(f"Error Status: {error_status}")
 
         except BlockingIOError:
