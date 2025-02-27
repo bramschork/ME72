@@ -187,7 +187,7 @@ def poll_joystick(controller):
                                     shooter_roboclaw.ForwardM2(
                                         shooter_address, 64)
                 else:
-                    print(event.type)
+                    print(event.code)
 
         except BlockingIOError:
             time.sleep(0.002)  # Minimize blocking delay
