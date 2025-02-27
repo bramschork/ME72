@@ -32,6 +32,10 @@ def set_baud_rate_38400():
         # Save the new baud rate to EEPROM to make it permanent
         roboclaw.WriteNVM(address)
         print("Baud rate saved to EEPROM.")
+
+        roboclaw.ForwardM2(address, 64)
+        sleep(2)
+        roboclaw.ForwardM2(address, 0)
     else:
         print("Failed to set baud rate.")
 
