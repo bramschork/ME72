@@ -1,56 +1,3 @@
-import evdev
-from evdev import InputDevice, ecodes
-import time
-import threading
-from roboclaw_3 import Roboclaw
-from math import ceil
-
-import atexit
-
-# Initialize Roboclaw
-roboclaw = Roboclaw("/dev/ttyS0", 38400)
-roboclaw.Open()
-
-address = 0x80  # Roboclaw address
-
-LOWER_DEAD_ZONE = 136
-UPPER_DEAD_ZONE = 120
-
-
-# Joystick axis mappings
-AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
-
-# Shared variables for joystick position
-joystick_positions = {'LEFT_Y': 128, 'RIGHT_Y': 128}
-lock = threading.Lock()
-left_speed = 0  # Motor 1 speed
-right_speed = 0  # Motor 2 speed
-
-# Locate the PS4 controller
-
-
-def stop_motors():
-    print("\nStopping motors...")
-    roboclaw.ForwardM1(address, 0)  # Force Stop Right Motor (M1)
-    roboclaw.ForwardM2(address, 0)  # Force Stop Left Motor (M2)
-    roboclaw.BackwardM1(address, 0)  # Ensure No Reverse Movement
-    roboclaw.BackwardM2(address, 0)  # Ensure No Reverse Movement
-    roboclaw.SpeedM1(address, 0)  # Final Check
-    roboclaw.SpeedM2(address, 0)  # Final Check
-
-
-# Register the stop_motors function to run on exit
-atexit.register(stop_motors)
-
-
-def find_ps4_controller():
-    for path in evdev.list_devices():
-        device = InputDevice(path)
-        if "Wireless Controller" in device.name:
-            return device
-    raise RuntimeError("PS4 controller not found! Ensure it's connected.")
-
-# Function to continuously send motor commands
 
 
 def send_motor_command():
@@ -68,7 +15,7 @@ def send_motor_command():
 
             # Motor 1 - Left Joystick Control (M2 is Left)
             if LOWER_DEAD_ZONE <= speed_L <= UPPER_DEAD_ZONE:  # Dead zone
-                roboclaw.ForwardM1(address, 0)  # ✅ Reverse Stop
+                roboclaw.ForwardM1(address, 0)
                 if last_left_speed != 0:
                     print("Sent Stop Command to Motor 1")
                     last_left_speed = 0
