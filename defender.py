@@ -66,7 +66,7 @@ def send_motor_command():
                 speed_L = left_speed
                 speed_R = right_speed
 
-            roboclaw.SetMaxVoltageMainBattery(address, 34)
+            # roboclaw.SetMaxVoltageMainBattery(address, 34)
 
             # Motor 1 - Left Joystick Control (M2 is Left)
             if LOWER_DEAD_ZONE <= speed_L <= UPPER_DEAD_ZONE:  # Dead zone
