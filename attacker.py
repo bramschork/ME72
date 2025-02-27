@@ -153,13 +153,13 @@ def poll_joystick(controller):
                     with lock:
                         joystick_positions['LEFT_Y'] = value
                         left_speed = value  # Directly store joystick value
-                    print(f"Joystick Left Y: {value}")
+                    # print(f"Joystick Left Y: {value}")
 
                 elif event.code == ecodes.ABS_RY:  # Right joystick
                     with lock:
                         joystick_positions['RIGHT_Y'] = value
                         right_speed = value  # Directly store joystick value
-                    print(f"Joystick Right Y: {value}")
+                    # print(f"Joystick Right Y: {value}")
 
                 elif event.type == ecodes.EV_ABS and event.code == ecodes.ABS_Z:
                     # Only toggle when the trigger is fully pressed (adjust threshold if needed)
@@ -183,8 +183,9 @@ def poll_joystick(controller):
                             for e in events:
                                 if e.type == ecodes.EV_ABS and e.code == ecodes.ABS_Z:
                                     event = e
-                                    shooter_roboclaw.ForwardM2(
-                                        shooter_address, 64)
+                                    shooter_roboclaw.ForwardM2(shooter_address, 64)'
+                else:
+                    print(event.type)
 
         except BlockingIOError:
             time.sleep(0.002)  # Minimize blocking delay
