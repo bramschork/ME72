@@ -162,6 +162,7 @@ def poll_joystick(controller):
                     # print(f"Joystick Right Y: {value}")
 
                 if event.type == ecodes.EV_ABS and event.code == ecodes.ABS_Z:
+                    print('trigger')
                     # Only toggle when the trigger is fully pressed (adjust threshold if needed)
                     if event.value > 200:  # Adjust this threshold as needed
                         # Toggle motor state
