@@ -32,7 +32,7 @@ def get_version(ser: serial.Serial, address: int = 0x80, command: int = 21) -> s
     Returns:
       A string containing the firmware version info.
     """
-    # command = 21  # GETVERSION command code (0x15 in hex)
+    command = 21  # GETVERSION command code (0x15 in hex)
     # Construct the packet: [address, command] followed by a 16-bit CRC.
     packet = bytes([address, command])
     crc = crc16(packet)
@@ -62,14 +62,16 @@ def main():
         print(f"Error opening serial port: {e}")
         return
 
-    version = get_version(ser, 21)
+    version = get_version(ser, command=21)
     print("Firmware version:", version.strip())
 
-    version = get_version(ser, 24)
-    # print("Battery version:", version.strip())
+    version = get_version(ser, command=24)
+    print("Battery version:", version.strip())
 
-    # version = get_version(ser, 94)
-    # print("EEPROM:", version.strip())
+    version = get_version(ser, command=94)
+    print("EEPROM:", version.strip())
+
+    ser.close()
 
     ser.close()
 
