@@ -13,8 +13,8 @@ roboclaw.Open()
 
 address = 0x80  # Roboclaw address
 
-LOWER_DEAD_ZONE = 136
-UPPER_DEAD_ZONE = 120
+LOWER_DEAD_ZONE = 138
+UPPER_DEAD_ZONE = 118
 
 
 # Joystick axis mappings
