@@ -36,6 +36,8 @@ right_speed = 0  # Motor 2 speed
 
 # Locate the PS4 controller
 
+
+# Second up from bottom pins facing right
 servo = Servo(12, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
 
 
@@ -162,9 +164,11 @@ def map_joystick_to_speed(value):
 def shooter_timer_shooter(delay):
     # Wait for the desired delay
     time.sleep(delay)
+    servo.min()  # Move to 0 degrees
     # Stop shooter motors
     shooter_roboclaw.ForwardM1(shooter_address, 0)
     shooter_roboclaw.ForwardM2(shooter_address, 0)
+    servo.max()
     print("done")
 
 
@@ -223,7 +227,7 @@ def poll_joystick(controller):
 
                     # Start the timer thread with a delay of, for example, 5 seconds
                     timer_thread = threading.Thread(
-                        target=shooter_timer_shooter, args=(5,))
+                        target=shooter_timer_shooter, args=(1,))
                     timer_thread.start()
                     # Print "L2" when the L2 button is pressed
 
