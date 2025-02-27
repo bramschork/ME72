@@ -173,7 +173,7 @@ def shooter_timer_intake(delay):
     time.sleep(delay)
     # Stop shooter motors
     shooter_roboclaw.BackwardM1(shooter_address, 0)
-    shooter_roboclaw.BackwardM1(shooter_address, 0)
+    shooter_roboclaw.BackwardM2(shooter_address, 0)
     print("done")
 
 
