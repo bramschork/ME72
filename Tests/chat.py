@@ -26,6 +26,8 @@ def writeS2(ser, address, cmd, value, retries=3):
         # Send value as a 2-byte word (big-endian)
         high = (value >> 8) & 0xFF
         low = value & 0xFF
+        print('VALUE')
+        print(value)
         ser.write(high.to_bytes(1, 'big'))
         crc = crc_update(crc, high)
         ser.write(low.to_bytes(1, 'big'))
