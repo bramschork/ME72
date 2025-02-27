@@ -14,7 +14,7 @@ while True:
 from gpiozero import Servo
 from time import sleep
 
-servo = Servo(25)
+servo = Servo(12)
 val = -1
 
 try:
