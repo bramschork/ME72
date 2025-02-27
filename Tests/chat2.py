@@ -76,7 +76,7 @@ def get_main_battery(ser, address):
 
 def main():
     # Configure these parameters as needed:
-    port = '/dev/ttyUSB0'   # e.g. 'COM3' for Windows
+    port = '/dev/serial0'   # e.g. 'COM3' for Windows
     baudrate = 38400
     address = 0x80          # Default RoboClaw address
 
