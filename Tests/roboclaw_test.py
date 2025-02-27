@@ -2,7 +2,7 @@ import serial
 import time
 import threading
 
-# Global lock so only one thread accesses the serial port at a time.
+# Global serial lock so that only one thread accesses the serial port at a time.
 serial_lock = threading.Lock()
 
 
@@ -55,7 +55,7 @@ def write1(ser, address, cmd, val, retries=3):
             if len(ack) == 1 and ack[0] != 0:
                 return True
         except Exception as e:
-            print(f"write1 error (cmd {cmd}, val {val}): {e}")
+            print(f"write1 error (cmd {cmd}, value {val}): {e}")
         time.sleep(0.01)
     return False
 
@@ -82,7 +82,7 @@ def writeS2(ser, address, cmd, val, retries=3):
             if len(ack) == 1 and ack[0] != 0:
                 return True
         except Exception as e:
-            print(f"writeS2 error (cmd {cmd}, val {val}): {e}")
+            print(f"writeS2 error (cmd {cmd}, value {val}): {e}")
         time.sleep(0.01)
     return False
 
@@ -107,9 +107,36 @@ def write4(ser, address, cmd, val, retries=3):
             if len(ack) == 1 and ack[0] != 0:
                 return True
         except Exception as e:
-            print(f"write4 error (cmd {cmd}, val {val}): {e}")
+            print(f"write4 error (cmd {cmd}, value {val}): {e}")
         time.sleep(0.01)
     return False
+
+
+def readN(ser, address, cmd, n, retries=3):
+    for _ in range(retries):
+        try:
+            with serial_lock:
+                ser.reset_input_buffer()
+                crc = 0
+                ser.write(address.to_bytes(1, 'big'))
+                crc = crc_update(crc, address)
+                ser.write(cmd.to_bytes(1, 'big'))
+                crc = crc_update(crc, cmd)
+                data = ser.read(n)
+                if len(data) != n:
+                    continue
+                for byte in data:
+                    crc = crc_update(crc, byte)
+                checksum = ser.read(2)
+                if len(checksum) != 2:
+                    continue
+            received_crc = (checksum[0] << 8) | checksum[1]
+            if crc == received_crc:
+                return data
+        except Exception as e:
+            print(f"readN error (cmd {cmd}, expected {n} bytes): {e}")
+        time.sleep(0.01)
+    return None
 
 
 class Roboclaw:
@@ -125,7 +152,7 @@ class Roboclaw:
         M1DUTY = 32
         M2DUTY = 33
         GETERROR = 90
-        # (Additional commands can be added as needed.)
+        # (Additional commands can be added as needed)
 
     def __init__(self, comport, rate, timeout=0.1, retries=3, address=0x80):
         self.comport = comport
@@ -138,7 +165,7 @@ class Roboclaw:
     def Open(self):
         try:
             self.ser = serial.Serial(
-                port=self.comport, baudrate=self.rate, timeout=self.timeout)
+                self.comport, self.rate, timeout=self.timeout)
         except Exception as e:
             print(f"Error opening serial port: {e}")
             return 0
@@ -150,46 +177,46 @@ class Roboclaw:
             self.ser.close()
             self.ser = None
 
-    # User accessible functions
-    # Note: the 'address' parameter is maintained for compatibility, but we use self.address internally.
-    def ForwardM1(self, address, val):
+    # Motor Commands
+    def ForwardM1(self, addr, val):
         return write1(self.ser, self.address, self.Cmd.M1FORWARD, val)
 
-    def BackwardM1(self, address, val):
+    def BackwardM1(self, addr, val):
         return write1(self.ser, self.address, self.Cmd.M1BACKWARD, val)
 
-    def ForwardM2(self, address, val):
+    def ForwardM2(self, addr, val):
         return write1(self.ser, self.address, self.Cmd.M2FORWARD, val)
 
-    def BackwardM2(self, address, val):
+    def BackwardM2(self, addr, val):
         return write1(self.ser, self.address, self.Cmd.M2BACKWARD, val)
 
-    def SpeedM1(self, address, val):
+    def SpeedM1(self, addr, val):
         return writeS2(self.ser, self.address, self.Cmd.M1DUTY, val)
 
-    def SpeedM2(self, address, val):
+    def SpeedM2(self, addr, val):
         return writeS2(self.ser, self.address, self.Cmd.M2DUTY, val)
 
-    def SetM1DefaultAccel(self, address, accel):
+    def SetM1DefaultAccel(self, addr, accel):
         result = write4(self.ser, self.address,
                         self.Cmd.SETM1DEFAULTACCEL, accel)
         if not result:
             print("Failed to set Motor 1 acceleration.")
         return result
 
-    def SetM2DefaultAccel(self, address, accel):
+    def SetM2DefaultAccel(self, addr, accel):
         result = write4(self.ser, self.address,
                         self.Cmd.SETM2DEFAULTACCEL, accel)
         if not result:
             print("Failed to set Motor 2 acceleration.")
         return result
 
-    def ReadError(self, address):
-        # For simplicity, this version does not implement GETERROR fully.
-        # You can expand it using a similar pattern to readN.
-        return 0
+    def ReadError(self, addr):
+        data = readN(self.ser, self.address, self.Cmd.GETERROR, 4)
+        if data:
+            return int.from_bytes(data, 'big', signed=True)
+        return None
 
-    def ReadVersion(self, address):
+    def ReadVersion(self, addr):
         try:
             with serial_lock:
                 self.ser.reset_input_buffer()
@@ -217,6 +244,4 @@ class Roboclaw:
             print(f"Error in ReadVersion: {e}")
         return None
 
-    # (Additional functions from your original library can be added here following the same pattern.)
-
-# End of library code
+# End of roboclaw.py
