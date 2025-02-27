@@ -1,5 +1,5 @@
 import time
-from roboclaw_3 import Roboclaw
+from roboclaw import Roboclaw
 
 # Initialize Roboclaw
 roboclaw = Roboclaw("/dev/serial0", 38400)
