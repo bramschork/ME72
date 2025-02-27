@@ -1,5 +1,5 @@
 import time
-from roboclaw import Roboclaw
+from roboclaw_3 import Roboclaw
 
 # Windows COM port example: "COM3"
 # Linux tty port example: "/dev/ttyACM0"
