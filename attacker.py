@@ -90,40 +90,40 @@ def send_motor_command():
             if LOWER_DEAD_ZONE <= speed_L <= UPPER_DEAD_ZONE:  # Dead zone
                 motor_roboclaw.ForwardM1(motor_address, 0)  # ✅ Reverse Stop
                 if last_left_speed != 0:
-                    print("Sent Stop Command to Motor 1")
+                    # print("Sent Stop Command to Motor 1")
                     last_left_speed = 0
             elif speed_L < 128:  # Forward (Now Backward)
                 # Reverse Forward
                 motor_roboclaw.ForwardM1(
                     motor_address, ceil((127 - speed_L)/2))
                 if last_left_speed != speed_L:
-                    print(f"Sent Reverse Speed to Motor 1: {127 - speed_L}")
+                    # print(f"Sent Reverse Speed to Motor 1: {127 - speed_L}")
                     last_left_speed = speed_L
             else:  # Reverse (Now Forward)
                 # Reverse Reverse
                 motor_roboclaw.BackwardM1(
                     motor_address, ceil((speed_L - 128)/2))
                 if last_left_speed != speed_L:
-                    print(f"Sent Forward Speed to Motor 1: {speed_L - 128}")
+                    # print(f"Sent Forward Speed to Motor 1: {speed_L - 128}")
                     last_left_speed = speed_L
 
             # Motor 2 - Right Joystick Control
             if LOWER_DEAD_ZONE <= speed_R <= UPPER_DEAD_ZONE:  # Dead zone
                 motor_roboclaw.ForwardM2(motor_address, 0)
                 if last_right_speed != 0:
-                    print("Sent Stop Command to Motor 2")
+                    # print("Sent Stop Command to Motor 2")
                     last_right_speed = 0
             elif speed_R < 128:  # Forward
                 motor_roboclaw.BackwardM2(
                     motor_address, ceil((127 - speed_R)/2))
                 if last_right_speed != speed_R:
-                    print(f"Sent Forward Speed to Motor 2: {127 - speed_R}")
+                    # print(f"Sent Forward Speed to Motor 2: {127 - speed_R}")
                     last_right_speed = speed_R
             else:  # Reverse
                 motor_roboclaw.ForwardM2(
                     motor_address, ceil((speed_R - 128)/2))
                 if last_right_speed != speed_R:
-                    print(f"Sent Reverse Speed to Motor 2: {speed_R - 128}")
+                    # print(f"Sent Reverse Speed to Motor 2: {speed_R - 128}")
                     last_right_speed = speed_R
 
         except Exception as e:
@@ -161,7 +161,7 @@ def poll_joystick(controller):
                         right_speed = value  # Directly store joystick value
                     # print(f"Joystick Right Y: {value}")
 
-                elif event.type == ecodes.EV_ABS and event.code == ecodes.ABS_Z:
+                if event.type == ecodes.EV_ABS and event.code == ecodes.ABS_Z:
                     # Only toggle when the trigger is fully pressed (adjust threshold if needed)
                     if event.value > 200:  # Adjust this threshold as needed
                         # Toggle motor state
