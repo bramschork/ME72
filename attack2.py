@@ -56,6 +56,7 @@ def process_trigger_event(event, threshold=200):
     """
     global motor_state, toggle_in_progress
 
+    print('process trigger')
     if event.value > threshold and not toggle_in_progress:
         # Toggle motor state
         motor_state = not motor_state
@@ -72,6 +73,8 @@ def process_trigger_event(event, threshold=200):
     elif event.value <= threshold:
         # Reset toggle flag when trigger is released
         toggle_in_progress = False
+        print('THRESHOLD')
+        print(threshold)
 ############################################################
 ############################################################
 ############################################################
