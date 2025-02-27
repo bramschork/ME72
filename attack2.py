@@ -188,8 +188,9 @@ def poll_joystick(controller):
             elif event.type == ecodes.EV_KEY:
                 # Print "L1" when the L1 button is pressed
                 if event.code == ecodes.BTN_TL and event.value == 1:
-                    shooter_roboclaw.ForwardM1(motor_address, 0)
-                    shooter_roboclaw.ForwardM2(motor_address, 0)
+                    shooter_roboclaw.ForwardM1(motor_address, 64)
+                    shooter_roboclaw.ForwardM2(motor_address, 64)
+                    print('L1')
                 # Print "L2" when the L2 button is pressed
                 elif event.code == ecodes.BTN_TR and event.value == 1:
                     pass
