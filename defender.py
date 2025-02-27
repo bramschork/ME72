@@ -16,7 +16,6 @@ address = 0x80  # Roboclaw address
 LOWER_DEAD_ZONE = 136
 UPPER_DEAD_ZONE = 120
 
-right_reverse = -1
 
 # Joystick axis mappings
 AXIS_CODES = {'LEFT_Y': ecodes.ABS_Y, 'RIGHT_Y': ecodes.ABS_RY}
@@ -92,7 +91,7 @@ def send_motor_command():
                 if last_right_speed != 0:
                     print("Sent Stop Command to Motor 2")
                     last_right_speed = 0
-            elif speed_R < 128*right_reverse:  # Forward
+            elif speed_R > 128:  # Forward
                 roboclaw.BackwardM2(address, ceil((127 - speed_R)/2))
                 if last_right_speed != speed_R:
                     print(f"Sent Forward Speed to Motor 2: {127 - speed_R}")
