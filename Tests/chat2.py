@@ -1,9 +1,5 @@
 import serial
 import time
-import evdev
-from evdev import InputDevice, ecodes
-
-# --- Motor control functions (RoboClaw) ---
 
 
 def crc_update(crc, data):
@@ -17,7 +13,7 @@ def crc_update(crc, data):
 
 
 def writeS2(ser, address, cmd, value, retries=3):
-    # Sends a command with a 16-bit value (writesword style).
+    # This function sends a command with a 16-bit value (using a “writesword” style command)
     for _ in range(retries):
         ser.reset_input_buffer()
         crc = 0
@@ -55,93 +51,51 @@ def set_motor_duty(ser, address, motor, duty):
         raise ValueError("Motor must be 1 or 2")
     return writeS2(ser, address, cmd, duty)
 
-# --- PS4 Controller functions ---
-
-
-def find_ps4_controller():
-    devices = [InputDevice(path) for path in evdev.list_devices()]
-    for device in devices:
-        if "Wireless Controller" in device.name:
-            return device
-    raise RuntimeError("PS4 controller not found! Ensure it's connected.")
-
-# --- Mapping function ---
-
-
-def map_joystick_to_duty(joy_value):
-    """
-    Maps a joystick value (0-256) to a motor duty value (0-127).
-    Here a joystick value of 128 (neutral) maps to 0 (motor off).
-    Only values above neutral produce a forward speed.
-    """
-    if joy_value <= 128:
-        return 0
-    # Map [128, 256] linearly to [0, 127]
-    duty = int((joy_value - 128) * 127 / 128)
-    return max(0, min(duty, 127))
-
-# --- Main loop combining controller and motor control ---
-
 
 def main():
-    # Initialize the serial port for the RoboClaw.
-    port = '/dev/serial0'
+    port = '/dev/serial0'   # Use /dev/serial0 as requested.
     baudrate = 38400
-    address = 0x80  # Default RoboClaw address
+    address = 0x80          # Default RoboClaw address.
+
     try:
         ser = serial.Serial(port, baudrate, timeout=0.1)
     except Exception as e:
         print("Error opening serial port:", e)
         return
-    # Allow port to settle.
+
+    # Allow port to settle
     time.sleep(0.1)
+    print("Motor control initialized.")
+    print("Enter a speed value between 0 (stop) and 127 (max speed), or 'q' to quit.")
 
-    # Initialize the PS4 controller.
     try:
-        controller = find_ps4_controller()
-    except RuntimeError as err:
-        print(err)
-        ser.close()
-        return
-    print(f"Connected to {controller.name} at {controller.path}")
+        while True:
+            user_input = input("Enter motor speed (0-127) or 'q' to quit: ")
+            if user_input.lower() == 'q':
+                break
 
-    # Initial joystick positions set to neutral.
-    joystick_positions = {
-        'LEFT_Y': 128,
-        'RIGHT_Y': 128,
-    }
+            try:
+                speed = int(user_input)
+            except ValueError:
+                print("Invalid input. Please enter an integer between 0 and 127.")
+                continue
 
-    print("Reading joystick positions. Move the joysticks to control motor speeds.")
-    try:
-        for event in controller.read_loop():
-            if event.type == ecodes.EV_ABS:
-                if event.code == ecodes.ABS_Y:  # Left joystick Y-axis
-                    joystick_positions['LEFT_Y'] = event.value
-                elif event.code == ecodes.ABS_RY:  # Right joystick Y-axis
-                    joystick_positions['RIGHT_Y'] = event.value
+            if speed < 0 or speed > 127:
+                print("Speed must be between 0 and 127.")
+                continue
 
-                # Compute motor duty values from joystick positions.
-                left_duty = map_joystick_to_duty(joystick_positions['LEFT_Y'])
-                right_duty = map_joystick_to_duty(
-                    joystick_positions['RIGHT_Y'])
-
-                # Debug prints: show raw and mapped values.
-                print(
-                    f"Left Joystick Raw: {joystick_positions['LEFT_Y']} -> Mapped Duty: {left_duty}")
-                print(
-                    f"Right Joystick Raw: {joystick_positions['RIGHT_Y']} -> Mapped Duty: {right_duty}")
-
-                # Send commands to motors.
-                left_success = set_motor_duty(ser, address, 1, left_duty)
-                right_success = set_motor_duty(ser, address, 2, right_duty)
-                print(
-                    f"Sent left motor duty {left_duty}, success: {left_success}")
-                print(
-                    f"Sent right motor duty {right_duty}, success: {right_success}")
+            # Send the variable speed to both motors
+            left_success = set_motor_duty(ser, address, 1, speed)
+            right_success = set_motor_duty(ser, address, 2, speed)
+            print(
+                f"Set left motor speed to {speed} (success: {left_success}).")
+            print(
+                f"Set right motor speed to {speed} (success: {right_success}).")
     except KeyboardInterrupt:
-        print("\nExiting...")
+        print("\nKeyboard interrupt received. Exiting...")
     finally:
         ser.close()
+        print("Serial port closed.")
 
 
 if __name__ == '__main__':
