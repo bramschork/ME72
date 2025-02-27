@@ -163,23 +163,23 @@ def poll_joystick(controller):
 
             # Process absolute axis events for joystick movement
             if event.type == ecodes.EV_ABS:
-                # Left joystick vertical movement (e.g. for left drive motor)
+                # Left joystick vertical movement (e.g. for left motor motor)
                 if event.code == ecodes.ABS_Y:
                     left_speed = event.value
-                    drive_speed = map_joystick_to_speed(left_speed)
-                    # Control the left drive motor (adjust command as needed)
-                    drive_roboclaw.SpeedM1(drive_address, drive_speed)
+                    motor_speed = map_joystick_to_speed(left_speed)
+                    # Control the left motor motor (adjust command as needed)
+                    motor_roboclaw.SpeedM1(motor_address, motor_speed)
                     print(
-                        f"Left joystick moved: {left_speed} (Mapped speed: {drive_speed})")
+                        f"Left joystick moved: {left_speed} (Mapped speed: {motor_speed})")
 
-                # Right joystick vertical movement (e.g. for right drive motor)
+                # Right joystick vertical movement (e.g. for right motor motor)
                 elif event.code == ecodes.ABS_RY:
                     right_speed = event.value
-                    drive_speed = map_joystick_to_speed(right_speed)
-                    # Control the right drive motor (adjust command as needed)
-                    drive_roboclaw.SpeedM2(drive_address, drive_speed)
+                    motor_speed = map_joystick_to_speed(right_speed)
+                    # Control the right motor motor (adjust command as needed)
+                    motor_roboclaw.SpeedM2(motor_address, motor_speed)
                     print(
-                        f"Right joystick moved: {right_speed} (Mapped speed: {drive_speed})")
+                        f"Right joystick moved: {right_speed} (Mapped speed: {motor_speed})")
 
             # Process key events for buttons
             elif event.type == ecodes.EV_KEY:
