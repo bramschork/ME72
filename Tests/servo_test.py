@@ -14,21 +14,15 @@ while True:
 from gpiozero import Servo
 from time import sleep
 
-servo = Servo(12, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
+servo = Servo(25)
+val = -1
 
-# Helper function to map angle (0-180) to servo.value (-1 to 1)
-
-
-def angle_to_value(angle):
-    return (angle / 180) * 2 - 1
-
-
-while True:
-    # Sweep from 0 to 180 degrees
-    for angle in range(0, 181, 5):  # adjust step size for smoother or faster sweep
-        servo.value = angle_to_value(angle)
-        sleep(0.02)
-    # Sweep back from 180 to 0 degrees
-    for angle in range(180, -1, -5):
-        servo.value = angle_to_value(angle)
-        sleep(0.02)
+try:
+    while True:
+        servo.value = val
+        sleep(0.1)
+        val = val + 0.1
+        if val > 1:
+            val = -1
+except KeyboardInterrupt:
+    print("Program stopped")
