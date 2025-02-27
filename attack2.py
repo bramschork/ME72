@@ -43,37 +43,6 @@ servo = Servo(12, min_pulse_width=0.5/1000, max_pulse_width=2.5/1000)
 ############################################################
 ############################################################
 ############################################################
-motor_state = False  # False: off (0), True: on (64)
-toggle_in_progress = False  # Prevents multiple toggles during a single press
-
-
-def process_trigger_event(event, threshold=200):
-    """
-    Process a trigger event to toggle the motor state.
-    When event.value exceeds threshold and a toggle hasn't already been triggered,
-    the motor state is toggled. Once the event.value falls below the threshold,
-    the toggle flag is reset.
-    """
-    global motor_state, toggle_in_progress
-
-    print('process trigger')
-    if not toggle_in_progress:
-        # Toggle motor state
-        motor_state = not motor_state
-        toggle_in_progress = True  # Mark that toggle has occurred for this press
-
-        # Set motor speed based on state
-        if motor_state:
-            shooter_roboclaw.ForwardM1(motor_address, 64)
-            print("Motor running at speed 64")
-        else:
-            shooter_roboclaw.ForwardM1(motor_address, 0)
-            print("Motor stopped")
-
-    elif event.value <= threshold:
-        # Reset toggle flag when trigger is released
-        toggle_in_progress = False
-        print('TOGLE IN PROGRESS')
 ############################################################
 ############################################################
 ############################################################
@@ -219,11 +188,11 @@ def poll_joystick(controller):
             elif event.type == ecodes.EV_KEY:
                 # Print "L1" when the L1 button is pressed
                 if event.code == ecodes.BTN_TL and event.value == 1:
-                    print("L1")
-                    process_trigger_event(event, threshold=200)
+                    shooter_roboclaw.ForwardM1(motor_address, 0)
+                    shooter_roboclaw.ForwardM2(motor_address, 0)
                 # Print "L2" when the L2 button is pressed
                 elif event.code == ecodes.BTN_TR and event.value == 1:
-                    print("L2")
+                    pass
 
         except BlockingIOError:
             time.sleep(0.002)  # Minimize blocking delay
