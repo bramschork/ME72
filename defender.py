@@ -66,8 +66,16 @@ def send_motor_command():
                 speed_L = left_speed
                 speed_R = right_speed
 
-            # roboclaw.SetMaxVoltageMainBattery(address, 34)
-            current_m1, current_m2 = roboclaw.ReadCurrents(address)
+            # roboclaw.SetMaxVoltageMainBattery(address, 34
+
+            result = roboclaw.ReadM1MaxCurrent(address)
+
+            # Check if the result is valid
+            if result[0]:
+                max_current = result[1]
+                min_current = result[2]
+            print('CURRENT')
+            print(max_current)
 
             # Print M1 current in Amperes
             print(f"Motor 1 Current: {current_m1 / 10.0} A")
