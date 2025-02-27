@@ -164,12 +164,14 @@ def poll_joystick(controller):
                 elif event.type == ecodes.EV_ABS and event.code == ecodes.ABS_Z:  # L2 Trigger Jogging
                     if event.value > 10:  # Adjust threshold as needed
                         if not intake:
+                            print('INTAKING')
                             intake = True
                             # Run motor backward at speed 64
                             shooter_roboclaw.BackwardM1(shooter_address, 32)
                             shooter_roboclaw.BackwardM2(shooter_address, 32)
                             time.sleep(0.5)
                         else:
+                            print('Stopping Again')
                             intake = False
                             shooter_roboclaw.BackwardM1(
                                 shooter_address, 0)   # Stop the motor
