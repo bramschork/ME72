@@ -4,8 +4,8 @@ from roboclaw import Roboclaw
 # Windows COM port example: "COM3"
 # Linux tty port example: "/dev/ttyACM0"
 # Replace with your actual port
-port = "/dev/ttyACM0"
-baud_rate = 115200
+port = "/dev/ttyS0"
+baud_rate = 38400
 
 # Create RoboClaw object
 roboclaw = Roboclaw(port, baud_rate)
