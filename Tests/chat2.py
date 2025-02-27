@@ -4,11 +4,11 @@ import time
 from math import ceil
 import threading
 
-# Global serial lock so that only one command is active at a time
+# Global serial lock so only one thread accesses the serial port at a time.
 serial_lock = threading.Lock()
 
 #################################
-# Low‐Level Helper Functions
+# Low-Level Helper Functions
 #################################
 
 
@@ -24,38 +24,44 @@ def crc_update(crc, data):
 
 def write0(ser, address, cmd, retries=3):
     for _ in range(retries):
-        with serial_lock:
-            ser.reset_input_buffer()
-            crc = 0
-            ser.write(address.to_bytes(1, 'big'))
-            crc = crc_update(crc, address)
-            ser.write(cmd.to_bytes(1, 'big'))
-            crc = crc_update(crc, cmd)
-            ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
-            ser.write((crc & 0xFF).to_bytes(1, 'big'))
-            ack = ser.read(1)
-        if len(ack) == 1 and ack[0] != 0:
-            return True
+        try:
+            with serial_lock:
+                ser.reset_input_buffer()
+                crc = 0
+                ser.write(address.to_bytes(1, 'big'))
+                crc = crc_update(crc, address)
+                ser.write(cmd.to_bytes(1, 'big'))
+                crc = crc_update(crc, cmd)
+                ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
+                ser.write((crc & 0xFF).to_bytes(1, 'big'))
+                ack = ser.read(1)
+            if len(ack) == 1 and ack[0] != 0:
+                return True
+        except Exception as e:
+            print(f"Error in write0 (cmd {cmd}): {e}")
         time.sleep(0.01)
     return False
 
 
 def write1(ser, address, cmd, value, retries=3):
     for _ in range(retries):
-        with serial_lock:
-            ser.reset_input_buffer()
-            crc = 0
-            ser.write(address.to_bytes(1, 'big'))
-            crc = crc_update(crc, address)
-            ser.write(cmd.to_bytes(1, 'big'))
-            crc = crc_update(crc, cmd)
-            ser.write(value.to_bytes(1, 'big'))
-            crc = crc_update(crc, value)
-            ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
-            ser.write((crc & 0xFF).to_bytes(1, 'big'))
-            ack = ser.read(1)
-        if len(ack) == 1 and ack[0] != 0:
-            return True
+        try:
+            with serial_lock:
+                ser.reset_input_buffer()
+                crc = 0
+                ser.write(address.to_bytes(1, 'big'))
+                crc = crc_update(crc, address)
+                ser.write(cmd.to_bytes(1, 'big'))
+                crc = crc_update(crc, cmd)
+                ser.write(value.to_bytes(1, 'big'))
+                crc = crc_update(crc, value)
+                ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
+                ser.write((crc & 0xFF).to_bytes(1, 'big'))
+                ack = ser.read(1)
+            if len(ack) == 1 and ack[0] != 0:
+                return True
+        except Exception as e:
+            print(f"Error in write1 (cmd {cmd}, value {value}): {e}")
         time.sleep(0.01)
     return False
 
@@ -63,24 +69,27 @@ def write1(ser, address, cmd, value, retries=3):
 def writeS2(ser, address, cmd, value, retries=3):
     # Sends a command with a 16-bit value.
     for _ in range(retries):
-        with serial_lock:
-            ser.reset_input_buffer()
-            crc = 0
-            ser.write(address.to_bytes(1, 'big'))
-            crc = crc_update(crc, address)
-            ser.write(cmd.to_bytes(1, 'big'))
-            crc = crc_update(crc, cmd)
-            high = (value >> 8) & 0xFF
-            low = value & 0xFF
-            ser.write(high.to_bytes(1, 'big'))
-            crc = crc_update(crc, high)
-            ser.write(low.to_bytes(1, 'big'))
-            crc = crc_update(crc, low)
-            ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
-            ser.write((crc & 0xFF).to_bytes(1, 'big'))
-            ack = ser.read(1)
-        if len(ack) == 1 and ack[0] != 0:
-            return True
+        try:
+            with serial_lock:
+                ser.reset_input_buffer()
+                crc = 0
+                ser.write(address.to_bytes(1, 'big'))
+                crc = crc_update(crc, address)
+                ser.write(cmd.to_bytes(1, 'big'))
+                crc = crc_update(crc, cmd)
+                high = (value >> 8) & 0xFF
+                low = value & 0xFF
+                ser.write(high.to_bytes(1, 'big'))
+                crc = crc_update(crc, high)
+                ser.write(low.to_bytes(1, 'big'))
+                crc = crc_update(crc, low)
+                ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
+                ser.write((crc & 0xFF).to_bytes(1, 'big'))
+                ack = ser.read(1)
+            if len(ack) == 1 and ack[0] != 0:
+                return True
+        except Exception as e:
+            print(f"Error in writeS2 (cmd {cmd}, value {value}): {e}")
         time.sleep(0.01)
     return False
 
@@ -88,47 +97,53 @@ def writeS2(ser, address, cmd, value, retries=3):
 def write4(ser, address, cmd, value, retries=3):
     # Sends a command with a 4-byte (long) argument.
     for _ in range(retries):
-        with serial_lock:
-            ser.reset_input_buffer()
-            crc = 0
-            ser.write(address.to_bytes(1, 'big'))
-            crc = crc_update(crc, address)
-            ser.write(cmd.to_bytes(1, 'big'))
-            crc = crc_update(crc, cmd)
-            b = value.to_bytes(4, 'big', signed=False)
-            for byte in b:
-                ser.write(byte.to_bytes(1, 'big'))
-                crc = crc_update(crc, byte)
-            ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
-            ser.write((crc & 0xFF).to_bytes(1, 'big'))
-            ack = ser.read(1)
-        if len(ack) == 1 and ack[0] != 0:
-            return True
+        try:
+            with serial_lock:
+                ser.reset_input_buffer()
+                crc = 0
+                ser.write(address.to_bytes(1, 'big'))
+                crc = crc_update(crc, address)
+                ser.write(cmd.to_bytes(1, 'big'))
+                crc = crc_update(crc, cmd)
+                b = value.to_bytes(4, 'big', signed=False)
+                for byte in b:
+                    ser.write(byte.to_bytes(1, 'big'))
+                    crc = crc_update(crc, byte)
+                ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
+                ser.write((crc & 0xFF).to_bytes(1, 'big'))
+                ack = ser.read(1)
+            if len(ack) == 1 and ack[0] != 0:
+                return True
+        except Exception as e:
+            print(f"Error in write4 (cmd {cmd}, value {value}): {e}")
         time.sleep(0.01)
     return False
 
 
 def readN(ser, address, cmd, n, retries=3):
-    # Sends a command and reads back n bytes of data (followed by a 2-byte checksum)
+    # Sends a command and reads n bytes (followed by a 2-byte checksum).
     for _ in range(retries):
-        with serial_lock:
-            ser.reset_input_buffer()
-            crc = 0
-            ser.write(address.to_bytes(1, 'big'))
-            crc = crc_update(crc, address)
-            ser.write(cmd.to_bytes(1, 'big'))
-            crc = crc_update(crc, cmd)
-            data = ser.read(n)
-            if len(data) != n:
-                continue
-            for byte in data:
-                crc = crc_update(crc, byte)
-            checksum = ser.read(2)
-            if len(checksum) != 2:
-                continue
-        received_crc = (checksum[0] << 8) | checksum[1]
-        if crc == received_crc:
-            return data
+        try:
+            with serial_lock:
+                ser.reset_input_buffer()
+                crc = 0
+                ser.write(address.to_bytes(1, 'big'))
+                crc = crc_update(crc, address)
+                ser.write(cmd.to_bytes(1, 'big'))
+                crc = crc_update(crc, cmd)
+                data = ser.read(n)
+                if len(data) != n:
+                    continue
+                for byte in data:
+                    crc = crc_update(crc, byte)
+                checksum = ser.read(2)
+                if len(checksum) != 2:
+                    continue
+            received_crc = (checksum[0] << 8) | checksum[1]
+            if crc == received_crc:
+                return data
+        except Exception as e:
+            print(f"Error in readN (cmd {cmd}, expected {n} bytes): {e}")
         time.sleep(0.01)
     return None
 
@@ -138,7 +153,7 @@ def readN(ser, address, cmd, n, retries=3):
 
 
 class Roboclaw:
-    # Command enumeration (subset of full commands; add more as needed)
+    # Command enumeration (subset of commands; extend as needed)
     class Cmd:
         M1FORWARD = 0
         M1BACKWARD = 1
@@ -165,7 +180,7 @@ class Roboclaw:
         SETM1DEFAULTACCEL = 68
         SETM2DEFAULTACCEL = 69
         GETERROR = 90
-        # Add additional commands as desired
+        # Extend with additional commands as needed
 
     def __init__(self, port, baudrate, timeout=0.1, address=0x80):
         self.port_name = port
@@ -209,32 +224,36 @@ class Roboclaw:
         return writeS2(self.ser, self.address, self.Cmd.M2DUTY, duty)
 
     def setMixedDuty(self, duty1, duty2):
-        # MIXEDDUTY command sends two 16-bit values in sequence.
         with serial_lock:
-            self.ser.reset_input_buffer()
-            crc = 0
-            self.ser.write(self.address.to_bytes(1, 'big'))
-            crc = crc_update(crc, self.address)
-            self.ser.write(self.Cmd.MIXEDDUTY.to_bytes(1, 'big'))
-            crc = crc_update(crc, self.Cmd.MIXEDDUTY)
-            # Write duty for M1
-            high1 = (duty1 >> 8) & 0xFF
-            low1 = duty1 & 0xFF
-            self.ser.write(high1.to_bytes(1, 'big'))
-            crc = crc_update(crc, high1)
-            self.ser.write(low1.to_bytes(1, 'big'))
-            crc = crc_update(crc, low1)
-            # Write duty for M2
-            high2 = (duty2 >> 8) & 0xFF
-            low2 = duty2 & 0xFF
-            self.ser.write(high2.to_bytes(1, 'big'))
-            crc = crc_update(crc, high2)
-            self.ser.write(low2.to_bytes(1, 'big'))
-            crc = crc_update(crc, low2)
-            self.ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
-            self.ser.write((crc & 0xFF).to_bytes(1, 'big'))
-            ack = self.ser.read(1)
-        return (len(ack) == 1 and ack[0] != 0)
+            try:
+                self.ser.reset_input_buffer()
+                crc = 0
+                self.ser.write(self.address.to_bytes(1, 'big'))
+                crc = crc_update(crc, self.address)
+                self.ser.write(self.Cmd.MIXEDDUTY.to_bytes(1, 'big'))
+                crc = crc_update(crc, self.Cmd.MIXEDDUTY)
+                # Write duty for M1
+                high1 = (duty1 >> 8) & 0xFF
+                low1 = duty1 & 0xFF
+                self.ser.write(high1.to_bytes(1, 'big'))
+                crc = crc_update(crc, high1)
+                self.ser.write(low1.to_bytes(1, 'big'))
+                crc = crc_update(crc, low1)
+                # Write duty for M2
+                high2 = (duty2 >> 8) & 0xFF
+                low2 = duty2 & 0xFF
+                self.ser.write(high2.to_bytes(1, 'big'))
+                crc = crc_update(crc, high2)
+                self.ser.write(low2.to_bytes(1, 'big'))
+                crc = crc_update(crc, low2)
+                self.ser.write(((crc >> 8) & 0xFF).to_bytes(1, 'big'))
+                self.ser.write((crc & 0xFF).to_bytes(1, 'big'))
+                ack = self.ser.read(1)
+                if len(ack) == 1 and ack[0] != 0:
+                    return True
+            except Exception as e:
+                print(f"Error in setMixedDuty: {e}")
+        return False
 
     # Encoder Commands
     def getM1Encoder(self):
@@ -271,7 +290,7 @@ class Roboclaw:
     def setMaxLogicBattery(self, value):
         return write1(self.ser, self.address, self.Cmd.SETMAXLB, value)
 
-    # Speed Commands (for example purposes, simple serial commands)
+    # Speed Commands
     def setM1Speed(self, speed):
         return write1(self.ser, self.address, self.Cmd.M1SPEED, speed)
 
@@ -280,14 +299,21 @@ class Roboclaw:
 
     # Acceleration Commands
     def setM1DefaultAccel(self, accel):
-        return write4(self.ser, self.address, self.Cmd.SETM1DEFAULTACCEL, accel)
+        result = write4(self.ser, self.address,
+                        self.Cmd.SETM1DEFAULTACCEL, accel)
+        if not result:
+            print("Failed to set Motor 1 acceleration.")
+        return result
 
     def setM2DefaultAccel(self, accel):
-        return write4(self.ser, self.address, self.Cmd.SETM2DEFAULTACCEL, accel)
+        result = write4(self.ser, self.address,
+                        self.Cmd.SETM2DEFAULTACCEL, accel)
+        if not result:
+            print("Failed to set Motor 2 acceleration.")
+        return result
 
     # Error and Version
     def getError(self):
-        # GETERROR returns a 4-byte value.
         data = readN(self.ser, self.address, self.Cmd.GETERROR, 4)
         if data:
             return int.from_bytes(data, 'big', signed=True)
@@ -295,28 +321,30 @@ class Roboclaw:
 
     def getVersion(self):
         with serial_lock:
-            self.ser.reset_input_buffer()
-            crc = 0
-            self.ser.write(self.address.to_bytes(1, 'big'))
-            crc = crc_update(crc, self.address)
-            self.ser.write(self.Cmd.GETVERSION.to_bytes(1, 'big'))
-            crc = crc_update(crc, self.Cmd.GETVERSION)
-            version = ""
-            # Read up to 48 bytes (null-terminated string)
-            for _ in range(48):
-                byte = self.ser.read(1)
-                if len(byte) == 0:
-                    break
-                val = byte[0]
-                crc = crc_update(crc, val)
-                if val == 0:
-                    break
-                version += chr(val)
-            checksum = self.ser.read(2)
-        if len(checksum) == 2:
-            received_crc = (checksum[0] << 8) | checksum[1]
-            if crc == received_crc:
-                return version
+            try:
+                self.ser.reset_input_buffer()
+                crc = 0
+                self.ser.write(self.address.to_bytes(1, 'big'))
+                crc = crc_update(crc, self.address)
+                self.ser.write(self.Cmd.GETVERSION.to_bytes(1, 'big'))
+                crc = crc_update(crc, self.Cmd.GETVERSION)
+                version = ""
+                for _ in range(48):
+                    byte = self.ser.read(1)
+                    if len(byte) == 0:
+                        break
+                    val = byte[0]
+                    crc = crc_update(crc, val)
+                    if val == 0:
+                        break
+                    version += chr(val)
+                checksum = self.ser.read(2)
+                if len(checksum) == 2:
+                    received_crc = (checksum[0] << 8) | checksum[1]
+                    if crc == received_crc:
+                        return version
+            except Exception as e:
+                print(f"Error in getVersion: {e}")
         return None
 
 #################################
@@ -325,10 +353,10 @@ class Roboclaw:
 
 
 def main():
-    # Use /dev/serial0 as requested.
+    # Use /dev/serial0 and default address 0x80.
     port = '/dev/serial0'
     baudrate = 38400
-    address = 0x80  # Default address
+    address = 0x80
 
     rc = Roboclaw(port, baudrate, timeout=0.1, address=address)
     if not rc.open():
@@ -336,19 +364,29 @@ def main():
         return
 
     print("Roboclaw opened successfully.")
-    print("Firmware Version:", rc.getVersion())
-    print("Main Battery Voltage (raw):", rc.getMainBattery())
-    print("Logic Battery Voltage (raw):", rc.getLogicBattery())
+    version = rc.getVersion()
+    if version is not None:
+        print("Firmware Version:", version)
+    else:
+        print("Failed to get firmware version.")
 
-    # Set default acceleration for both motors
+    main_batt = rc.getMainBattery()
+    if main_batt is not None:
+        print("Main Battery Voltage (raw):", main_batt)
+    else:
+        print("Failed to read main battery voltage.")
+
+    logic_batt = rc.getLogicBattery()
+    if logic_batt is not None:
+        print("Logic Battery Voltage (raw):", logic_batt)
+    else:
+        print("Failed to read logic battery voltage.")
+
+    # Set default acceleration for both motors.
     if rc.setM1DefaultAccel(8):
         print("Motor 1 acceleration set.")
-    else:
-        print("Failed to set Motor 1 acceleration.")
     if rc.setM2DefaultAccel(8):
         print("Motor 2 acceleration set.")
-    else:
-        print("Failed to set Motor 2 acceleration.")
 
     # Demo: Power cycle motors (on for 1 second, off for 1 second, 10 cycles)
     cycles = 10
@@ -358,24 +396,23 @@ def main():
     for i in range(cycles):
         print(f"Cycle {i+1}: Turning motors ON")
         if not rc.setM1Duty(on_duty):
-            print("Failed to set Motor 1 duty")
+            print("Failed to set Motor 1 duty.")
         if not rc.setM2Duty(on_duty):
-            print("Failed to set Motor 2 duty")
+            print("Failed to set Motor 2 duty.")
         time.sleep(1)
         print(f"Cycle {i+1}: Turning motors OFF")
         if not rc.setM1Duty(off_duty):
-            print("Failed to set Motor 1 duty")
+            print("Failed to set Motor 1 duty.")
         if not rc.setM2Duty(off_duty):
-            print("Failed to set Motor 2 duty")
+            print("Failed to set Motor 2 duty.")
         time.sleep(1)
 
-    # Read encoder values (if connected and running)
+    # Optionally read encoders and error status.
     enc1 = rc.getM1Encoder()
     enc2 = rc.getM2Encoder()
     print("Encoder Motor 1:", enc1)
     print("Encoder Motor 2:", enc2)
 
-    # Read error status
     err = rc.getError()
     print("Error Status:", err)
 
