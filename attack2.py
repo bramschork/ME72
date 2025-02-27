@@ -159,12 +159,21 @@ def map_joystick_to_speed(value):
     return speed
 
 
-def shooter_timer(delay):
+def shooter_timer_shooter(delay):
     # Wait for the desired delay
     time.sleep(delay)
     # Stop shooter motors
     shooter_roboclaw.ForwardM1(shooter_address, 0)
     shooter_roboclaw.ForwardM2(shooter_address, 0)
+    print("done")
+
+
+def shooter_timer_intake(delay):
+    # Wait for the desired delay
+    time.sleep(delay)
+    # Stop shooter motors
+    shooter_roboclaw.BackwardM1(shooter_address, 0)
+    shooter_roboclaw.BackwardM1(shooter_address, 0)
     print("done")
 
 
@@ -197,17 +206,26 @@ def poll_joystick(controller):
             elif event.type == ecodes.EV_KEY:
                 # Print "L1" when the L1 button is pressed
                 if event.code == ecodes.BTN_TL and event.value == 1:
+                    shooter_roboclaw.BackwardM1M1(shooter_address, 32)
+                    shooter_roboclaw.BackwardM1(shooter_address, 32)
+                    # print('L1')
+
+                    # Start the timer thread with a delay of, for example, 5 seconds
+                    timer_thread = threading.Thread(
+                        target=shooter_timer_intake, args=(5,))
+                    timer_thread.start()
+                    # Print "L2" when the L2 button is pressed
+
+                elif event.code == ecodes.BTN_TR and event.value == 1:
                     shooter_roboclaw.ForwardM1(shooter_address, 32)
                     shooter_roboclaw.ForwardM2(shooter_address, 32)
                     # print('L1')
 
                     # Start the timer thread with a delay of, for example, 5 seconds
                     timer_thread = threading.Thread(
-                        target=shooter_timer, args=(5,))
+                        target=shooter_timer_shooter, args=(5,))
                     timer_thread.start()
                     # Print "L2" when the L2 button is pressed
-                elif event.code == ecodes.BTN_TR and event.value == 1:
-                    pass
 
         except BlockingIOError:
             time.sleep(0.002)  # Minimize blocking delay
