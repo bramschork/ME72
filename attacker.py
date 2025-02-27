@@ -183,7 +183,8 @@ def poll_joystick(controller):
                             for e in events:
                                 if e.type == ecodes.EV_ABS and e.code == ecodes.ABS_Z:
                                     event = e
-                                    shooter_roboclaw.ForwardM2(shooter_address, 64)'
+                                    shooter_roboclaw.ForwardM2(
+                                        shooter_address, 64)
                 else:
                     print(event.type)
 
