@@ -2,7 +2,7 @@ import serial
 from time import sleep
 
 # Serial Configuration
-serial_port = "/dev/serial0"  # Use /dev/serial0 for Raspberry Pi
+serial_port = "/dev/ttyS0"  # Use /dev/serial0 for Raspberry Pi
 baudrate = 38400              # Match this with the RoboClaw baud rate
 address = 0x80                # Default RoboClaw address
 
@@ -12,7 +12,7 @@ roboclaw = serial.Serial(serial_port, baudrate, timeout=1)
 
 def read_settings_from_eeprom():
     print("Requesting Settings from EEPROM...")
-    # Construct the packet
+    # Construct the packet for Read Settings from EEPROM
     packet = [address, 95]  # 95 = Read Settings from EEPROM Command
     checksum = address ^ 95
     packet.append(checksum)
@@ -25,7 +25,7 @@ def read_settings_from_eeprom():
     response = roboclaw.read(32)
 
     if response:
-        print("EEPROM Settings Response:", response)
+        print("EEPROM Settings Response:", response.hex())
     else:
         print("No response from RoboClaw. Check wiring and baud rate.")
 
