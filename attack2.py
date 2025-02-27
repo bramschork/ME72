@@ -173,7 +173,7 @@ def poll_joystick(controller):
                         right_speed = value  # Directly store joystick value
                     print(f"Joystick Right Y: {value}")
                 # error_status = roboclaw.ReadError(address)
-                print(f"Error Status: {error_status}")
+                # print(f"Error Status: {error_status}")
 
             # Process key events for buttons
             elif event.type == ecodes.EV_KEY:
