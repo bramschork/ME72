@@ -151,35 +151,29 @@ def map_joystick_to_speed(value):
 
 
 def poll_joystick(controller):
-    # if motor_running is still needed elsewhere
-    global left_speed, right_speed, motor_running
-
+    global left_speed, right_speed
     while True:
         try:
             event = controller.read_one()
             if event is None:
-                time.sleep(0.002)
+                time.sleep(0.002)  # Reduced sleep to improve polling speed
                 continue
 
-            # Process absolute axis events for joystick movement
             if event.type == ecodes.EV_ABS:
-                # Left joystick vertical movement (e.g. for left motor motor)
-                if event.code == ecodes.ABS_Y:
-                    left_speed = event.value
-                    motor_speed = map_joystick_to_speed(left_speed)
-                    # Control the left motor motor (adjust command as needed)
-                    motor_roboclaw.SpeedM1(motor_address, motor_speed)
-                    print(
-                        f"Left joystick moved: {left_speed} (Mapped speed: {motor_speed})")
+                value = event.value
+                if event.code == ecodes.ABS_Y:  # Left joystick
+                    with lock:
+                        joystick_positions['LEFT_Y'] = value
+                        left_speed = value  # Directly store joystick value
+                    print(f"Joystick Left Y: {value}")
 
-                # Right joystick vertical movement (e.g. for right motor motor)
-                elif event.code == ecodes.ABS_RY:
-                    right_speed = event.value
-                    motor_speed = map_joystick_to_speed(right_speed)
-                    # Control the right motor motor (adjust command as needed)
-                    motor_roboclaw.SpeedM2(motor_address, motor_speed)
-                    print(
-                        f"Right joystick moved: {right_speed} (Mapped speed: {motor_speed})")
+                elif event.code == ecodes.ABS_RY:  # Right joystick
+                    with lock:
+                        joystick_positions['RIGHT_Y'] = value
+                        right_speed = value  # Directly store joystick value
+                    print(f"Joystick Right Y: {value}")
+                error_status = roboclaw.ReadError(address)
+                print(f"Error Status: {error_status}")
 
             # Process key events for buttons
             elif event.type == ecodes.EV_KEY:
@@ -191,9 +185,7 @@ def poll_joystick(controller):
                     print("L2")
 
         except BlockingIOError:
-            time.sleep(0.002)
-
-# Main function
+            time.sleep(0.002)  # Minimize blocking delay
 
 
 def main():
