@@ -166,20 +166,7 @@ def shooter_timer_shooter(delay):
     # Wait for the desired delay
 
     # Create controller object (ensure correct device port)
-    servo = Controller()
-
-    # Set servo 0 (channel 0) to 0° position.
-    # The mapping depends on your controller's configuration.
-    servo.setTarget(0, 6000)   # 6000 is an example pulse width for 0°
-    time.sleep(2)
-
-    # Set servo 0 to 1980° position.
-    # You must calculate the pulse width corresponding to 1980°.
-    # For instance, if 6000 = 0° and each degree adds 5 units:
-    pulse_for_1980 = 6000 + (1980 * 5)
-    servo.setTarget(0, pulse_for_1980)
-    time.sleep(2)
-
+    time.sleep(delay)
     print("Done")
     # Stop shooter motors
     shooter_roboclaw.ForwardM1(shooter_address, 0)
