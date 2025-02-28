@@ -10,8 +10,6 @@ import atexit
 
 # Servo control
 from gpiozero import Servo
-from maestro import Controller  # Example: using Pololu Maestro
-
 
 # Initialize Roboclaws
 motor_roboclaw = Roboclaw("/dev/ttyS0", 38400)
