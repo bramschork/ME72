@@ -7,6 +7,9 @@ roboclaw.Open()
 
 address = 0x80  # changed roboclaw address from 0x82 to 0x80
 
+main_batt = roboclaw.ReadMainBatteryVoltage(address)
+logic_batt = roboclaw.ReadLogicBatteryVoltage(address)
+print(f"Main Battery Voltage: {main_batt}V, Logic Battery Voltage: {logic_batt}V")
 
 def ramp_motor_speed():
     while True:
