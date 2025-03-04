@@ -5,7 +5,7 @@ from roboclaw_3 import Roboclaw
 roboclaw = Roboclaw("/dev/serial0", 38400)
 roboclaw.Open()
 
-address = 0x82  # Roboclaw address
+address = 0x80  # Roboclaw address
 
 
 def ramp_motor_speed():
